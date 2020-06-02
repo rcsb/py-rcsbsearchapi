@@ -32,7 +32,7 @@ def test_single():
 
 
 @pytest.mark.internet
-@pytest.mark.interactive
+@pytest.mark.progressbar
 def test_iquery():
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
     session = Session(q1)
@@ -44,10 +44,32 @@ def test_iquery():
 def test_iter():
     ids = ["4HHB", "2GS2"]
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
-    session = Session(q1)
-    result = set(session)
+    result = set(q1())
     assert len(result) == 2
     assert result == set(ids)
+
+
+@pytest.mark.internet
+def test_inv():
+    q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
+    q = ~q1
+    # Lots of results
+    first = next(iter(q()))
+    assert first is not None
+    assert first != "5T89"
+
+
+@pytest.mark.internet
+def test_xor():
+    ids1 = ["5T89", "2GS2"]
+    ids2 = ["4HHB", "2GS2"]
+    q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids1)
+    q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids2)
+    q = q1 ^ q2
+    print(f"XOR Query: {q}")
+    result = set(q())
+    assert len(result) == 2
+    assert result == {ids1[0], ids2[0]}
 
 
 @pytest.mark.internet
@@ -84,3 +106,37 @@ def test_errors():
         assert False, "Should raise error"
     except requests.HTTPError:
         pass
+
+
+@pytest.mark.internet
+def test_example1():
+    "'Biological Assembly Search' from http://search.rcsb.org/#examples"
+    q1 = Terminal("rcsb_struct_symmetry.symbol", "exact_match", "C2")
+    q2 = Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
+    q3 = Terminal(value='"heat-shock transcription factor"')
+    q4 = Terminal("rcsb_entry_info.polymer_entity_count_DNA", "greater_or_equal", 1)
+    q = q1 & q2 & q3 & q4  # AND of all queries
+
+    results = set(q("assembly"))
+    assert len(results) > 0  # 14 results 2020-06
+    assert "1FYL-1" in results
+
+
+@pytest.mark.internet
+def test_example2():
+    "'X-Ray Structures Search' from http://search.rcsb.org/#examples"
+    q = (
+        Terminal(value='"thymidine kinase"')
+        & Terminal(
+            "rcsb_entity_source_organism.taxonomy_lineage.name",
+            "exact_match",
+            "Viruses",
+        )
+        & Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION",)
+        & Terminal("rcsb_entry_info.resolution_combined", "less_or_equal", 2.5,)
+        & Terminal("rcsb_entry_info.nonpolymer_entity_count", "greater", 0)
+    )
+
+    results = set(q("entry"))
+    assert len(results) > 0  # 224 results 2020-06
+    assert "1KI6" in results

@@ -10,14 +10,20 @@ import logging
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Union, Optional, List, Iterable
+from typing import Dict, Union, Optional, List, Iterable, Tuple
+import sys
 
-try:
+if sys.version_info > (3, 8):
     from typing import Literal
-except ImportError:
+else:
     from typing_extensions import Literal
 
 # tqdm is optional
+
+# Allowed return types for searches. http://search.rcsb.org/#return-type
+ReturnType = Literal[
+    "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance"
+]
 
 
 class Query(ABC):
@@ -47,7 +53,7 @@ class Query(ABC):
         return json.dumps(self.to_dict, separators=(",", ":"))
 
     @abstractmethod
-    def _assign_ids(self, node_id=0) -> ("Query", int):
+    def _assign_ids(self, node_id=0) -> Tuple["Query", int]:
         """Assign node_ids sequentially for all terminal nodes
 
         This is a helper for the assign_ids() method
@@ -56,7 +62,7 @@ class Query(ABC):
         """
         ...
 
-    def assign_ids(self) -> ("Query", int):
+    def assign_ids(self) -> "Query":
         """Assign node_ids sequentially for all terminal nodes
 
         Returns the modified query.
@@ -64,7 +70,7 @@ class Query(ABC):
         return self._assign_ids(0)[0]
 
     @abstractmethod
-    def __inv__(self):
+    def __invert__(self):
         """Negation: `~a`"""
         ...
 
@@ -86,33 +92,46 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 100):
+        """Evaluate this query and return an iterator of all result IDs"""
+        return Session(self, return_type, rows)
+
 
 @dataclass(frozen=True)
 class Terminal(Query):
     """A terminal node
     """
 
-    attribute: str
-    operator: str
-    value: Union[List, str]
+    attribute: Optional[str] = None
+    operator: Optional[str] = None
+    value: Union[List, str, None] = None
     service: str = "text"
     negation: bool = False
     node_id: int = 0
 
+    def __post_init__(self):
+        # value is a required keyword argument
+        assert self.value is not None
+
     def to_dict(self):
+        params = dict()
+        if self.attribute is not None:
+            params["attribute"] = self.attribute
+        if self.operator is not None:
+            params["operator"] = self.operator
+        if self.value is not None:
+            params["value"] = self.value
+        if self.negation is not None:
+            params["negation"] = self.negation
+
         return dict(
             type="terminal",
             service=self.service,
-            parameters=dict(
-                attribute=self.attribute,
-                operator=self.operator,
-                value=self.value,
-                negation=self.negation,
-            ),
+            parameters=params,
             node_id=self.node_id,
         )
 
-    def __inv__(self):
+    def __invert__(self):
         return Terminal(
             self.attribute,
             self.operator,
@@ -122,7 +141,7 @@ class Terminal(Query):
             self.node_id,
         )
 
-    def _assign_ids(self, node_id=0) -> (Query, int):
+    def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
         if self.node_id == node_id:
             return (self, node_id + 1)
         else:
@@ -136,6 +155,25 @@ class Terminal(Query):
                     node_id,
                 ),
                 node_id + 1,
+            )
+
+    def __str__(self):
+        """Return a simplified string representation
+
+        Examples:
+
+            Terminal("attr", "op", "val")
+            ~Terminal(value="val")
+
+        """
+        negation = "~" if self.negation else ""
+        if self.attribute is None and self.operator is None:
+            # value-only
+            return f"{negation}Terminal(value={self.value!r})"
+        else:
+            return (
+                f"{negation}Terminal({self.attribute!r}, {self.operator!r}, "
+                f"{self.value!r})"
             )
 
 
@@ -153,7 +191,7 @@ class Group(Query):
             nodes=[node.to_dict() for node in self.nodes],
         )
 
-    def __inv__(self):
+    def __invert__(self):
         if self.operator == "and":
             return Group("or", [~node for node in self.nodes])
 
@@ -175,9 +213,9 @@ class Group(Query):
             elif isinstance(other, Group) and other.operator == "or":
                 return Group("or", self.nodes + other.nodes)
 
-        return super(self).__or__(other)
+        return super().__or__(other)
 
-    def _assign_ids(self, node_id=0) -> (Query, int):
+    def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
         nodes = []
         changed = False
         for node in self.nodes:
@@ -189,7 +227,15 @@ class Group(Query):
         if changed:
             return (Group(self.operator, nodes), node_id)
         else:
-            return self
+            return (self, node_id)
+
+    def __str__(self):
+        if self.operator == "and":
+            return f"({' & '.join((str(n) for n in self.nodes))})"
+        elif self.operator == "or":
+            return f"({' | '.join((str(n) for n in self.nodes))})"
+        else:
+            raise ValueError("Illegal Operator")
 
 
 class Session(object):
@@ -199,8 +245,15 @@ class Session(object):
     """
 
     url = "http://search.rcsb.org/rcsbsearch/v1/query"
+    query_id: str
+    query: Query
+    return_type: ReturnType
+    start: int
+    rows: int
 
-    def __init__(self, query: Query, return_type="entry", rows=100):
+    def __init__(
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 100
+    ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
         self.return_type = return_type
@@ -208,12 +261,12 @@ class Session(object):
         self.rows = rows
 
     @staticmethod
-    def make_uuid():
+    def make_uuid() -> str:
         "Create a new UUID to identify a query"
         return uuid.uuid4().hex
 
     @staticmethod
-    def _extract_identifiers(query_json):
+    def _extract_identifiers(query_json: Optional[Dict]) -> List[str]:
         """Extract identifiers from a JSON response"""
         if query_json is None:
             return []
@@ -249,17 +302,18 @@ class Session(object):
         else:
             raise Exception(f"Unexpected status: {response.status_code}")
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[str]:
         "Generator for all results as a list of identifiers"
         start = 0
         response = self._single_query(start=start)
+        if response is None:
+            return  # be explicit for mypy
         identifiers = self._extract_identifiers(response)
         start += self.rows
         print(f"Got {len(identifiers)} ids")
 
         if len(identifiers) == 0:
             return
-
         yield from identifiers
 
         total = response["total_count"]
@@ -277,7 +331,7 @@ class Session(object):
 
         Requires tqdm.
         """
-        from tqdm import trange
+        from tqdm import trange  # type: ignore
 
         response = self._single_query(start=0)
         if response is None:
