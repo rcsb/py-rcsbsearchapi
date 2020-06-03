@@ -1,1 +1,10 @@
-site_name: My Docs
+site_name: RCSB Search for Python
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - mkautodoc
+
+pages:
+  - Home: index.md
+  - API: api.md
