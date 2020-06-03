@@ -28,7 +28,10 @@ setuptools.setup(
     version=__version__,
     tests_requires=["tox", "pytest", "black", "flake8", "mypy"],
     install_requires=install_requires,
-    extras={"progressbar": "tqdm"},
+    extras={
+        "progressbar": ["tqdm"],
+        "docs": ["mkdocs"]
+    },
     packages=setuptools.find_packages(exclude=["tests"]),
     scripts=[],
     classifiers=[
