@@ -30,7 +30,7 @@ setuptools.setup(
     install_requires=install_requires,
     extras={
         "progressbar": ["tqdm"],
-        "docs": ["mkdocs"]
+        "docs": ["sphinx", "recommonmark", "sphinx-rtd-theme"]
     },
     packages=setuptools.find_packages(exclude=["tests"]),
     scripts=[],

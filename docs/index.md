@@ -2,6 +2,11 @@
 
 The `rcsbsearch` package provides a python interface to the [RCSB Search API](http://search.rcsb.org/). Use it to fetch lists of PDB IDs corresponding to advanced query searches.
 
+## Contents
+
+* [Quickstart](self)
+* [API Reference](api.md)
+
 ## Quickstart
 
 Searches are built up from a series of `Terminal` nodes. For example:

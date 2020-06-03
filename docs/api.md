@@ -1,17 +1,7 @@
 # API Documentation
 
-::: rcsbsearch.Query
-    :docstring:
+```eval_rst
+.. automodule:: rcsbsearch
     :members:
-
-::: rcsbsearch.Terminal
-    :docstring:
-    :members:
-
-::: rcsbsearch.Group
-    :docstring:
-    :members:
-
-::: rcsbsearch.Session
-    :docstring:
-    :members:
+    :show-inheritance:
+```

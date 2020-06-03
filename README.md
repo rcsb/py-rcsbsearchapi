@@ -1,3 +1,5 @@
+[![Documentation Status](https://readthedocs.org/projects/rcsbsearch/badge/?version=latest)](https://rcsbsearch.readthedocs.io/en/latest/?badge=latest)
+
 # rcsbsearch
 
 Python interface for the RCSB search API.
