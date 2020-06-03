@@ -310,7 +310,7 @@ class Session(object):
             return  # be explicit for mypy
         identifiers = self._extract_identifiers(response)
         start += self.rows
-        print(f"Got {len(identifiers)} ids")
+        logging.debug(f"Got {len(identifiers)} ids")
 
         if len(identifiers) == 0:
             return
@@ -322,7 +322,7 @@ class Session(object):
             assert len(identifiers) == self.rows
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
-            print(f"Got {len(identifiers)} ids")
+            logging.debug(f"Got {len(identifiers)} ids")
             start += self.rows
             yield from identifiers
 
