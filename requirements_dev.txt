@@ -1,0 +1,4 @@
+# Full dependencies
+--index-url https://pypi.python.org/simple/
+
+-e .[progressbar,docs]

@@ -28,7 +28,7 @@ setuptools.setup(
     version=__version__,
     tests_requires=["tox", "pytest", "black", "flake8", "mypy"],
     install_requires=install_requires,
-    extras={
+    extras_require={
         "progressbar": ["tqdm"],
         "docs": ["sphinx", "recommonmark", "sphinx-rtd-theme"]
     },
