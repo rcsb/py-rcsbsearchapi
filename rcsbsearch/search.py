@@ -238,6 +238,36 @@ class Group(Query):
             raise ValueError("Illegal Operator")
 
 
+@dataclass(frozen=True)
+class Attr:
+    """A search attribute, e.g. "rcsb_entry_container_identifiers.entry_id"
+
+    Terminals can be constructed from Attributes using either a functional syntax, which
+    mirrors the API operators, or with python operators.
+
+    | Function         | Operator            |
+    |------------------|---------------------|
+    | exact_match      | attr == str         |
+    | contains_words   | List[str] in attr   |
+    | contains_phrase  | str in attr         |
+    | greater          | attr > Date,number  |
+    | less             | attr < Date,number  |
+    | greater_or_equal | attr >= Date,number |
+    | less_or_equal    | attr <= Date,number |
+    | equals           | attr == Date,number |
+    | range            | attr[start:end]     |
+    | range_closed     |                     |
+    | exists           | bool(attr)          |
+    | in               | attr in value       |
+
+    """
+
+    attribute: str
+
+    def exact_match(self, value: str):
+        return Terminal(self.attribute, "exact_match", value)
+
+
 class Session(object):
     """A single query session.
 
