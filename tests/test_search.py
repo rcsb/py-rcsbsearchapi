@@ -1,6 +1,6 @@
-from rcsbsearch import Terminal, Group, Session
+from rcsbsearch import Terminal, Group, Session, Attr, Value
 import requests
-import pytest
+import pytest  # type: ignore
 
 # q1 = rcsb.Terminal("rcsb_struct_symmetry.type", "exact_match", "Icosahedral")
 # q2 = rcsb.Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
@@ -140,3 +140,19 @@ def test_example2():
     results = set(q("entry"))
     assert len(results) > 0  # 224 results 2020-06
     assert "1KI6" in results
+
+
+def test_attr():
+    attr = Attr("attr")
+
+    term = attr == "value"
+    assert isinstance(term, Terminal)
+    assert term.operator == "exact_match"
+
+    term = "value" == attr
+    assert isinstance(term, Terminal)
+    assert term.operator == "exact_match"
+
+    term = Value("value") == attr
+    assert isinstance(term, Terminal)
+    assert term.operator == "exact_match"
