@@ -1,4 +1,4 @@
-from rcsbsearch import Terminal, Group, Session, Attr, Value
+from rcsbsearch import Terminal, Group, Session, Attr, Value, TextQuery
 import requests
 import pytest  # type: ignore
 
@@ -156,3 +156,10 @@ def test_attr():
     term = Value("value") == attr
     assert isinstance(term, Terminal)
     assert term.operator == "exact_match"
+
+
+@pytest.mark.internet
+def test_freetext():
+    query = TextQuery("tubulin")
+    results = set(query())
+    assert len(results) > 0

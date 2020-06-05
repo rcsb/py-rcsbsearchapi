@@ -144,10 +144,6 @@ class Terminal(Query):
     negation: bool = False
     node_id: int = 0
 
-    def __post_init__(self):
-        # value is a required keyword argument
-        assert self.value is not None
-
     def to_dict(self):
         params = dict()
         if self.attribute is not None:
@@ -210,6 +206,14 @@ class Terminal(Query):
                 f"{negation}Terminal({self.attribute!r}, {self.operator!r}, "
                 f"{self.value!r})"
             )
+
+
+class TextQuery(Terminal):
+    """Special case of a Terminal for free-text queries"""
+
+    def __init__(self, value: str, negation: bool = False):
+        """Search for the string value anywhere in the text"""
+        super().__init__(value=value, negation=negation)
 
 
 @dataclass(frozen=True)
