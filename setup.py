@@ -12,6 +12,8 @@ install_requires = ["requests"]
 if sys.version_info < (3, 8):
     install_requires.append("typing_extensions")  # 3.6-3.7 only
 
+tests_requires = ["tox", "pytest", "black", "flake8", "mypy"]
+
 # README
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -26,17 +28,18 @@ setuptools.setup(
     author="Spencer Bliven",
     author_email="spencer.bliven@gmail.com",
     version=__version__,
-    tests_requires=["tox", "pytest", "black", "flake8", "mypy"],
+    tests_requires=tests_requires,
     install_requires=install_requires,
     extras_require={
         "progressbar": ["tqdm"],
         "docs": [
             "sphinx",
             "sphinx-rtd-theme",
-            "recommonmarkdown",
+            "recommonmark",
             "sphinx-markdown-tables",
             "m2r",
         ],
+        "tests": tests_requires,
     },
     packages=setuptools.find_packages(exclude=["tests"]),
     scripts=[],
