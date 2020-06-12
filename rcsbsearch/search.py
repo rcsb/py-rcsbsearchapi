@@ -1,6 +1,4 @@
-"""Interact with the RCSB Search API.
-
-https://search.rcsb.org/#search-api
+"""Interact with the [RCSB Search API](https://search.rcsb.org/#search-api).
 """
 
 import uuid
@@ -11,20 +9,32 @@ import math
 from datetime import date
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Union, Optional, List, Iterable, Tuple, TypeVar, Generic
+import functools
+from typing import (
+    Dict,
+    Union,
+    Optional,
+    List,
+    Iterable,
+    Tuple,
+    TypeVar,
+    Generic,
+    Callable,
+    overload,
+)
 import sys
 
 if sys.version_info > (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
-
 # tqdm is optional
 
 # Allowed return types for searches. http://search.rcsb.org/#return-type
 ReturnType = Literal[
     "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance"
 ]
+TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
     str,
@@ -58,9 +68,10 @@ class Query(ABC):
     Note that only AND, OR, and negation of terminals are directly supported by
     the API, so other operations may be slower.
 
-    Queries can be executed by calling them as functions (`list(query())`)
+    Queries can be executed by calling them as functions (`list(query())`) or using
+    the exec function.
 
-    Queries are immutable.
+    Queries are immutable, and all modifying functions return new instances.
     """
 
     @abstractmethod
@@ -90,31 +101,75 @@ class Query(ABC):
         return self._assign_ids(0)[0]
 
     @abstractmethod
-    def __invert__(self):
+    def __invert__(self) -> "Query":
         """Negation: `~a`"""
         ...
 
-    def __and__(self, other):
+    def __and__(self, other: "Query") -> "Query":
         """Intersection: `a & b`"""
         assert isinstance(other, Query)
         return Group("and", [self, other])
 
-    def __or__(self, other):
+    def __or__(self, other: "Query") -> "Query":
         """Union: `a | b`"""
         assert isinstance(other, Query)
         return Group("or", [self, other])
 
-    def __sub__(self, other):
+    def __sub__(self, other: "Query") -> "Query":
         """Difference: `a - b`"""
         return self & ~other
 
-    def __xor__(self, other):
+    def __xor__(self, other: "Query") -> "Query":
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 100):
+    def exec(self, return_type: ReturnType = "entry", rows: int = 100) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
         return Session(self, return_type, rows)
+
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 100) -> "Session":
+        """Evaluate this query and return an iterator of all result IDs"""
+        return self.exec(return_type, rows)
+
+    @overload
+    def and_(self, other: "Query") -> "Query":
+        ...
+
+    @overload
+    def and_(self, other: Union[str, "Attr"]) -> "PartialQuery":
+        ...
+
+    def and_(
+        self, other: Union[str, "Query", "Attr"]
+    ) -> Union["Query", "PartialQuery"]:
+        """Extend this query with an additional attribute via an AND"""
+        if isinstance(other, Query):
+            return self & other
+        elif isinstance(other, Attr):
+            return PartialQuery(self, "and", other)
+        elif isinstance(other, str):
+            return PartialQuery(self, "and", Attr(other))
+        else:
+            raise TypeError(f"Expected Query or Attr, got {type(other)}")
+
+    @overload
+    def or_(self, other: "Query") -> "Query":
+        ...
+
+    @overload
+    def or_(self, other: Union[str, "Attr"]) -> "PartialQuery":
+        ...
+
+    def or_(self, other: Union[str, "Query", "Attr"]) -> Union["Query", "PartialQuery"]:
+        """Extend this query with an additional attribute via an OR"""
+        if isinstance(other, Query):
+            return self & other
+        elif isinstance(other, Attr):
+            return PartialQuery(self, "or", other)
+        elif isinstance(other, str):
+            return PartialQuery(self, "or", Attr(other))
+        else:
+            raise TypeError(f"Expected Query or Attr, got {type(other)}")
 
 
 @dataclass(frozen=True)
@@ -220,7 +275,7 @@ class TextQuery(Terminal):
 class Group(Query):
     """AND and OR combinations of queries"""
 
-    operator: Literal["and", "or"]
+    operator: TAndOr
     nodes: Iterable[Query] = ()
 
     def to_dict(self):
@@ -234,23 +289,29 @@ class Group(Query):
         if self.operator == "and":
             return Group("or", [~node for node in self.nodes])
 
-    def __and__(self, other):
+    def __and__(self, other: Query) -> Query:
         # Combine nodes if possible
         if self.operator == "and":
-            if isinstance(other, Terminal):
-                return Group("and", self.nodes + [other])
-            elif isinstance(other, Group) and other.operator == "and":
-                return Group("and", self.nodes + other.nodes)
+            if isinstance(other, Group):
+                if other.operator == "and":
+                    return Group("and", (*self.nodes, *other.nodes))
+            elif isinstance(other, Query):
+                return Group("and", (*self.nodes, other))
+            else:
+                return NotImplemented
 
-        return super(self).__and__(other)
+        return super().__and__(other)
 
-    def __or__(self, other):
+    def __or__(self, other: Query) -> Query:
         # Combine nodes if possible
         if self.operator == "or":
-            if isinstance(other, Terminal):
-                return Group("or", self.nodes + [other])
-            elif isinstance(other, Group) and other.operator == "or":
-                return Group("or", self.nodes + other.nodes)
+            if isinstance(other, Group):
+                if other.operator == "or":
+                    return Group("or", (*self.nodes, *other.nodes))
+            elif isinstance(other, Terminal):
+                return Group("or", (*self.nodes, other))
+            else:
+                return NotImplemented
 
         return super().__or__(other)
 
@@ -284,7 +345,7 @@ class Attr:
     Terminals can be constructed from Attr objects using either a functional syntax,
     which mirrors the API operators, or with python operators.
 
-    | Function         | Operator            |
+    | Builder Function | Operator            |
     |------------------|---------------------|
     | exact_match      | attr == str         |
     | contains_words   | List[str] in attr   |
@@ -300,51 +361,55 @@ class Attr:
     | in_              | attr in Value(val)  |
 
     Rather than their normal bool return values, operators return Terminals.
+
+    A complete list of valid attributes is available in the
+    [schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
     """
 
     attribute: str
 
-    def exact_match(self, value: Union[str, "Value[str]"]):
+    def exact_match(self, value: Union[str, "Value[str]"]) -> Terminal:
+        """Exact match with the value"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "exact_match", value)
 
-    def contains_words(self, value: Union[List[str], "Value[List[str]]"]):
+    def contains_words(self, value: Union[List[str], "Value[List[str]]"]) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "contains_words", value)
 
-    def contains_phrase(self, value: Union[str, "Value[str]"]):
+    def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "contains_phrase", value)
 
-    def greater(self, value: TNumberLike):
+    def greater(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "greater", value)
 
-    def less(self, value: TNumberLike):
+    def less(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "less", value)
 
-    def greater_or_equal(self, value: TNumberLike):
+    def greater_or_equal(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "greater_or_equal", value)
 
-    def less_or_equal(self, value: TNumberLike):
+    def less_or_equal(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "less_or_equal", value)
 
-    def equals(self, value: TNumberLike):
+    def equals(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "equals", value)
 
-    def range(self, value: Union[List[int], Tuple[int, int]]):
+    def range(self, value: Union[List[int], Tuple[int, int]]) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "range", value)
@@ -354,12 +419,12 @@ class Attr:
         value: Union[
             List[int], Tuple[int, int], "Value[List[int]]", "Value[Tuple[int, int]]"
         ],
-    ):
+    ) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "range_closed", value)
 
-    def exists(self):
+    def exists(self) -> Terminal:
         return Terminal(self.attribute, "exists")
 
     def in_(
@@ -374,12 +439,47 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ):
+    ) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "in", value)
 
-    def __eq__(self, value):
+    @overload  # type: ignore[override]
+    def __eq__(self, value: "Attr") -> bool:
+        ...
+
+    @overload  # type: ignore[override]
+    def __eq__(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Terminal:
+        ...
+
+    def __eq__(
+        self,
+        value: Union[
+            "Attr",
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Union[Terminal, bool]:  # type: ignore[override]
+        if isinstance(value, Attr):
+            return self.attribute == value.attribute
         if isinstance(value, Value):
             value = value.value
         if isinstance(value, str):
@@ -393,35 +493,72 @@ class Attr:
         else:
             return NotImplemented
 
-    def __lt__(self, value: TNumberLike):
-        if isinstance(value, Value):
-            value = value.value
-        return self.less(value)
+    @overload  # type: ignore[override]
+    def __ne__(self, value: "Attr") -> bool:
+        ...
 
-    def __le__(self, value: TNumberLike):
-        if isinstance(value, Value):
-            value = value.value
-        return self.less_or_equal(value)
+    @overload  # type: ignore[override]
+    def __ne__(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Terminal:
+        ...
 
-    def __ne__(self, value):
+    def __ne__(
+        self,
+        value: Union[
+            "Attr",
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Union[Terminal, bool]:  # type: ignore[override]
+        if isinstance(value, Attr):
+            return self.attribute != value.attribute
         if isinstance(value, Value):
             value = value.value
         return ~(self == value)
 
-    def __gt__(self, value: TNumberLike):
+    def __lt__(self, value: TNumberLike) -> Terminal:
+        if isinstance(value, Value):
+            value = value.value
+        return self.less(value)
+
+    def __le__(self, value: TNumberLike) -> Terminal:
+        if isinstance(value, Value):
+            value = value.value
+        return self.less_or_equal(value)
+
+    def __gt__(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return self.greater(value)
 
-    def __ge__(self, value: TNumberLike):
+    def __ge__(self, value: TNumberLike) -> Terminal:
         if isinstance(value, Value):
             value = value.value
         return self.greater_or_equal(value)
 
-    def __bool__(self):
+    def __bool__(self) -> Terminal:
         return self.exists()
 
-    def __contains__(self, value):
+    def __contains__(
+        self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]
+    ) -> Terminal:
         """Maps to contains_words or contains_phrase depending on the value passed.
 
         * `"value" in attr` maps to `attr.contains_phrase("value")` for simple values.
@@ -433,8 +570,239 @@ class Attr:
         if isinstance(value, list):
             if len(value) == 0 or isinstance(value[0], str):
                 return self.contains_words(value)
+            else:
+                return NotImplemented
         else:
             return self.contains_phrase(value)
+
+
+# Type for functions returning Terminal
+FTerminal = TypeVar("FTerminal", bound=Callable[..., Terminal])
+# Type for functions returning Query
+FQuery = TypeVar("FQuery", bound=Callable[..., Query])
+
+
+def _attr_delegate(attr_func: FTerminal) -> Callable[[FQuery], FQuery]:
+    """Decorator for PartialQuery methods. Delegates a function to self.attr.
+
+    This reduces boilerplate, especially for classes with lots of dunder methods
+    (preventing the use of `__getattr__`).
+
+    Argument:
+    - attr_func: A method in the Attr class producing a Terminal
+
+    Returns: A function producing a Query according to the PartialQuery's operator
+    """
+
+    def decorator(partialquery_func: FQuery):
+        @functools.wraps(partialquery_func)
+        def wrap(self: "PartialQuery", *args, **kwargs) -> Query:
+            term: Terminal = attr_func(self.attr, *args, **kwargs)
+            if self.operator == "and":
+                return self.query & term
+            elif self.operator == "or":
+                return self.query | term
+            else:
+                raise ValueError(f"Unknown operator: {self.operator}")
+
+        return wrap
+
+    return decorator
+
+
+class PartialQuery:
+    """A PartialQuery extends a growing query with an Attr. It is constructed
+    using the builder syntax with the `and_` and `or_` methods. It is not usually
+    necessary to create instances of this class directly.
+
+    PartialQuery instances behave like Attr instances in most situations.
+    """
+
+    attr: Attr
+    query: Query
+    operator: TAndOr
+
+    def __init__(self, query: Query, operator: TAndOr, attr: Attr):
+        self.query = query
+        self.operator = operator
+        self.attr = attr
+
+    @_attr_delegate(Attr.exact_match)
+    def exact_match(self, value: Union[str, "Value[str]"]) -> Query:
+        ...
+
+    @_attr_delegate(Attr.contains_words)
+    def contains_words(self, value: Union[List[str], "Value[List[str]]"]) -> Query:
+        ...
+
+    @_attr_delegate(Attr.contains_phrase)
+    def contains_phrase(self, value: Union[str, "Value[str]"]) -> Query:
+        ...
+
+    @_attr_delegate(Attr.greater)
+    def greater(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.less)
+    def less(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.greater_or_equal)
+    def greater_or_equal(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.less_or_equal)
+    def less_or_equal(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.equals)
+    def equals(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.range)
+    def range(self, value: Union[List[int], Tuple[int, int]]) -> Query:
+        ...
+
+    @_attr_delegate(Attr.range_closed)
+    def range_closed(
+        self,
+        value: Union[
+            List[int], Tuple[int, int], "Value[List[int]]", "Value[Tuple[int, int]]"
+        ],
+    ) -> Query:
+        ...
+
+    @_attr_delegate(Attr.exists)
+    def exists(self) -> Query:
+        ...
+
+    @_attr_delegate(Attr.in_)
+    def in_(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Query:
+        ...
+
+    @overload  # type: ignore[override]
+    def __eq__(self, value: "PartialQuery") -> bool:
+        ...
+
+    @overload  # type: ignore[override]
+    def __eq__(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Query:
+        ...
+
+    def __eq__(
+        self,
+        value: Union[
+            "PartialQuery",
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Union[Query, bool]:  # type: ignore[override]
+        if isinstance(value, PartialQuery):
+            return (
+                self.attr == value.attr
+                and self.query == value.query
+                and self.operator == value.operator
+            )
+
+        if self.operator == "and":
+            return self.query & (self.attr == value)
+        elif self.operator == "or":
+            return self.query | (self.attr == value)
+        else:
+            raise ValueError(f"Unknown operator: {self.operator}")
+
+    @overload  # type: ignore[override]
+    def __ne__(self, value: "PartialQuery") -> bool:
+        ...
+
+    @overload  # type: ignore[override]
+    def __ne__(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Query:
+        ...
+
+    def __ne__(
+        self,
+        value: Union[
+            "PartialQuery",
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Union[Query, bool]:  # type: ignore[override]
+        if isinstance(value, PartialQuery):
+            return self.attr != value.attr
+        return ~(self == value)
+
+    @_attr_delegate(Attr.__lt__)
+    def __lt__(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.__le__)
+    def __le__(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.__gt__)
+    def __gt__(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.__ge__)
+    def __ge__(self, value: TNumberLike) -> Query:
+        ...
+
+    @_attr_delegate(Attr.__bool__)
+    def __bool__(self) -> Query:
+        ...
+
+    @_attr_delegate(Attr.__contains__)
+    def __contains__(
+        self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]
+    ) -> Query:
+        ...
 
 
 T = TypeVar("T", bound="TValue")
@@ -457,7 +825,7 @@ class Value(Generic[T]):
 
     value: T
 
-    def __contains__(self, attr: Attr):
+    def __contains__(self, attr: Attr) -> Terminal:
         "Implements `attr in Value(...)`"
         if not isinstance(attr, Attr):
             return NotImplemented
@@ -470,12 +838,39 @@ class Value(Generic[T]):
             return attr.in_(self.value)
         return NotImplemented
 
-    def __eq__(self, attr):
+    @overload  # type: ignore[override]
+    def __eq__(self, attr: "Value") -> bool:
+        ...
+
+    @overload  # type: ignore[override]
+    def __eq__(self, attr: Attr) -> Terminal:
+        ...
+
+    def __eq__(self, attr: Union["Value", Attr]) -> Union[bool, Terminal]:
+        # type: ignore[override]
+        if isinstance(attr, Value):
+            return self.value == attr.value
         if not isinstance(attr, Attr):
             return NotImplemented
         return attr == self
 
-    def __lt__(self, attr: Attr):
+    @overload  # type: ignore[override]
+    def __ne__(self, attr: "Value") -> bool:
+        ...
+
+    @overload  # type: ignore[override]
+    def __ne__(self, attr: Attr) -> Terminal:
+        ...
+
+    def __ne__(self, attr: Union["Value", Attr]) -> Union[bool, Terminal]:
+        # type: ignore[override]
+        if isinstance(attr, Value):
+            return self.value != attr.value
+        if not isinstance(attr, Attr):
+            return NotImplemented
+        return attr != self.value
+
+    def __lt__(self, attr: Attr) -> Terminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -486,7 +881,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr.greater(self.value)
 
-    def __le__(self, attr: Attr):
+    def __le__(self, attr: Attr) -> Terminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -497,12 +892,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr.greater_or_equal(self.value)
 
-    def __ne__(self, attr):
-        if not isinstance(attr, Attr):
-            return NotImplemented
-        return attr != self.value
-
-    def __gt__(self, attr: Attr):
+    def __gt__(self, attr: Attr) -> Terminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -513,7 +903,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr.less(self.value)
 
-    def __ge__(self, attr: Attr):
+    def __ge__(self, attr: Attr) -> Terminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (

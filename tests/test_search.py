@@ -1,4 +1,5 @@
 from rcsbsearch import Terminal, Group, Session, Attr, Value, TextQuery
+from rcsbsearch.search import PartialQuery
 import requests
 import pytest  # type: ignore
 
@@ -110,14 +111,37 @@ def test_errors():
 
 @pytest.mark.internet
 def test_example1():
-    "'Biological Assembly Search' from http://search.rcsb.org/#examples"
-    q1 = Terminal("rcsb_struct_symmetry.symbol", "exact_match", "C2")
-    q2 = Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
-    q3 = Terminal(value='"heat-shock transcription factor"')
-    q4 = Terminal("rcsb_entry_info.polymer_entity_count_DNA", "greater_or_equal", 1)
-    q = q1 & q2 & q3 & q4  # AND of all queries
+    """'Biological Assembly Search' from http://search.rcsb.org/#examples
 
-    results = set(q("assembly"))
+    (Also used in the README)
+    """
+    # Create terminals for each query
+    q1 = TextQuery('"heat-shock transcription factor"')
+    q2 = Attr("rcsb_struct_symmetry.symbol") == "C2"
+    q3 = Attr("rcsb_struct_symmetry.kind") == "Global Symmetry"
+    q4 = Attr("rcsb_entry_info.polymer_entity_count_DNA") >= 1
+
+    # combined using bitwise operators (&, |, ~, etc)
+    query = q1 & q2 & q3 & q4  # AND of all queries
+
+    results = set(query("assembly"))
+    assert len(results) > 0  # 14 results 2020-06
+    assert "1FYL-1" in results
+
+    # Builder syntax
+    query2 = (
+        TextQuery('"heat-shock transcription factor"')
+        .and_("rcsb_struct_symmetry.symbol")
+        .exact_match("C2")
+        .and_("rcsb_struct_symmetry.kind")
+        .exact_match("Global Symmetry")
+        .and_("rcsb_entry_info.polymer_entity_count_DNA")
+        .greater_or_equal(1)
+    )
+
+    assert query2 == query
+
+    results = set(query2.exec("assembly"))
     assert len(results) > 0  # 14 results 2020-06
     assert "1FYL-1" in results
 
@@ -163,3 +187,42 @@ def test_freetext():
     query = TextQuery("tubulin")
     results = set(query())
     assert len(results) > 0
+
+
+def test_partialquery():
+    query = Attr("a").equals("aval").and_("b")
+
+    assert isinstance(query, PartialQuery)
+
+    query = query.exact_match("bval")
+
+    assert isinstance(query, Group)
+    assert query.operator == "and"
+    assert len(query.nodes) == 2
+    assert query.nodes[0].attribute == "a"
+    assert query.nodes[0].operator == "equals"
+    assert query.nodes[0].value == "aval"
+    assert query.nodes[1].attribute == "b"
+    assert query.nodes[1].operator == "exact_match"
+    assert query.nodes[1].value == "bval"
+
+    query = query.and_(Attr("c") < 5)
+    assert len(query.nodes) == 3
+    assert query.nodes[2].attribute == "c"
+    assert query.nodes[2].operator == "less"
+    assert query.nodes[2].value == 5
+
+    query = query.or_("d")
+
+    assert isinstance(query, PartialQuery)
+    assert query.attr == Attr("d")
+    assert query.operator == "or"
+
+    query = query == "dval"
+    assert isinstance(query, Group)
+    assert query.operator == "or"
+    assert len(query.nodes) == 2
+    assert isinstance(query.nodes[0], Group)
+    assert query.nodes[1].attribute == "d"
+    assert query.nodes[1].operator == "exact_match"
+    assert query.nodes[1].value == "dval"
