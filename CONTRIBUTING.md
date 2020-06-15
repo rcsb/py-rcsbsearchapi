@@ -26,8 +26,18 @@ These are tested by the 'lint' tox environment:
 
 ## Building docs
 
-    pip install mkdocs
-    mkdocs serve
+Docs are written in markdown and use sphinx to generate HTML files. The recommonmark
+package is used for `.md` files, with sphinx-markdown-tables for table support.
+Docstrings are parsed by `m2r`, which includes additional markdown extensions.
+
+Building with tox:
+
+    tox -e docs
+
+Building manually:
+
+    cd docs
+    make html
 
 ## Making a release
 

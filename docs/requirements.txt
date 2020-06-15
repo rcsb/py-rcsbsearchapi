@@ -1,4 +1,5 @@
 # Pin dependencies for the docs
+# Should be kept up-to-date with setup.py
 sphinx==3.0.4
 sphinx-rtd-theme==0.4.3
 typing-extensions==3.7.4.2

@@ -1,15 +1,4 @@
-[![Build Status](https://travis-ci.org/sbliven/rcsbsearch.svg?branch=master)](https://travis-ci.org/sbliven/rcsbsearch)
-[![Documentation Status](https://readthedocs.org/projects/rcsbsearch/badge/?version=latest)](https://rcsbsearch.readthedocs.io/en/latest/?badge=latest)
-
-# rcsbsearch
-
-Python interface for the RCSB search API.
-
-Currently the 'text search' part of the API has been implemented.
-
-This package requires python 3.7 or later.
-
-## Example
+# Quickstart
 
 Here is a quick example of how the package is used. Two syntaxes are available for
 constructing queries: an "operator" API using python's comparators, and a "builder"
@@ -36,6 +25,9 @@ a heat-shock transcription factor.
     # Call the query to execute it
     for assemblyid in query("assembly"):
         print(assemblyid)
+
+For a full list of attributes, please refer to the [RCSB
+schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
 
 ### Builder Example
 
@@ -68,9 +60,10 @@ Detailed documentation is at [rcsbsearch.readthedocs.io](https://rcsbsearch.read
 
 ## License
 
-Code is licensed under the BSD 3-clause license. See [LICENSE](LICENSE) for details.
+Code is licensed under the BSD 3-clause license. See
+[LICENSE](https://github.com/sbliven/rcsbsearch/blob/master/LICENSE) for details.
 
 ## Developers
 
 For information about building and developing `rcsbsearch`, see
-[CONTRIBUTING.md](CONTRIBUTING.md)
+[CONTRIBUTING.md](https://github.com/sbliven/rcsbsearch/blob/master/CONTRIBUTING.md)

@@ -444,6 +444,8 @@ class Attr:
             value = value.value
         return Terminal(self.attribute, "in", value)
 
+    # Need ignore[override] because typeshed restricts __eq__ return value
+    # https://github.com/python/mypy/issues/2783
     @overload  # type: ignore[override]
     def __eq__(self, value: "Attr") -> bool:
         ...
