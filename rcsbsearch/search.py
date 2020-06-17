@@ -363,6 +363,8 @@ class Attr:
 
     Rather than their normal bool return values, operators return Terminals.
 
+    Pre-instantiated attributes are available from the `rcsbsearch.rcsb_attributes`
+    object. These are generally easier to use than constructing Attr objects by hand.
     A complete list of valid attributes is available in the
     [schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
     """

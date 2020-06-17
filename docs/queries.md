@@ -11,15 +11,18 @@ attributes to some search value. In the operator syntax, python's comparator
 operators are used to construct the comparison. The operators are overloaded to
 return `Terminal` objects for the comparisons.
 
-    from rcsbsearch import Attr, TextQuery
+    from rcsbsearch import TextQuery
+    from rcsbsearch import rcsb_attributes as attrs
 
     # Create terminals for each query
     q1 = TextQuery('"heat-shock transcription factor"')
-    q2 = Attr("rcsb_struct_symmetry.symbol") == "C2"
-    q3 = Attr("rcsb_struct_symmetry.kind") == "Global Symmetry"
-    q4 = Attr("rcsb_entry_info.polymer_entity_count_DNA") >= 1
+    q2 = attrs.rcsb_struct_symmetry.symbol == "C2"
+    q3 = attrs.rcsb_struct_symmetry.kind == "Global Symmetry"
+    q4 = attrs.rcsb_entry_info.polymer_entity_count_DNA >= 1
 
-For a full list of attributes, please refer to the [RCSB
+Attributes are available from the rcsb_attributes object and can be tab-completed.
+They can additionally be constructed from strings using the `Attr(attribute)`
+constructor. For a full list of attributes, please refer to the [RCSB
 schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
 
 `Terminal`s are combined into `Group`s using python's bitwise operators. This is
@@ -50,7 +53,7 @@ The operator syntax is great for simple queries, but requires parentheses or
 temporary variables for complex nested queries. In these cases the builder syntax may
 be clearer. Queries are built up by appending operations sequentially.
 
-    from rcsbsearch import Attr, TextQuery
+    from rcsbsearch import TextQuery
 
     # Start with a Attr or TextQuery, then add terms
     results = TextQuery('"heat-shock transcription factor"') \

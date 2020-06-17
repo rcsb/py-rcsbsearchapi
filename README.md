@@ -22,13 +22,14 @@ API](http://search.rcsb.org/#search-example-1) page, using the operator syntax. 
 query finds symmetric dimers having a twofold rotation with the DNA-binding domain of
 a heat-shock transcription factor.
 
-    from rcsbsearch import Attr, TextQuery
+    from rcsbsearch import TextQuery
+    from rcsbsearch import rcsb_attributes as attrs
 
     # Create terminals for each query
     q1 = TextQuery('"heat-shock transcription factor"')
-    q2 = Attr("rcsb_struct_symmetry.symbol") == "C2"
-    q3 = Attr("rcsb_struct_symmetry.kind") == "Global Symmetry"
-    q4 = Attr("rcsb_entry_info.polymer_entity_count_DNA") >= 1
+    q2 = attrs.rcsb_struct_symmetry.symbol == "C2"
+    q3 = attrs.rcsb_struct_symmetry.kind == "Global Symmetry"
+    q4 = attrs.rcsb_entry_info.polymer_entity_count_DNA >= 1
 
     # combined using bitwise operators (&, |, ~, etc)
     query = q1 & q2 & q3 & q4  # AND of all queries
@@ -41,7 +42,7 @@ a heat-shock transcription factor.
 
 Here is the same example using the builder syntax
 
-    from rcsbsearch import Attr, TextQuery
+    from rcsbsearch import TextQuery
 
     # Start with a Attr or TextQuery, then add terms
     results = TextQuery('"heat-shock transcription factor"') \
