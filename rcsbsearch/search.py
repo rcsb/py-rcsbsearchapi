@@ -16,6 +16,7 @@ from typing import (
     Optional,
     List,
     Iterable,
+    Iterator,
     Tuple,
     TypeVar,
     Generic,
@@ -345,20 +346,20 @@ class Attr:
     Terminals can be constructed from Attr objects using either a functional syntax,
     which mirrors the API operators, or with python operators.
 
-    | Builder Function | Operator            |
-    |------------------|---------------------|
-    | exact_match      | attr == str         |
-    | contains_words   | List[str] in attr   |
-    | contains_phrase  | str in attr         |
-    | greater          | attr > date,number  |
-    | less             | attr < date,number  |
-    | greater_or_equal | attr >= date,number |
-    | less_or_equal    | attr <= date,number |
-    | equals           | attr == date,number |
-    | range            | attr[start:end]     |
-    | range_closed     |                     |
-    | exists           | bool(attr)          |
-    | in_              | attr in Value(val)  |
+    | Builder Function   | Operator            |
+    |--------------------|---------------------|
+    | `exact_match`      | attr == str         |
+    | `contains_words`   | List[str] in attr   |
+    | `contains_phrase`  | str in attr         |
+    | `greater`          | attr > date,number  |
+    | `less`             | attr < date,number  |
+    | `greater_or_equal` | attr >= date,number |
+    | `less_or_equal`    | attr <= date,number |
+    | `equals`           | attr == date,number |
+    | `range`            | attr[start:end]     |
+    | `range_closed`     |                     |
+    | `exists`           | bool(attr)          |
+    | `in_`              | attr in Value(val)  |
 
     Rather than their normal bool return values, operators return Terminals.
 
@@ -917,7 +918,7 @@ class Value(Generic[T]):
         return attr.less_or_equal(self.value)
 
 
-class Session(object):
+class Session(Iterable[str]):
     """A single query session.
 
     Handles paging the query and parsing results
@@ -981,7 +982,7 @@ class Session(object):
         else:
             raise Exception(f"Unexpected status: {response.status_code}")
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Iterator[str]:
         "Generator for all results as a list of identifiers"
         start = 0
         response = self._single_query(start=start)

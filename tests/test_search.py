@@ -1,4 +1,5 @@
 from rcsbsearch import Terminal, Group, Session, Attr, Value, TextQuery
+from rcsbsearch import rcsb_attributes as attrs
 from rcsbsearch.search import PartialQuery
 import requests
 import pytest  # type: ignore
@@ -117,9 +118,9 @@ def test_example1():
     """
     # Create terminals for each query
     q1 = TextQuery('"heat-shock transcription factor"')
-    q2 = Attr("rcsb_struct_symmetry.symbol") == "C2"
-    q3 = Attr("rcsb_struct_symmetry.kind") == "Global Symmetry"
-    q4 = Attr("rcsb_entry_info.polymer_entity_count_DNA") >= 1
+    q2 = attrs.rcsb_struct_symmetry.symbol == "C2"
+    q3 = attrs.rcsb_struct_symmetry.kind == "Global Symmetry"
+    q4 = attrs.rcsb_entry_info.polymer_entity_count_DNA >= 1
 
     # combined using bitwise operators (&, |, ~, etc)
     query = q1 & q2 & q3 & q4  # AND of all queries

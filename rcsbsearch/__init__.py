@@ -8,7 +8,17 @@ from .search import (
     Attr,
     Value,
 )  # noqa: F401
+from .schema import rcsb_attributes
 
 __version__ = "0.2.0-dev1"
 
-__all__ = ["Query", "Group", "Terminal", "TextQuery", "Session", "Attr", "Value"]
+__all__ = [
+    "Query",
+    "Group",
+    "Terminal",
+    "TextQuery",
+    "Session",
+    "Attr",
+    "Value",
+    "rcsb_attributes",
+]
