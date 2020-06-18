@@ -87,7 +87,8 @@ Building manually:
 
 5. Push!
 
-    twine upload -s --identity 780796DF dist/*
+    git push
     git push --tags
+    twine upload -s --identity 780796DF dist/*
 
 6. Bump version number
