@@ -66,29 +66,29 @@ Building manually:
 
 1. Test
 
-    tox
+        tox
 
 2. Build
 
-    python setup.py sdist bdist_wheel
+        python setup.py sdist bdist_wheel
 
 3. Tag
 
-    git tag -s -a v0.1.0
+        git tag -s -a v0.1.0
 
 4. Run checks
 
-    twine check dist/*
-    git verify-tag v0.1.0
+        twine check dist/*
+        git verify-tag v0.1.0
 
 4. Push to testing
 
-    twine upload --repository testpypi -s --identity 780796DF dist/*
+        twine upload --repository testpypi -s --identity 780796DF dist/*
 
 5. Push!
 
-    git push
-    git push --tags
-    twine upload -s --identity 780796DF dist/*
+        git push
+        git push --tags
+        twine upload -s --identity 780796DF dist/*
 
 6. Bump version number
