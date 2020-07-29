@@ -1,8 +1,6 @@
 # Pin dependencies for the docs
 # Should be kept up-to-date with setup.py
-sphinx==3.0.4
+sphinx==2.4.4
 sphinx-rtd-theme==0.4.3
 typing-extensions==3.7.4.2
-recommonmark==0.6.0
-sphinx-markdown-tables==0.0.14
-m2r==0.2.1
+myst-parser==0.8.2

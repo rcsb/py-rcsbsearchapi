@@ -26,9 +26,10 @@ These are tested by the 'lint' tox environment:
 
 ## Building docs
 
-Docs are written in markdown and use sphinx to generate HTML files. The recommonmark
-package is used for `.md` files, with sphinx-markdown-tables for table support.
-Docstrings are parsed by `m2r`, which includes additional markdown extensions.
+Docs are written in the [MyST](https://myst-parser.readthedocs.io) superset of
+markdown. [Google style
+docstrings](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html) are
+preferred for API documentation.
 
 Building with tox:
 
@@ -38,6 +39,16 @@ Building manually:
 
     cd docs
     make html
+
+For live updates, you can also install the `sphinx-autobuild` tool (pip or conda)
+
+    pip install sphinx-autobuild
+    cd docs
+    make livehtml
+
+Which runs:
+
+    sphinx-autobuild -z rcsbsearch docs docs/_build/html
 
 ## Making a release
 

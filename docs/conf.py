@@ -12,8 +12,6 @@
 #
 import os
 import sys
-from recommonmark.transform import AutoStructify
-import m2r
 
 sys.path.insert(0, os.path.abspath(".."))
 import rcsbsearch  # noqa: E402
@@ -29,8 +27,8 @@ author = "Spencer Bliven"
 # built documents.
 #
 # The short X.Y version.
-version = rcsbsearch.__version__
-# The full version, including alpha/beta/rc tagss
+version = rcsbsearch.__version__.split("-")[0]
+# The full version, including alpha/beta/rc tags
 release = rcsbsearch.__version__
 
 
@@ -43,8 +41,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.coverage",
     "sphinx.ext.napoleon",
-    "recommonmark",
-    "sphinx_markdown_tables",
+    "myst_parser",
 ]
 # source_suffix = [".rst", ".md"]  # Redundant with newer sphinx versions
 
@@ -55,6 +52,19 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+# Napoleon settings
+# napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+# napoleon_include_init_with_doc = False
+# napoleon_include_private_with_doc = False
+# napoleon_include_special_with_doc = True
+# napoleon_use_admonition_for_examples = False
+# napoleon_use_admonition_for_notes = False
+# napoleon_use_admonition_for_references = False
+# napoleon_use_ivar = False
+# napoleon_use_param = True
+# napoleon_use_rtype = True
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -68,37 +78,3 @@ html_theme = "sphinx_rtd_theme"
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-
-# app setup hook
-
-# We use commonmark+sphinx_markdown_tables for .md files and m2r for docstrings. This
-# is inconsistent, but I couldn't get table support with other combinations.
-
-# https://stackoverflow.com/a/56428123/81658
-def docstring(app, what, name, obj, options, lines):
-    "Use m2r for docstring parsing"
-    md = "\n".join(lines)
-
-    # Parse md -> rst with m2r
-    rst = m2r.convert(md)
-
-    lines.clear()
-    lines.extend(rst.splitlines())
-
-
-def setup(app):
-    app.connect("autodoc-process-docstring", docstring)
-    app.add_config_value(
-        "recommonmark_config",
-        {
-            # 'url_resolver': lambda url: github_doc_root + url,
-            "enable_auto_toc_tree": True,
-            "auto_toc_tree_section": "Contents",
-            "enable_math": False,
-            "enable_inline_math": False,
-            "enable_eval_rst": True,
-        },
-        True,
-    )
-    app.add_transform(AutoStructify)

@@ -1,5 +1,7 @@
 # Quickstart
 
+## Syntax
+
 Here is a quick example of how the package is used. Two syntaxes are available for
 constructing queries: an "operator" API using python's comparators, and a "builder"
 syntax where terms are chained together. Which to use is a matter of preference.
