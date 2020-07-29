@@ -3,7 +3,8 @@
 
 from . import Attr
 import requests
-from typing import Union
+import re
+from typing import Union, Iterator
 
 
 def _get_json_schema():
@@ -17,6 +18,37 @@ def _get_json_schema():
 
 class SchemaGroup:
     """A non-leaf node in the RCSB schema. Leaves are Attr values."""
+
+    def search(self, pattern: Union[str, re.Pattern], flags=0) -> Iterator[Attr]:
+        """Find all attributes in the schema matching a regular expression.
+
+        Returns:
+            An iterator supplying Attr objects whose attribute matches.
+        """
+        matcher = re.compile(pattern, flags=flags)
+        return filter(lambda a: matcher.search(a.attribute), self)
+
+    def __iter__(self) -> Iterator[Attr]:
+        """Iterate over all leaf nodes
+
+        Example:
+
+            >>> [a for a in attrs if "stoichiometry" in a.attribute]
+            [Attr(attribute='rcsb_struct_symmetry.stoichiometry')]
+
+        """
+
+        def leaves(self):
+            for k, v in self.__dict__.items():
+                if isinstance(v, Attr):
+                    yield v
+                elif isinstance(v, SchemaGroup):
+                    yield from iter(v)
+                else:
+                    # Shouldn't happen
+                    raise TypeError(f"Unrecognized member {k!r}: {v!r}")
+
+        return leaves(self)
 
     def __str__(self):
         return "\n".join((str(c) for c in self.__dict__.values()))
@@ -52,10 +84,19 @@ def _make_schema():
     return _make_group("", json)
 
 
+# Note that docstring needs to be set in __init__
 rcsb_attributes = _make_schema()
-"""Object with known RCSB attributes.
+"""Object with all known RCSB attributes.
 
 This is provided to ease autocompletion as compared to creating Attr objects from
-strings. For example, `rcsb_attributes.rcsb_nonpolymer_instance_feature_summary.chem_id`
-is equivalent to `Attr(rcsb_nonpolymer_instance_feature_summary.chem_id)`
+strings. For example,
+::
+
+    rcsb_attributes.rcsb_nonpolymer_instance_feature_summary.chem_id
+
+is equivalent to
+::
+
+    Attr('rcsb_nonpolymer_instance_feature_summary.chem_id')
+
 """

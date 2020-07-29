@@ -56,9 +56,9 @@ TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]
 
 
 class Query(ABC):
-    """Superclass for all types of queries.
+    """Base class for all types of queries.
 
-    Queries support set operators:
+    Queries can be combined using set operators:
 
     - `q1 & q2`: Intersection (AND)
     - `q1 | q2`: Union (OR)
@@ -82,22 +82,29 @@ class Query(ABC):
 
     def to_json(self) -> str:
         """Get JSON string of this query"""
-        return json.dumps(self.to_dict, separators=(",", ":"))
+        return json.dumps(self.to_dict(), separators=(",", ":"))
 
     @abstractmethod
     def _assign_ids(self, node_id=0) -> Tuple["Query", int]:
         """Assign node_ids sequentially for all terminal nodes
 
-        This is a helper for the assign_ids() method
+        This is a helper for the :py:meth:`Query.assign_ids` method
 
-        Returns a tuple with the modified query and the next available node_id
+        Args:
+            node_id: Id to assign to the first leaf of this query
+
+        Returns:
+            query: The modified query, with node_ids assigned
+            node_id: The next available node_id
+
         """
         ...
 
     def assign_ids(self) -> "Query":
         """Assign node_ids sequentially for all terminal nodes
 
-        Returns the modified query.
+        Returns:
+            the modified query, with node_ids assigned sequentially from 0
         """
         return self._assign_ids(0)[0]
 
@@ -181,16 +188,15 @@ class Terminal(Query):
     value.
 
     Examples:
-
-        Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION")
-        Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["5T89", "1TIM"])
-        Terminal(value="tubulin")
+        >>> Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        >>> Terminal("rcsb_id", "in", ["5T89", "1TIM"])
+        >>> Terminal(value="tubulin")
 
     A full list of attributes is available in the
-    [schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
-    Operators are documented [here](http://search.rcsb.org/#field-queries).
+    `schema <http://search.rcsb.org/rcsbsearch/v1/metadata/schema>`_.
+    Operators are documented `here <http://search.rcsb.org/#field-queries>`_.
 
-    The `Attr` class provides a more pythonic way of constructing Terminals.
+    The :py:class:`Attr` class provides a more pythonic way of constructing Terminals.
     """
 
     attribute: Optional[str] = None
@@ -248,9 +254,8 @@ class Terminal(Query):
         """Return a simplified string representation
 
         Examples:
-
-            Terminal("attr", "op", "val")
-            ~Terminal(value="val")
+            >>> Terminal("attr", "op", "val")
+            >>> ~Terminal(value="val")
 
         """
         negation = "~" if self.negation else ""
@@ -268,7 +273,12 @@ class TextQuery(Terminal):
     """Special case of a Terminal for free-text queries"""
 
     def __init__(self, value: str, negation: bool = False):
-        """Search for the string value anywhere in the text"""
+        """Search for the string value anywhere in the text
+
+        Args:
+            value: free-text query
+            negation: find structures without the pattern
+        """
         super().__init__(value=value, negation=negation)
 
 
@@ -331,6 +341,7 @@ class Group(Query):
             return (self, node_id)
 
     def __str__(self):
+        ""  # hide in documentation
         if self.operator == "and":
             return f"({' & '.join((str(n) for n in self.nodes))})"
         elif self.operator == "or":
@@ -346,27 +357,41 @@ class Attr:
     Terminals can be constructed from Attr objects using either a functional syntax,
     which mirrors the API operators, or with python operators.
 
+    +--------------------+---------------------+
     | Builder Function   | Operator            |
-    |--------------------|---------------------|
-    | `exact_match`      | attr == str         |
-    | `contains_words`   | List[str] in attr   |
-    | `contains_phrase`  | str in attr         |
-    | `greater`          | attr > date,number  |
-    | `less`             | attr < date,number  |
-    | `greater_or_equal` | attr >= date,number |
-    | `less_or_equal`    | attr <= date,number |
-    | `equals`           | attr == date,number |
-    | `range`            | attr[start:end]     |
-    | `range_closed`     |                     |
-    | `exists`           | bool(attr)          |
-    | `in_`              | attr in Value(val)  |
+    +====================+=====================+
+    | exact_match        | attr == str         |
+    +--------------------+---------------------+
+    | contains_words     |                     |
+    +--------------------+---------------------+
+    | contains_phrase    |                     |
+    +--------------------+---------------------+
+    | greater            | attr > date,number  |
+    +--------------------+---------------------+
+    | less               | attr < date,number  |
+    +--------------------+---------------------+
+    | greater_or_equal   | attr >= date,number |
+    +--------------------+---------------------+
+    | less_or_equal      | attr <= date,number |
+    +--------------------+---------------------+
+    | equals             | attr == date,number |
+    +--------------------+---------------------+
+    | range              | attr[start:end]     |
+    +--------------------+---------------------+
+    | range_closed       |                     |
+    +--------------------+---------------------+
+    | exists             | bool(attr)          |
+    +--------------------+---------------------+
+    | in\\_               |                     |
+    +--------------------+---------------------+
 
     Rather than their normal bool return values, operators return Terminals.
 
-    Pre-instantiated attributes are available from the `rcsbsearch.rcsb_attributes`
-    object. These are generally easier to use than constructing Attr objects by hand.
-    A complete list of valid attributes is available in the
-    [schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
+    Pre-instantiated attributes are available from the
+    :py:data:`rcsbsearch.rcsb_attributes` object. These are generally easier to use
+    than constructing Attr objects by hand. A complete list of valid attributes is
+    available in the `schema <http://search.rcsb.org/rcsbsearch/v1/metadata/schema>`_.
+
     """
 
     attribute: str
@@ -377,42 +402,58 @@ class Attr:
             value = value.value
         return Terminal(self.attribute, "exact_match", value)
 
-    def contains_words(self, value: Union[List[str], "Value[List[str]]"]) -> Terminal:
+    def contains_words(self, value: Union[str, "Value[str]"]) -> Terminal:
+        """Match any word within the string.
+
+        Words are split at whitespace. All results which match any word are returned,
+        with results matching more words sorted first.
+        """
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "contains_words", value)
 
     def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
+        """Match an exact phrase"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "contains_phrase", value)
 
     def greater(self, value: TNumberLike) -> Terminal:
+        """Attribute > `value`"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "greater", value)
 
     def less(self, value: TNumberLike) -> Terminal:
+        """Attribute < `value`"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "less", value)
 
     def greater_or_equal(self, value: TNumberLike) -> Terminal:
+        """Attribute >= `value`"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "greater_or_equal", value)
 
     def less_or_equal(self, value: TNumberLike) -> Terminal:
+        """Attribute <= `value`"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "less_or_equal", value)
 
     def equals(self, value: TNumberLike) -> Terminal:
+        """Attribute == `value`"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "equals", value)
 
     def range(self, value: Union[List[int], Tuple[int, int]]) -> Terminal:
+        """Attribute is within the specified half-open range
+
+        Args:
+            value: lower and upper bounds `[a, b)`
+        """
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "range", value)
@@ -423,26 +464,42 @@ class Attr:
             List[int], Tuple[int, int], "Value[List[int]]", "Value[Tuple[int, int]]"
         ],
     ) -> Terminal:
+        """Attribute is within the specified closed range
+
+        Args:
+            value: lower and upper bounds `[a, b]`
+        """
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "range_closed", value)
 
     def exists(self) -> Terminal:
+        """Attribute is defined for the structure"""
         return Terminal(self.attribute, "exists")
 
     def in_(
         self,
         value: Union[
-            str,
-            int,
-            float,
-            date,
-            "Value[str]",
-            "Value[int]",
-            "Value[float]",
-            "Value[date]",
+            List[str],
+            List[int],
+            List[float],
+            List[date],
+            Tuple[str, ...],
+            Tuple[int, ...],
+            Tuple[float, ...],
+            Tuple[date, ...],
+            "Value[List[str]]",
+            "Value[List[int]]",
+            "Value[List[float]]",
+            "Value[List[date]]",
+            "Value[Tuple[str, ...]]",
+            "Value[Tuple[int, ...]]",
+            "Value[Tuple[float, ...]]",
+            "Value[Tuple[date, ...]]",
         ],
     ) -> Terminal:
+        """Attribute is contained in the list of values
+        """
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "in", value)
@@ -818,10 +875,7 @@ class Value(Generic[T]):
     """Represents a value in a query.
 
     In most cases values are unnecessary and can be replaced directly by the python
-    value. The exception is the 'in' operator, which must be called on a Value object
-    due to the way python handles operator overloading:
-
-        Attr("rcsb_struct_symmetry.type") in Value(["C4", "D2"])
+    value.
 
     Values can also be used if the Attr object appears on the right:
 
@@ -829,19 +883,6 @@ class Value(Generic[T]):
     """
 
     value: T
-
-    def __contains__(self, attr: Attr) -> Terminal:
-        "Implements `attr in Value(...)`"
-        if not isinstance(attr, Attr):
-            return NotImplemented
-        # Valid TSimpleNumberLike constraints
-        if (
-            isinstance(self.value, int)
-            or isinstance(self.value, float)
-            or isinstance(self.value, date)
-        ):
-            return attr.in_(self.value)
-        return NotImplemented
 
     @overload  # type: ignore[override]
     def __eq__(self, attr: "Value") -> bool:

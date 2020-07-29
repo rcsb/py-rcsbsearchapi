@@ -3,6 +3,7 @@ from rcsbsearch import rcsb_attributes as attrs
 from rcsbsearch.search import PartialQuery
 import requests
 import pytest  # type: ignore
+from itertools import islice
 
 # q1 = rcsb.Terminal("rcsb_struct_symmetry.type", "exact_match", "Icosahedral")
 # q2 = rcsb.Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
@@ -227,3 +228,32 @@ def test_partialquery():
     assert query.nodes[1].attribute == "d"
     assert query.nodes[1].operator == "exact_match"
     assert query.nodes[1].value == "dval"
+
+
+def test_operators():
+    q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])
+    results = list(q1())
+    assert len(results) == 2
+
+    q1 = attrs.citation.rcsb_authors.contains_words("kisko bliven")
+    results = list(q1())
+    assert results[0] == "5T89"  # first hit has both authors
+    assert "3V6B" in results  # only a single author
+
+    q1 = attrs.citation.rcsb_authors.contains_phrase("kisko bliven")
+    results = list(q1())
+    assert len(results) == 0
+
+    q1 = attrs.struct.title.contains_phrase(
+        "VEGF-A in complex with VEGFR-1 domains D1-6"
+    )
+    results = list(q1())
+    assert "5T89" in results
+
+    q1 = attrs.rcsb_struct_symmetry.type.exact_match("Asymmetric")
+    results = list(islice(q1(), 5))
+    assert len(results) == 5
+
+    q1 = attrs.rcsb_struct_symmetry.type.exact_match("symmetric")
+    results = list(islice(q1(), 5))
+    assert len(results) == 0
