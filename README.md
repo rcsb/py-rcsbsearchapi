@@ -72,6 +72,21 @@ Detailed documentation is at [rcsbsearch.readthedocs.io](https://rcsbsearch.read
 
 Code is licensed under the BSD 3-clause license. See [LICENSE](LICENSE) for details.
 
+## Citing rcsbsearch
+
+Please cite the rcsbsearch package by URL:
+
+> https://rcsbsearch.readthedocs.io
+
+You should also cite the RCSB service this package utilizes:
+
+> Yana Rose, Jose M. Duarte, Robert Lowe, Joan Segura, Chunxiao Bi, Charmi
+> Bhikadiya, Li Chen, Alexander S. Rose, Sebastian Bittrich, Stephen K. Burley,
+> John D. Westbrook. RCSB Protein Data Bank: Architectural Advances Towards
+> Integrated Searching and Efficient Access to Macromolecular Structure Data
+> from the PDB Archive, Journal of Molecular Biology, 2020.
+> DOI: [10.1016/j.jmb.2020.11.003](https://doi.org/10.1016/j.jmb.2020.11.003)
+
 ## Developers
 
 For information about building and developing `rcsbsearch`, see
