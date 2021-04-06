@@ -1,6 +1,6 @@
 # Pin dependencies for the docs
 # Should be kept up-to-date with setup.py
-sphinx==2.4.4
-sphinx-rtd-theme==0.4.3
-typing-extensions==3.7.4.2
-myst-parser==0.8.2
+sphinx==3.5.3
+sphinx-rtd-theme==0.5.2
+typing-extensions==3.7.4.3
+myst-parser==0.13.5
