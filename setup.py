@@ -37,6 +37,7 @@ setuptools.setup(
         "docs": ["sphinx", "sphinx-rtd-theme", "myst-parser"],
     },
     packages=setuptools.find_packages(exclude=["tests"]),
+    package_data={"": ["resources/*"]},
     scripts=[],
     classifiers=[
         "Programming Language :: Python :: 3",
