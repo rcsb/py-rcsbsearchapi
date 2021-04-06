@@ -1,9 +1,11 @@
-from rcsbsearch import Terminal, Group, Session, Attr, Value, TextQuery
+from itertools import islice
+
+import pytest  # type: ignore
+import requests
+
+from rcsbsearch import Attr, Group, Session, Terminal, TextQuery, Value
 from rcsbsearch import rcsb_attributes as attrs
 from rcsbsearch.search import PartialQuery
-import requests
-import pytest  # type: ignore
-from itertools import islice
 
 # q1 = rcsb.Terminal("rcsb_struct_symmetry.type", "exact_match", "Icosahedral")
 # q2 = rcsb.Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
@@ -158,8 +160,16 @@ def test_example2():
             "exact_match",
             "Viruses",
         )
-        & Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION",)
-        & Terminal("rcsb_entry_info.resolution_combined", "less_or_equal", 2.5,)
+        & Terminal(
+            "exptl.method",
+            "exact_match",
+            "X-RAY DIFFRACTION",
+        )
+        & Terminal(
+            "rcsb_entry_info.resolution_combined",
+            "less_or_equal",
+            2.5,
+        )
         & Terminal("rcsb_entry_info.nonpolymer_entity_count", "greater", 0)
     )
 

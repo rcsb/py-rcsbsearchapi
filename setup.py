@@ -1,4 +1,4 @@
-import setuptools
+import setuptools  # type: ignore
 import sys
 
 # Load the version number from __init__.py
@@ -8,9 +8,9 @@ for line in open("rcsbsearch/__init__.py"):
         exec(line.strip())
 
 # Version-specific requirements
-install_requires = ["requests"]
+install_requires = ["requests", "jsonschema"]
 if sys.version_info < (3, 8):
-    install_requires.append("typing_extensions")  # 3.6-3.7 only
+    install_requires.append("typing_extensions")  # 3.7 only
 
 tests_requires = ["tox", "pytest", "black", "flake8", "mypy"]
 

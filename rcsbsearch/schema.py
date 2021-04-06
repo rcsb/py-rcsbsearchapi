@@ -3,19 +3,55 @@
 Provides access to all valid attributes for search queries.
 """
 
-from . import Attr
-import requests
+import json
+import logging
+import os
+import pkgutil
 import re
-from typing import Union, Iterator
+from typing import Any, Iterator, List, Union
+
+import requests
+
+from .search import Attr
+
+METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v1/metadata/schema"
+SEARCH_SCHEMA_URL = "http://search.rcsb.org/json-schema-rcsb_search_query.json"
+
+ENV_RCSBSEARCH_DOWNLOAD_SCHEMA = "RCSBSEARCH_DOWNLOAD_SCHEMA"
 
 
-def _get_json_schema():
+def _get_json_schema(download=None):
+    """Get the JSON schema
+
+    The RCSBSEARCH_DOWNLOAD_SCHEMA environmental variable controls whether
+    to download the schema from the web each time vs using the version shipped
+    with rcsbsearch
+    """
+    if download is True or (
+        download is None
+        and (
+            os.environ.get(ENV_RCSBSEARCH_DOWNLOAD_SCHEMA, "no").lower()
+            in ("1", "yes", "y")
+        )
+    ):
+        return _download_json_schema()
+    return _load_json_schema()
+
+
+def _download_json_schema():
     "Get the current JSON schema from the web"
-    url = "http://search.rcsb.org/rcsbsearch/v1/metadata/schema"
+    url = METADATA_SCHEMA_URL
 
+    logging.info(f"Dowloading {url}")
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
+
+
+def _load_json_schema():
+    logging.info("Loading schema from file")
+    latest = pkgutil.get_data(__package__, "resources/metadata_schema.json")
+    return json.loads(latest)
 
 
 class SchemaGroup:
@@ -65,6 +101,21 @@ def _make_group(fullname: str, node) -> Union[SchemaGroup, Attr]:
     Returns:
     An Attr (Leaf nodes) or SchemaGroup (object nodes)
     """
+    if "anyOf" in node:
+        children = {_make_group(fullname, n) for n in node["anyOf"]}
+        # Currently only deal with anyOf in leaf nodes
+        assert len(children) == 1, f"type of {fullname} couldn't be determined"
+        return next(iter(children))
+    if "oneOf" in node:
+        children = {_make_group(fullname, n) for n in node["oneOf"]}
+        # Currently only deal with oneOf in leaf nodes
+        assert len(children) == 1, f"type of {fullname} couldn't be determined"
+        return next(iter(children))
+    if "allOf" in node:
+        children = {_make_group(fullname, n) for n in node["allOf"]}
+        # Currently only deal with allOf in leaf nodes
+        assert len(children) == 1, f"type of {fullname} couldn't be determined"
+        return next(iter(children))
     if node["type"] in ("string", "number", "integer", "date"):
         return Attr(fullname)
     elif node["type"] == "array":
@@ -81,13 +132,14 @@ def _make_group(fullname: str, node) -> Union[SchemaGroup, Attr]:
         raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
 
 
-def _make_schema():
+def _make_schema() -> SchemaGroup:
     json = _get_json_schema()
-    return _make_group("", json)
+    schema = _make_group("", json)
+    assert isinstance(schema, SchemaGroup)  # for type checking
+    return schema
 
 
-# Note that docstring needs to be set in __init__
-rcsb_attributes = _make_schema()
+rcsb_attributes: SchemaGroup
 """Object with all known RCSB attributes.
 
 This is provided to ease autocompletion as compared to creating Attr objects from
@@ -101,4 +153,36 @@ is equivalent to
 
     Attr('rcsb_nonpolymer_instance_feature_summary.chem_id')
 
+All attributes in `rcsb_attributes` can be iterated over.
+
+    >>> [a for a in rcsb_attributes if "stoichiometry" in a.attribute]
+    [Attr(attribute='rcsb_struct_symmetry.stoichiometry')]
+
+Attributes matching a regular expression can also be filtered:
+
+    >>> list(rcsb_attributes.search('rcsb.*stoichiometry'))
+    [Attr(attribute='rcsb_struct_symmetry.stoichiometry')]a
+
 """
+
+
+def __getattr__(name: str) -> Any:
+    # delay instantiating rcsb_attributes until it is needed
+    if name == "rcsb_attributes":
+        if "rcsb_attributes" not in globals():
+            globals()["rcsb_attributes"] = _make_schema()
+        return globals()["rcsb_attributes"]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> List[str]:
+    return sorted(__all__)
+
+
+__all__ = [  # noqa: F822
+    "METADATA_SCHEMA_URL",
+    "SEARCH_SCHEMA_URL",
+    "ENV_RCSBSEARCH_DOWNLOAD_SCHEMA",
+    "rcsb_attributes",
+    "SchemaGroup",
+]

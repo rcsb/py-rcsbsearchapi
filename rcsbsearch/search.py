@@ -1,29 +1,30 @@
 """Interact with the [RCSB Search API](https://search.rcsb.org/#search-api).
 """
 
-import uuid
-import requests
+import functools
 import json
 import logging
 import math
-from datetime import date
+import sys
+import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import functools
+from datetime import date
 from typing import (
+    Callable,
     Dict,
-    Union,
-    Optional,
-    List,
+    Generic,
     Iterable,
     Iterator,
+    List,
+    Optional,
     Tuple,
     TypeVar,
-    Generic,
-    Callable,
+    Union,
     overload,
 )
-import sys
+
+import requests
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -402,7 +403,9 @@ class Attr:
             value = value.value
         return Terminal(self.attribute, "exact_match", value)
 
-    def contains_words(self, value: Union[str, "Value[str]"]) -> Terminal:
+    def contains_words(
+        self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]
+    ) -> Terminal:
         """Match any word within the string.
 
         Words are split at whitespace. All results which match any word are returned,
@@ -410,6 +413,8 @@ class Attr:
         """
         if isinstance(value, Value):
             value = value.value
+        if isinstance(value, list):
+            value = " ".join(value)
         return Terminal(self.attribute, "contains_words", value)
 
     def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
@@ -498,8 +503,7 @@ class Attr:
             "Value[Tuple[date, ...]]",
         ],
     ) -> Terminal:
-        """Attribute is contained in the list of values
-        """
+        """Attribute is contained in the list of values"""
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "in", value)
@@ -694,7 +698,9 @@ class PartialQuery:
         ...
 
     @_attr_delegate(Attr.contains_words)
-    def contains_words(self, value: Union[List[str], "Value[List[str]]"]) -> Query:
+    def contains_words(
+        self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]
+    ) -> Query:
         ...
 
     @_attr_delegate(Attr.contains_phrase)
