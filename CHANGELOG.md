@@ -1,6 +1,16 @@
 # Changelog
 
-## v0.2.0 (tbd)
+## v0.2.2 (2021-04-06)
+
+- Remove `in` operator syntax (incompatible with python spec)
+- Fix import error due to schema change
+- Ship schema with the package for stability and performance
+
+## v0.2.1 (2020-06-18)
+
+- Test release process
+
+## v0.2.0 (2020-06-18)
 
 - Add builder syntax
   - Add PartialQuery helper
