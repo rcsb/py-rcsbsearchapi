@@ -360,7 +360,7 @@ class Attr:
     which mirrors the API operators, or with python operators.
 
     +--------------------+---------------------+
-    | Builder Function   | Operator            |
+    | Fluent Function    | Operator            |
     +====================+=====================+
     | exact_match        | attr == str         |
     +--------------------+---------------------+
@@ -679,7 +679,7 @@ def _attr_delegate(attr_func: FTerminal) -> Callable[[FQuery], FQuery]:
 
 class PartialQuery:
     """A PartialQuery extends a growing query with an Attr. It is constructed
-    using the builder syntax with the `and_` and `or_` methods. It is not usually
+    using the fluent syntax with the `and_` and `or_` methods. It is not usually
     necessary to create instances of this class directly.
 
     PartialQuery instances behave like Attr instances in most situations.

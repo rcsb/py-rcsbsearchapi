@@ -3,7 +3,7 @@
 ## Syntax
 
 Here is a quick example of how the package is used. Two syntaxes are available for
-constructing queries: an "operator" API using python's comparators, and a "builder"
+constructing queries: an "operator" API using python's comparators, and a "fluent"
 syntax where terms are chained together. Which to use is a matter of preference.
 
 ### Operator example
@@ -32,9 +32,9 @@ a heat-shock transcription factor.
 For a full list of attributes, please refer to the [RCSB
 schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
 
-### Builder Example
+### Fluent Example
 
-Here is the same example using the builder syntax
+Here is the same example using the fluent syntax
 
     from rcsbsearch import Attr, TextQuery
 

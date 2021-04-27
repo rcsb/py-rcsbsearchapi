@@ -6,14 +6,15 @@
 
 Python interface for the RCSB search API.
 
-Currently the 'text search' part of the API has been implemented.
+Currently the 'text search' part of the API has been implemented. See 'Supported
+features' below.
 
 This package requires python 3.7 or later.
 
 ## Example
 
 Here is a quick example of how the package is used. Two syntaxes are available for
-constructing queries: an "operator" API using python's comparators, and a "builder"
+constructing queries: an "operator" API using python's comparators, and a "fluent"
 syntax where terms are chained together. Which to use is a matter of preference.
 
 ### Operator example
@@ -39,9 +40,10 @@ a heat-shock transcription factor.
     for assemblyid in query("assembly"):
         print(assemblyid)
 
-### Builder Example
+### Fluent Example
 
-Here is the same example using the builder syntax
+Here is the same example using the
+[fluent](https://en.wikipedia.org/wiki/Fluent_interface) syntax.
 
     from rcsbsearch import TextQuery
 
@@ -55,6 +57,22 @@ Here is the same example using the builder syntax
     # Exec produces an iterator of IDs
     for assemblyid in results:
         print(assemblyid)
+
+
+## Supported Features
+
+The following table lists the status of current and planned features.
+
+- [x] Attribute Comparison operations
+- [x] Query set operations
+- [x] Attribute `contains`, `in_` (fluent only)
+- [ ] Sequence search
+- [ ] Sequence motif search
+- [ ] Structural search
+- [ ] Structural motif search
+- [ ] Chemical search
+
+Contributions are welcome for unchecked items!
 
 ## Installation
 

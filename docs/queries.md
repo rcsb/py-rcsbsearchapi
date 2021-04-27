@@ -1,7 +1,7 @@
 # Queries
 
 Two syntaxes are available for constructing queries: an "operator" API using python's
-comparators, and a "builder" API where terms are chained together. Which to use is a
+comparators, and a "fluent" API where terms are chained together. Which to use is a
 matter of preference, and both construct the same query object.
 
 ## Operator syntax
@@ -47,10 +47,10 @@ for options):
     assemblies = set(query("assembly"))
 
 
-## Builder syntax
+## Fluent syntax
 
 The operator syntax is great for simple queries, but requires parentheses or
-temporary variables for complex nested queries. In these cases the builder syntax may
+temporary variables for complex nested queries. In these cases the fluent syntax may
 be clearer. Queries are built up by appending operations sequentially.
 
     from rcsbsearch import TextQuery

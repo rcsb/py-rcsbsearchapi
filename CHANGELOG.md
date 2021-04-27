@@ -12,7 +12,7 @@
 
 ## v0.2.0 (2020-06-18)
 
-- Add builder syntax
+- Add fluent syntax (originally called builder syntax)
   - Add PartialQuery helper
 - Improve docs & automated testing
 

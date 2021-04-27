@@ -132,7 +132,7 @@ def test_example1():
     assert len(results) > 0  # 14 results 2020-06
     assert "1FYL-1" in results
 
-    # Builder syntax
+    # Fluent syntax
     query2 = (
         TextQuery('"heat-shock transcription factor"')
         .and_("rcsb_struct_symmetry.symbol")
