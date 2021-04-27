@@ -6,6 +6,7 @@ import json
 import logging
 import math
 import sys
+import urllib.parse
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -1079,5 +1080,14 @@ class Session(Iterable[str]):
 
         return identifiers[:limit]
 
+    def rcsb_query_editor_url(self) -> str:
+        """URL to edit this query in the RCSB query editor"""
+        data = json.dumps(self._make_params(), separators=(",", ":"))
+        return (
+            f"http://search.rcsb.org/query-editor.html?json={urllib.parse.quote(data)}"
+        )
 
-# %%
+    def rcsb_query_builder_url(self) -> str:
+        """URL to view this query on the RCSB website query builder"""
+        data = json.dumps(self._make_params(), separators=(",", ":"))
+        return f"http://www.rcsb.org/search?request={urllib.parse.quote(data)}"
