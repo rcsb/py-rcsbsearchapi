@@ -31,3 +31,4 @@ dependencies:
   - pip
   - pip:
     - sphinx-rtd-theme
+    - rcsbsearch
