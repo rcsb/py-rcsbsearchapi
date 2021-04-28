@@ -384,7 +384,7 @@ class Attr:
     +--------------------+---------------------+
     | exists             | bool(attr)          |
     +--------------------+---------------------+
-    | in\\_               |                     |
+    | in\\_              |                     |
     +--------------------+---------------------+
 
     Rather than their normal bool return values, operators return Terminals.
