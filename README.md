@@ -18,6 +18,12 @@ Here is a quick example of how the package is used. Two syntaxes are available f
 constructing queries: an "operator" API using python's comparators, and a "fluent"
 syntax where terms are chained together. Which to use is a matter of preference.
 
+A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using binder:
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fquickstart.ipynb)
+
+An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fcovid.ipynb)
+
 ### Operator example
 
 Here is an example from the [RCSB Search
@@ -40,6 +46,9 @@ a heat-shock transcription factor.
     # Call the query to execute it
     for assemblyid in query("assembly"):
         print(assemblyid)
+
+For a full list of attributes, please refer to the [RCSB
+schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
 
 ### Fluent Example
 

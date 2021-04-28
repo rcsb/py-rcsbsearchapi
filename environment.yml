@@ -31,4 +31,5 @@ dependencies:
   - pip
   - pip:
     - sphinx-rtd-theme
+    # Install rcsbsearch from local directory
     - .
