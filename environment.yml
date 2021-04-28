@@ -1,0 +1,33 @@
+# Create conda environment
+# This file is used for mybinder.org, so it includes all optional dependencies
+name: rcsbsearch
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Python 3.7 or newer
+  - python >= 3.7
+
+  # Required dependencies
+  - requests
+  - jsonschema
+  # python 3.7 only
+  - typing_extensions
+
+  # dev requirements
+  - tqdm
+  - tox
+  - pytest
+  - black
+  - flake8
+  - mypy
+  - sphinx
+  - myst-parser
+
+  # notebook packages
+  - jupyter
+  - nglview
+
+  - pip
+  - pip:
+    - sphinx-rtd-theme
