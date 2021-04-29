@@ -12,7 +12,8 @@ install_requires = ["requests", "jsonschema"]
 if sys.version_info < (3, 8):
     install_requires.append("typing_extensions")  # 3.7 only
 
-tests_requires = ["tox", "pytest", "black", "flake8", "mypy"]
+# pin black version to get around https://github.com/psf/black/issues/2168
+tests_requires = ["tox", "pytest", "black==20.8b1", "flake8", "mypy"]
 
 # README
 with open("README.md", "r") as fh:
