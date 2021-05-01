@@ -29,7 +29,7 @@ setuptools.setup(
     author="Spencer Bliven",
     author_email="spencer.bliven@gmail.com",
     version=__version__,
-    tests_requires=tests_requires,
+    tests_require=tests_requires,
     install_requires=install_requires,
     extras_require={
         "progressbar": ["tqdm"],
