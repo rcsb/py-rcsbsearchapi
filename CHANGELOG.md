@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3 (2021-04-28)
+
+- Fix mug with missing schema files when installed via pip
+- Add jupyter notebooks
+- Try rcsbsearch live with binder
+
 ## v0.2.2 (2021-04-06)
 
 - Remove `in` operator syntax (incompatible with python spec)
