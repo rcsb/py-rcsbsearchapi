@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, List
 from .search import Terminal  # noqa: F401
 from .search import Attr, Group, Query, Session, TextQuery, Value
 
-__version__ = "0.2.3"
+__version__ = "0.3.0-dev0"
 
 
 # loading rcsb_attributes can cause errors, so load it lazily
