@@ -82,6 +82,7 @@ The following table lists the status of current and planned features.
 - [ ] Structural search
 - [ ] Structural motif search
 - [ ] Chemical search
+- [ ] Rich results using the Data API
 
 Contributions are welcome for unchecked items!
 
