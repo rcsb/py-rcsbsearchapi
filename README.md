@@ -6,7 +6,7 @@
 
 # rcsbsearch
 
-Python interface for the RCSB search API.
+Python interface for the RCSB PDB search API.
 
 Currently the 'text search' part of the API has been implemented. See 'Supported
 features' below.
@@ -27,7 +27,7 @@ An additional example including a Covid-19 related example is in [notebooks/covi
 
 ### Operator example
 
-Here is an example from the [RCSB Search
+Here is an example from the [RCSB PDB Search
 API](http://search.rcsb.org/#search-example-1) page, using the operator syntax. This
 query finds symmetric dimers having a twofold rotation with the DNA-binding domain of
 a heat-shock transcription factor.
@@ -48,7 +48,7 @@ a heat-shock transcription factor.
     for assemblyid in query("assembly"):
         print(assemblyid)
 
-For a full list of attributes, please refer to the [RCSB
+For a full list of attributes, please refer to the [RCSB PDB
 schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
 
 ### Fluent Example
@@ -108,7 +108,7 @@ Please cite the rcsbsearch package by URL:
 
 > https://rcsbsearch.readthedocs.io
 
-You should also cite the RCSB service this package utilizes:
+You should also cite the RCSB PDB service this package utilizes:
 
 > Yana Rose, Jose M. Duarte, Robert Lowe, Joan Segura, Chunxiao Bi, Charmi
 > Bhikadiya, Li Chen, Alexander S. Rose, Sebastian Bittrich, Stephen K. Burley,
