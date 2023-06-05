@@ -1,4 +1,4 @@
-"""Interact with the [RCSB Search API](https://search.rcsb.org/#search-api).
+"""Interact with the [RCSB PDB Search API](https://search.rcsb.org/#search-api).
 """
 
 import functools
@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
 from typing import (
+    Any,
     Callable,
     Dict,
     Generic,
@@ -52,6 +53,7 @@ TValue = Union[
     Tuple[int, ...],
     Tuple[float, ...],
     Tuple[date, ...],
+    Dict[str, Any],
 ]
 # Types valid for numeric operators
 TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]"]
@@ -195,7 +197,7 @@ class Terminal(Query):
         >>> Terminal(value="tubulin")
 
     A full list of attributes is available in the
-    `schema <http://search.rcsb.org/rcsbsearch/v1/metadata/schema>`_.
+    `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
     Operators are documented `here <http://search.rcsb.org/#field-queries>`_.
 
     The :py:class:`Attr` class provides a more pythonic way of constructing Terminals.
@@ -205,7 +207,7 @@ class Terminal(Query):
     operator: Optional[str] = None
     value: Optional[TValue] = None
     service: str = "text"
-    negation: bool = False
+    negation: Optional[bool] = False
     node_id: int = 0
 
     def to_dict(self):
@@ -274,14 +276,14 @@ class Terminal(Query):
 class TextQuery(Terminal):
     """Special case of a Terminal for free-text queries"""
 
-    def __init__(self, value: str, negation: bool = False):
+    def __init__(self, value: str):
         """Search for the string value anywhere in the text
 
         Args:
             value: free-text query
             negation: find structures without the pattern
         """
-        super().__init__(value=value, negation=negation)
+        super().__init__(service="full_text", value=value, negation=None)
 
 
 @dataclass(frozen=True)
@@ -343,7 +345,7 @@ class Group(Query):
             return (self, node_id)
 
     def __str__(self):
-        ""  # hide in documentation
+        """"""  # hide in documentation
         if self.operator == "and":
             return f"({' & '.join((str(n) for n in self.nodes))})"
         elif self.operator == "or":
@@ -378,9 +380,7 @@ class Attr:
     +--------------------+---------------------+
     | equals             | attr == date,number |
     +--------------------+---------------------+
-    | range              | attr[start:end]     |
-    +--------------------+---------------------+
-    | range_closed       |                     |
+    | range              | dict (keys below)*  |
     +--------------------+---------------------+
     | exists             | bool(attr)          |
     +--------------------+---------------------+
@@ -392,8 +392,13 @@ class Attr:
     Pre-instantiated attributes are available from the
     :py:data:`rcsbsearch.rcsb_attributes` object. These are generally easier to use
     than constructing Attr objects by hand. A complete list of valid attributes is
-    available in the `schema <http://search.rcsb.org/rcsbsearch/v1/metadata/schema>`_.
+    available in the `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
 
+    * The `range` dictionary requires the following keys:
+     * "from" -> int
+     * "to" -> int
+     * "include_lower" -> bool
+     * "include_upper" -> bool
     """
 
     attribute: str
@@ -454,7 +459,7 @@ class Attr:
             value = value.value
         return Terminal(self.attribute, "equals", value)
 
-    def range(self, value: Union[List[int], Tuple[int, int]]) -> Terminal:
+    def range(self, value: Dict[str, Any]) -> Terminal:
         """Attribute is within the specified half-open range
 
         Args:
@@ -463,21 +468,6 @@ class Attr:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "range", value)
-
-    def range_closed(
-        self,
-        value: Union[
-            List[int], Tuple[int, int], "Value[List[int]]", "Value[Tuple[int, int]]"
-        ],
-    ) -> Terminal:
-        """Attribute is within the specified closed range
-
-        Args:
-            value: lower and upper bounds `[a, b]`
-        """
-        if isinstance(value, Value):
-            value = value.value
-        return Terminal(self.attribute, "range_closed", value)
 
     def exists(self) -> Terminal:
         """Attribute is defined for the structure"""
@@ -729,16 +719,7 @@ class PartialQuery:
         ...
 
     @_attr_delegate(Attr.range)
-    def range(self, value: Union[List[int], Tuple[int, int]]) -> Query:
-        ...
-
-    @_attr_delegate(Attr.range_closed)
-    def range_closed(
-        self,
-        value: Union[
-            List[int], Tuple[int, int], "Value[List[int]]", "Value[Tuple[int, int]]"
-        ],
-    ) -> Query:
+    def range(self, value: Dict[str, Any]) -> Query:
         ...
 
     @_attr_delegate(Attr.exists)
@@ -974,7 +955,7 @@ class Session(Iterable[str]):
     Handles paging the query and parsing results
     """
 
-    url = "http://search.rcsb.org/rcsbsearch/v1/query"
+    url = "http://search.rcsb.org/rcsbsearch/v2/query"
     query_id: str
     query: Query
     return_type: ReturnType
@@ -1012,7 +993,7 @@ class Session(Iterable[str]):
             query=self.query.to_dict(),
             return_type=self.return_type,
             request_info=dict(query_id=self.query_id, src="ui"),  # TODO src deprecated?
-            request_options=dict(pager=dict(start=start, rows=self.rows)),
+            request_options=dict(paginate=dict(start=start, rows=self.rows)), # v1 -> v2: pager parameter is renamed to paginate
         )
 
     def _single_query(self, start=0) -> Optional[Dict]:
@@ -1081,13 +1062,13 @@ class Session(Iterable[str]):
         return identifiers[:limit]
 
     def rcsb_query_editor_url(self) -> str:
-        """URL to edit this query in the RCSB query editor"""
+        """URL to edit this query in the RCSB PDB query editor"""
         data = json.dumps(self._make_params(), separators=(",", ":"))
         return (
             f"http://search.rcsb.org/query-editor.html?json={urllib.parse.quote(data)}"
         )
 
     def rcsb_query_builder_url(self) -> str:
-        """URL to view this query on the RCSB website query builder"""
+        """URL to view this query on the RCSB PDB website query builder"""
         data = json.dumps(self._make_params(), separators=(",", ":"))
         return f"http://www.rcsb.org/search?request={urllib.parse.quote(data)}"
