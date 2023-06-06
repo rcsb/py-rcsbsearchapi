@@ -60,7 +60,6 @@ def test_inv():
 
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
     q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
-    q3 = Terminal("rcsb_entry_container_identifiers.entry_id", )
     q = ~q1
     q22 = ~q2
     # Lots of results
