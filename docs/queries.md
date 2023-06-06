@@ -22,8 +22,8 @@ return `Terminal` objects for the comparisons.
 
 Attributes are available from the rcsb_attributes object and can be tab-completed.
 They can additionally be constructed from strings using the `Attr(attribute)`
-constructor. For a full list of attributes, please refer to the [RCSB
-schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
+constructor. For a full list of attributes, please refer to the [RCSB PDB
+schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 
 `Terminal`s are combined into `Group`s using python's bitwise operators. This is
 analogous to how bitwise operators act on python `set` objects. The operators are

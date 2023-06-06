@@ -22,8 +22,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="rcsbsearch",
-    url="https://github.com/sbliven/rcsbsearch",
-    description="Access the RCSB Search API",
+    url="https://github.com/rcsb/py-rcsb_api_search",
+    description="Access the RCSB PDB Search API",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Spencer Bliven",

@@ -6,7 +6,7 @@ Get it from pypi:
 
     pip install rcsbsearch
 
-Or, download from [github](https://github.com/sbliven/rcsbsearch)
+Or, download from [github](https://github.com/rcsb/py-rcsb_api_search)
 
 ## Syntax
 
@@ -43,8 +43,8 @@ a heat-shock transcription factor.
     for assemblyid in query("assembly"):
         print(assemblyid)
 
-For a full list of attributes, please refer to the [RCSB
-schema](http://search.rcsb.org/rcsbsearch/v1/metadata/schema).
+For a full list of attributes, please refer to the [RCSB PDB
+schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 
 ### Fluent Example
 
