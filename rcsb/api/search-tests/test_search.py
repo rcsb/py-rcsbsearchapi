@@ -4,9 +4,9 @@ import time
 import pytest  # type: ignore
 import requests
 
-from rcsbsearch import Attr, Group, Session, Terminal, TextQuery, Value
-from rcsbsearch import rcsb_attributes as attrs
-from rcsbsearch.search import PartialQuery
+from rcsb.api.search.search import Attr, Group, Session, Terminal, TextQuery, Value
+from rcsb.api.search.search import rcsb_attributes as attrs
+from rcsb.api.search.search import PartialQuery
 
 # q1 = rcsb.Terminal("rcsb_struct_symmetry.type", "exact_match", "Icosahedral")
 # q2 = rcsb.Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
@@ -57,17 +57,18 @@ def test_iter():
 
 @pytest.mark.internet
 def test_inv():
+
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
     q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
-    
     q = ~q1
-    q_test = ~q2
+    q22 = ~q2
     # Lots of results
     first = next(iter(q()))
-    second = iter(q_test())
+    second = iter(q22())
+    #print(first)
     assert first is not None
     assert first != "5T89"
-
+    #this might take a while, but I want to try it
     assert second is not None
     assert second != "4HHB" or "2GS2"
 
@@ -79,7 +80,7 @@ def test_xor():
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids1)
     q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids2)
     q = q1 ^ q2
-    print(f"XOR Query: {q}")
+    #print(f"XOR Query: {q}")
     result = set(q())
     assert len(result) == 2
     assert result == {ids1[0], ids2[0]}
@@ -276,6 +277,7 @@ def test_operators():
     results = list(islice(q1(), 5))
     assert len(results) == 0
 
+
 def test_request_bottleneck():
     """Depending on hardware, this test may take a couple of minutes. """
     try:
@@ -284,3 +286,19 @@ def test_request_bottleneck():
     except requests.exceptions.HTTPError: 
         assert False, "Attempted to fetch from server too quickly"
     except: assert False, "Some other error occured"
+
+    
+test_construction()
+test_single()
+test_iquery()
+test_iter()
+test_xor()
+test_pagination()
+test_example1()
+test_example2()
+test_attr()
+test_freetext()
+test_inv()
+test_partialquery()
+test_errors()
+test_request_bottleneck()

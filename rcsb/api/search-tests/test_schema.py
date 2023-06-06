@@ -1,4 +1,4 @@
-from rcsbsearch import rcsb_attributes as attrs
+from rcsb.api.search.search import rcsb_attributes as attrs
 
 
 def test_schema():

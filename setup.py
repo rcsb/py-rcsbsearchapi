@@ -1,58 +1,68 @@
-import setuptools  # type: ignore
-import sys
+# File: setup.py
+# Date: 6-Jun-2023
+#
+# Updates:
+#
+#
+import re
 
-# Load the version number from __init__.py
-__version__ = "Undefined"
-for line in open("rcsbsearch/__init__.py"):
-    if line.startswith("__version__"):
-        exec(line.strip())
+from setuptools import find_packages
+from setuptools import setup
 
-# Version-specific requirements
-install_requires = ["requests", "jsonschema"]
-if sys.version_info < (3, 8):
-    install_requires.append("typing_extensions")  # 3.7 only
+packages = []
+thisPackage = "rcsb.api.search"
 
-# pin black version to get around https://github.com/psf/black/issues/2168
-tests_requires = ["tox", "pytest", "black==20.8b1", "flake8", "mypy"]
+with open("rcsb/api/search/__init__.py", "r", encoding="utf-8") as fd:
+    version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
 
-# README
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+# Load packages from requirements*.txt
+with open("requirements.txt", "r", encoding="utf-8") as ifh:
+    packagesRequired = [ln.strip() for ln in ifh.readlines()]
 
+with open("README.md", "r", encoding="utf-8") as ifh:
+    longDescription = ifh.read()
 
-setuptools.setup(
-    name="rcsbsearch",
-    url="https://github.com/rcsb/py-rcsb_api_search",
-    description="Access the RCSB PDB Search API",
-    long_description=long_description,
+if not version:
+    raise RuntimeError("Cannot find version information")
+
+setup(
+    name=thisPackage,
+    version=version,
+    description="RCSB PDB Python Package for supporting our search api",
     long_description_content_type="text/markdown",
+    long_description=longDescription,
     author="Spencer Bliven",
     author_email="spencer.bliven@gmail.com",
-    version=__version__,
-    tests_require=tests_requires,
-    install_requires=install_requires,
-    extras_require={
-        "progressbar": ["tqdm"],
-        "tests": tests_requires,
-        # should match docs/requirements.txt
-        "docs": ["sphinx", "sphinx-rtd-theme", "myst-parser"],
-    },
-    packages=setuptools.find_packages(exclude=["tests"]),
-    package_data={"": ["resources/*"]},
-    scripts=[],
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+    url="https://github.com/rcsb/py-rcsb_api_search",
+    #
+    license="BSD 3-Clause",
+    classifiers=(
         "Development Status :: 4 - Beta",
-        # "Development Status :: 5 - Production/Stable",
-        "Operating System :: OS Independent",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: BSD License",
-        "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "Typing :: Typed",
-    ],
-    # Uses dataclasses, f-strings, typing
-    python_requires=">=3.7",
+        # 'Development Status :: 5 - Production/Stable',
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "License :: OSI Approved :: Apache Software License", #don't know if this is correct
+        "Programming Language :: Python",
+        # "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+    ),
+    entry_points={"console_scripts": []},
+    #
+    install_requires=packagesRequired,
+    packages=find_packages(exclude=["rcsb.mock-data", "rcsb.api.search-tests", "rcsb.api.search-tests-*", "tests.*"]), #mock data?? - Santi
+    package_data={
+        # If any package contains *.md or *.rst ...  files, include them:
+        "": ["*.md", "*.rst", "*.txt", "*.cfg"]
+    },
+    #
+    test_suite="rcsb.api.tsearch-tests",
+    tests_require=["tox"],
+    #
+    # Not configured ...
+    extras_require={"dev": ["check-manifest"], "test": ["coverage"]},
+    # Added for
+    command_options={"build_sphinx": {"project": ("setup.py", thisPackage), "version": ("setup.py", version), "release": ("setup.py", version)}},
+    # This setting for namespace package support -
+    zip_safe=False,
 )

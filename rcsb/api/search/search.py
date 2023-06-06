@@ -1,7 +1,6 @@
 """Interact with the [RCSB PDB Search API](https://search.rcsb.org/#search-api).
 """
 
-import time
 import functools
 import json
 import logging
@@ -9,6 +8,7 @@ import math
 import sys
 import urllib.parse
 import uuid
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
@@ -208,7 +208,7 @@ class Terminal(Query):
     operator: Optional[str] = None
     value: Optional[TValue] = None
     service: str = "text"
-    negation: Optional[bool] = False
+    negation: Optional[bool] = False #investigate whether this can be changed to None
     node_id: int = 0
 
     def to_dict(self):
@@ -395,11 +395,11 @@ class Attr:
     than constructing Attr objects by hand. A complete list of valid attributes is
     available in the `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
 
-    * The 'range' dictionary requires the following keys:
-        * "from" -> int
-        * "to" -> int
-        * "include_lower" -> bool
-        * "include_upper" -> bool   
+    * The `range` dictionary requires the following keys:
+     * "from" -> int
+     * "to" -> int
+     * "include_lower" -> bool
+     * "include_upper" -> bool
     """
 
     attribute: str
@@ -469,7 +469,7 @@ class Attr:
         if isinstance(value, Value):
             value = value.value
         return Terminal(self.attribute, "range", value)
-    
+
     def exists(self) -> Terminal:
         """Attribute is defined for the structure"""
         return Terminal(self.attribute, "exists")
@@ -994,7 +994,7 @@ class Session(Iterable[str]):
             query=self.query.to_dict(),
             return_type=self.return_type,
             request_info=dict(query_id=self.query_id, src="ui"),  # TODO src deprecated?
-            request_options=dict(paginate=dict(start=start, rows=self.rows)),
+            request_options=dict(paginate=dict(start=start, rows=self.rows)), # v1 -> v2: pager parameter is renamed to paginate
         )
 
     def _single_query(self, start=0) -> Optional[Dict]:
@@ -1032,7 +1032,7 @@ class Session(Iterable[str]):
 
         while start < total:
             assert len(identifiers) == self.rows
-            time.sleep(0.10) # delay between requests to prevent 429 error
+            time.sleep(0.10) # This prevents the user from bottlenecking the server with requests. 
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
             logging.debug(f"Got {len(identifiers)} ids")

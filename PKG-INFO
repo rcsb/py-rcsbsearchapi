@@ -1,15 +1,15 @@
-Metadata-Version: 2.1
-Name: rcsb.utils.targets
-Version: 0.71
-Summary: RCSB Python Wrapper Module for Target Utilities
-Home-page: https://github.com/rcsb/py-rcsb_utils_targets
-Author: John Westbrook
-Author-email: john.westbrook@rcsb.org
-License: Apache 2.0
-Classifier: Development Status :: 3 - Alpha
+Metadata-Version: 2.0
+Name: rcsb.api.search
+Version: 1.42.0
+Summary: RCSB PDB Python Package for supporting our search api
+Home-page: https://github.com/rcsb/py-rcsb_api_search
+Author: Spencer Bliven
+Author-email: spencer.bliven@gmail.com
+License: BSD 3-Clause
+Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
 Classifier: Natural Language :: English
-Classifier: License :: OSI Approved :: Apache Software License
+Classifier: License :: OSI Approved :: BSD 3-Clause
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3.9
@@ -20,11 +20,13 @@ License-File: LICENSE
 
 # RCSB Python Target Data Management Utilities
 
-[![Build Status](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_apis/build/status/rcsb.py-rcsb_utils_targets?branchName=master)](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_build/latest?definitionId=29&branchName=master)
+[![Build Status](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_apis/build/status/rcsb.py-rcsb_utils_targets?branchName=master)](https://dev.azure.com/rcsb/RCSB%20PDB%20Pypache Software Licensethon%20Projects/_build/latest?definitionId=29&branchName=master) 
+
+the above is wrong. 
 
 ## Introduction
 
-This module contains methods for target data management.
+This module contains a package for accessing the RCSB PDB database in python/
 
 ### Installation
 
@@ -32,10 +34,11 @@ Download the library source software from the project repository:
 
 ```bash
 
-git clone --recurse-submodules https://github.com/rcsb/py-rcsb_utils_targets.git
+git clone --recurse-submodules https://github.com/rcsb/py-rcsb_api_search.git
 
 ```
 
+the above link is wrong. 
 Optionally, run test suite (Python versions 3.9) using
 [setuptools](https://setuptools.readthedocs.io/en/latest/) or
 [tox](http://tox.readthedocs.io/en/latest/example/platform.html):
@@ -51,7 +54,7 @@ tox
 Installation is via the program [pip](https://pypi.python.org/pypi/pip).
 
 ```bash
-pip install rcsb.utils.targets
+pip install rcsb.api.search
 
 or for the local repository:
 

@@ -1,5 +1,5 @@
 #
-# File: py-rcsb_utils_targets/MANIFEST.in
+# File: py-rcsb_api_search/MANIFEST.in
 #
 include HISTORY.txt
 include requirements.txt
