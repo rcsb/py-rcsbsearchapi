@@ -8,6 +8,7 @@ import math
 import sys
 import urllib.parse
 import uuid
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
@@ -207,7 +208,7 @@ class Terminal(Query):
     operator: Optional[str] = None
     value: Optional[TValue] = None
     service: str = "text"
-    negation: Optional[bool] = False
+    negation: Optional[bool] = False #investigate whether this can be changed to None
     node_id: int = 0
 
     def to_dict(self):
@@ -1031,6 +1032,7 @@ class Session(Iterable[str]):
 
         while start < total:
             assert len(identifiers) == self.rows
+            time.sleep(0.10) # This prevents the user from bottlenecking the server with requests. 
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
             logging.debug(f"Got {len(identifiers)} ids")
