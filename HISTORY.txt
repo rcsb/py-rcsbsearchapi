@@ -1,0 +1,63 @@
+# RCSB_UTILS_TARGETS HISTORY
+   7-Nov-2020  - V0.11 Created module
+  12-Nov-2020  - V0.12 Add consolidation of DrugBank target FASTA files
+  24-Nov-2020  - V0.13 Add ChEMBLTargetProvider() and tests
+  28-Nov-2020  - V0.14 Add CARDTargetProvider() and tests
+  30-Nov-2020  - V0.15 Add SAbDabTargetProvider() and tests
+   1-Dec-2020  - V0.16 Connect to UniProtIdMappingProvider() and add tagged fasta comment output.
+   2-Dec-2020  - V0.17 Migrate molecule based ChEMBL methods to rcsb.utils.chemref.ChEMBLProvider()
+   6-Dec-2020  - V0.18 Expose an exportFasta() method in each provider and add taxon output file options
+  13-Dec-2020  - V0.19 Make Pharos sql restore a shell process.
+  14-Dec-2020  - V0.20 Suppress stderr in the export of mysql table data.
+  13-May-2021  - V0.21 Additional caching and stashing functions for all providers
+  12-Jun-2021  - V0.22 Adding SAbDabTargetFeatureProvider() and CARDTargetFeatureProvider() modules
+  13-Jun-2021  - V0.23 Move features to separate paths in CARDTargetFeatureProvider() and SAbDabTargetFeatureProvider()
+  13-Jun-2021  - V0.24 Add feature identifiers to the outputs of CARDTargetFeatureProvider() and SAbDabTargetFeatureProvider()
+  14-Jun-2021  - V0.25 Standardized version and timestamp in CARDTargetFeatureProvider() and SAbDabTargetFeatureProvider()
+  19-Jun-2021  - V0.26 Add cofactor and activity provider modules for ChEMBL, DrugBank, and Pharos and associated tests.
+  20-Jun-2021  - V0.27 Move ChEMBL API settings into the ChEMBLTargetActivityProvider and ChEMBLTargetMechanismProvider modules
+  20-Jun-2021  - V0.28 Add method getTargetIdList() in ChEMBLTargetActivityProvider module and standardize some method prototypes
+  20-Jun-2021  - V0.29 Add multiprocessing class to ChEMBLTargetActivityProvider and standardize cofactor attribute names
+  21-Jun-2021  - V0.30 Make ChEMBL activity query more selective and focus error handling more specifically on return issues.
+  22-Jun-2021  - V0.31 Add name and mechanism queries in the ChEMBLTargetActivityProvider workflow. Use DrugBankProvider is a
+                       data source in DrugBankTargetProvider() rather than FASTA downloads.
+  23-Jun-2021  - V0.32 Add preprocessing filter to Pharos SQL dump input and handle missing ChEMBL API results more gracefully
+  24-Jun-2021  - V0.33 Get release versions from data source for ChEMBL, DrugBank and Pharos and propagate these in all resource files
+  24-Jun-2021  - V0.34 Add getVersion() method in PharosTargetProvider() module
+  25-Jun-2021  - V0.35 Add a target_name attributed to Pharos, DrugBank and ChEMBL cofactor data.
+  25-Jun-2021  - V0.36 Update method prototype skipExisting -> skip in ChEMBLTargetActivityProvider().
+  26-Jun-2021  - V0.37 Serialize DrugBank cofactors in pickle - resolve missing target names -
+  26-Jun-2021  - V0.38 Make chemical component and BIRD definitions singular.
+  27-Jun-2021  - V0.39 Add diagnostics to capture statistics for ChEMBL and Pharos mapped an unmapped cofactors
+  27-Jun-2021  - V0.40 Refactor FASTA comment parsing strategy and make fewer assumptions about comment content
+  27-Jun-2021  - V0.41 Add annotation of neighbor interactions to cofactor activity selections
+  30-Jun-2021  - V0.42 Add reload() public methods to feature and cofactor provider modules
+   1-Jul-2021  - V0.43 Adjustment linting rules to preserve unreferenced internal methods
+   2-Jul-2021  - V0.44 Add the remaining subset of the antibody data from SAbDab and add taxonomy filtering for CARD features
+   2-Jul-2021  - V0.45 Handle to testing case lacking taxonomy in CARDTargetFeatureProvider()
+   7-Jul-2021  - V0.46 Add IMGTTargetProvider() and IMGTTargetFeatureProvider() modules and associated tests
+  11-Jul-2021  - V0.47 Add support for "alignedRegions" in sequence alignment result files
+  12-Jul-2021  - V0.48 Export aligned regions as lists of dictionaries in JSON
+  12-Jul-2021  - V0.49 Adjust diagnostics for long running activity workflow
+  12-Jul-2021  - V0.50 Add public reload method for ChEMBLTargetActivityProvider()
+  12-Jul-2021  - V0.51 Make return status True in ChEMBLTargetActivityProvider.fetchTargetActivityData if the filtered target list is empty
+  13-Jul-2021  - V0.52 Make all getFeatures() return an empty list rather than None, plus other small json export adjustments
+  13-Jul-2021  - V0.53 Various unifying API method adjustments in cofactor and features providers
+  14-Jul-2021  - V0.54 Adjustments for more descriptive IMGT attribute names
+  14-Jul-2021  - V0.55 Standardize provider APIs extend functionality of PharosTargetActivityProvider
+  28-Jul-2021  - V0.56 Update constructor API for TaxonomyProvider and update dependencies
+   5-Sep-2021  - V0.57 Update SAbDab data importer, fix initialization in ChEMBLTargetActivityProvider.getStatusDetails()
+  14-Sep-2021  - V0.58 Add cache test for TaxonomyProvider() add bypass for ChEMBL fetchStatus() test
+   8-Oct-2021  - V0.59 Fix changing column heading issue for SAbDabTargetProvider()
+   6-Jan-2023  - V0.60 Configuration changes to support tox 4
+   9-Feb-2023  - V0.61 Find Highest_Clin_Trial column regardless of month in SAbDabTargetProvider(), Update baseVersion for ChEMBL
+  27-Feb-2023  - V0.62 Fix PharosTargetProvider mysql loading issue
+   3-Mar-2023  - V0.63 Fix typo and handle missing activityType in PharosTargetCofactorProvider()
+  13-Mar-2023  - V0.64 Add CARDTargetAnnotationProvider (to replace CARDTargetFeatureProvider)
+  22-Mar-2023  - V0.65 Add timeout to IMGT data file fetch, and update py-rcsb_exdb_assets locators
+  24-Mar-2023  - V0.66 In PharosTargetProvider(), download sql file to separate dir
+  11-Apr-2023  - V0.67 Fix issue with CARD lineage tree building--handle cases with two parents at same depth; Add treeNodeList building and exporting
+  27-Apr-2023  - V0.68 Update CARD treeNodeList building
+   2-May-2023  - V0.69 Remove depth field from CARD lineage tree
+   5-May-2023  - V0.70 Actually check cache files exist in PharosTargetProvider testCache()
+  22-May-2023  - V0.71 Add retries to tox task for MMseqs2 download

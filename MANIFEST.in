@@ -1,0 +1,7 @@
+#
+# File: py-rcsb_utils_targets/MANIFEST.in
+#
+include HISTORY.txt
+include requirements.txt
+include README.md
+#
