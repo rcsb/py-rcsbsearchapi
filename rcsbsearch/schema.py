@@ -14,7 +14,7 @@ import requests
 
 from .search import Attr
 
-METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v1/metadata/schema"
+METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v2/metadata/schema"
 SEARCH_SCHEMA_URL = "http://search.rcsb.org/json-schema-rcsb_search_query.json"
 
 ENV_RCSBSEARCH_DOWNLOAD_SCHEMA = "RCSBSEARCH_DOWNLOAD_SCHEMA"
@@ -42,7 +42,7 @@ def _download_json_schema():
     "Get the current JSON schema from the web"
     url = METADATA_SCHEMA_URL
 
-    logging.info(f"Dowloading {url}")
+    logging.info(f"Downloading {url}")
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
@@ -55,7 +55,7 @@ def _load_json_schema():
 
 
 class SchemaGroup:
-    """A non-leaf node in the RCSB schema. Leaves are Attr values."""
+    """A non-leaf node in the RCSB PDB schema. Leaves are Attr values."""
 
     def search(self, pattern: Union[str, re.Pattern], flags=0) -> Iterator[Attr]:
         """Find all attributes in the schema matching a regular expression.
@@ -140,7 +140,7 @@ def _make_schema() -> SchemaGroup:
 
 
 rcsb_attributes: SchemaGroup
-"""Object with all known RCSB attributes.
+"""Object with all known RCSB PDB attributes.
 
 This is provided to ease autocompletion as compared to creating Attr objects from
 strings. For example,

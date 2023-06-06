@@ -1,4 +1,5 @@
 from itertools import islice
+import time
 
 import pytest  # type: ignore
 import requests
@@ -56,12 +57,20 @@ def test_iter():
 
 @pytest.mark.internet
 def test_inv():
+
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
+    q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
     q = ~q1
+    q22 = ~q2
     # Lots of results
     first = next(iter(q()))
+    second = iter(q22())
+    #print(first)
     assert first is not None
     assert first != "5T89"
+    #this might take a while, but I want to try it
+    assert second is not None
+    assert second != "4HHB" or "2GS2"
 
 
 @pytest.mark.internet
@@ -71,7 +80,7 @@ def test_xor():
     q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids1)
     q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids2)
     q = q1 ^ q2
-    print(f"XOR Query: {q}")
+    #print(f"XOR Query: {q}")
     result = set(q())
     assert len(result) == 2
     assert result == {ids1[0], ids2[0]}
@@ -154,7 +163,7 @@ def test_example1():
 def test_example2():
     "'X-Ray Structures Search' from http://search.rcsb.org/#examples"
     q = (
-        Terminal(value='"thymidine kinase"')
+        TextQuery('"thymidine kinase"')
         & Terminal(
             "rcsb_entity_source_organism.taxonomy_lineage.name",
             "exact_match",
@@ -267,3 +276,29 @@ def test_operators():
     q1 = attrs.rcsb_struct_symmetry.type.exact_match("symmetric")
     results = list(islice(q1(), 5))
     assert len(results) == 0
+
+
+def test_request_bottleneck():
+    """Depending on hardware, this test may take a couple of minutes. """
+    try:
+        q1 = TextQuery("protease")
+        resultL = list(q1())
+    except requests.exceptions.HTTPError: 
+        assert False, "Attempted to fetch from server too quickly"
+    except: assert False, "Some other error occured"
+
+    
+test_construction()
+test_single()
+test_iquery()
+test_iter()
+test_xor()
+test_pagination()
+test_example1()
+test_example2()
+test_attr()
+test_freetext()
+test_inv()
+test_partialquery()
+test_errors()
+test_request_bottleneck()
