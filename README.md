@@ -6,7 +6,7 @@
 
 # rcsbsearch
 
-Python interface for the RCSB PDB search API.
+Python interface for the RCSB PDB Search API.
 
 Currently the 'text search' part of the API has been implemented. See 'Supported
 features' below.
