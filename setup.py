@@ -56,7 +56,7 @@ setup(
         "": ["*.md", "*.rst", "*.txt", "*.cfg"]
     },
     #
-    test_suite="rcsb.api.tsearch-tests",
+    test_suite="rcsb.api.search-tests",
     tests_require=["tox"],
     #
     # Not configured ...

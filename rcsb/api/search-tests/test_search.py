@@ -4,8 +4,8 @@ import time
 import pytest  # type: ignore
 import requests
 
-from rcsb.api.search.search import Attr, Group, Session, Terminal, TextQuery, Value
-from rcsb.api.search.search import rcsb_attributes as attrs
+from rcsb.api.search import Attr, Group, Session, Terminal, TextQuery, Value
+from rcsb.api.search import rcsb_attributes as attrs
 from rcsb.api.search.search import PartialQuery
 
 # q1 = rcsb.Terminal("rcsb_struct_symmetry.type", "exact_match", "Icosahedral")
