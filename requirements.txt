@@ -1,6 +1,6 @@
 # Minimial dependencies
---index-url https://pypi.python.org/simple/
+#--index-url https://pypi.python.org/simple/
 
--e .
+#-e .
 
 # not sure what to change here

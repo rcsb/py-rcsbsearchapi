@@ -4,9 +4,9 @@ import time
 import pytest  # type: ignore
 import requests
 
-from rcsb.api.search import Attr, Group, Session, Terminal, TextQuery, Value
-from rcsb.api.search import rcsb_attributes as attrs
-from rcsb.api.search.search import PartialQuery
+from rcsbsearchapi.search import Attr, Group, Session, Terminal, TextQuery, Value
+from rcsbsearchapi import rcsb_attributes as attrs
+from rcsbsearchapi.search import PartialQuery
 
 # q1 = rcsb.Terminal("rcsb_struct_symmetry.type", "exact_match", "Icosahedral")
 # q2 = rcsb.Terminal("rcsb_struct_symmetry.kind", "exact_match", "Global Symmetry")
@@ -288,17 +288,17 @@ def test_request_bottleneck():
     except: assert False, "Some other error occured"
 
     
-test_construction()
-test_single()
-test_iquery()
+#test_construction()
+#test_single()
+#test_iquery()
 test_iter()
-test_xor()
-test_pagination()
-test_example1()
-test_example2()
-test_attr()
-test_freetext()
+#test_xor()
+#test_pagination()
+#test_example1()
+#test_example2()
+#test_attr()
+#test_freetext()
 test_inv()
-test_partialquery()
-test_errors()
-test_request_bottleneck()
+#test_partialquery()
+#test_errors()
+#test_request_bottleneck()

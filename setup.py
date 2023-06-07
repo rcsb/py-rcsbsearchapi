@@ -10,9 +10,9 @@ from setuptools import find_packages
 from setuptools import setup
 
 packages = []
-thisPackage = "rcsb.api.search"
+thisPackage = "rcsbsearchapi.search"
 
-with open("rcsb/api/search/__init__.py", "r", encoding="utf-8") as fd:
+with open("rcsbsearchapi/__init__.py", "r", encoding="utf-8") as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
 
 # Load packages from requirements*.txt
@@ -36,7 +36,7 @@ setup(
     url="https://github.com/rcsb/py-rcsb_api_search",
     #
     license="BSD 3-Clause",
-    classifiers=(
+    classifiers=[
         "Development Status :: 4 - Beta",
         # 'Development Status :: 5 - Production/Stable',
         "Intended Audience :: Developers",
@@ -46,17 +46,17 @@ setup(
         # "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
-    ),
+    ],
     entry_points={"console_scripts": []},
     #
     install_requires=packagesRequired,
-    packages=find_packages(exclude=["rcsb.mock-data", "rcsb.api.search-tests", "rcsb.api.search-tests-*", "tests.*"]), #mock data?? - Santi
+    packages=find_packages(exclude=["rcsb.mock-data", "tests", "tests-*", "tests.*"]), #mock data?? - Santi
     package_data={
         # If any package contains *.md or *.rst ...  files, include them:
         "": ["*.md", "*.rst", "*.txt", "*.cfg"]
     },
     #
-    test_suite="rcsb.api.search-tests",
+    test_suite="tests",
     tests_require=["tox"],
     #
     # Not configured ...
