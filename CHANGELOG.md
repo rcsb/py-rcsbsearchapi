@@ -2,7 +2,7 @@
 
 ## v1.0.0 (2023-06-08)
 
-- Project forked from sbliven into RCSB PDB GitHub organization as `rcsbsearchapi`
+- Project forked from [sbliven/rcsbsearch](https://github.com/sbliven/rcsbsearch) into RCSB PDB GitHub organization as `rcsbsearchapi`
 - Updated schema from v1 to v2
 - Additional bug fixes
 

@@ -1,8 +1,8 @@
-[![PyPi Release](https://img.shields.io/pypi/v/rcsbsearch.svg)](https://pypi.org/project/rcsbsearch/)
-[![Build Status](https://travis-ci.org/sbliven/rcsbsearch.svg?branch=master)](https://travis-ci.org/sbliven/rcsbsearch)
-[![Documentation Status](https://readthedocs.org/projects/rcsbsearch/badge/?version=latest)](https://rcsbsearch.readthedocs.io/en/latest/?badge=latest)
+[![PyPi Release](https://img.shields.io/pypi/v/rcsbsearchapi.svg)](https://pypi.org/project/rcsbsearchapi/)
+[![Build Status](https://travis-ci.org/rcsb/rcsbsearchapi.svg?branch=master)](https://travis-ci.org/rcsb/rcsbsearchapi)
+[![Documentation Status](https://readthedocs.org/projects/rcsbsearchapi/badge/?version=latest)](https://rcsbsearchapi.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fcovid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/rcsbsearchapi/master?filepath=notebooks%2Fcovid.ipynb)
 
 # rcsbsearchapi
 
@@ -20,10 +20,10 @@ constructing queries: an "operator" API using python's comparators, and a "fluen
 syntax where terms are chained together. Which to use is a matter of preference.
 
 A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using binder:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fquickstart.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/rcsbsearchapi/master?filepath=notebooks%2Fquickstart.ipynb)
 
 An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fcovid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/rcsbsearchapi/master?filepath=notebooks%2Fcovid.ipynb)
 
 ### Operator example
 
