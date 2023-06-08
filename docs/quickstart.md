@@ -4,7 +4,7 @@
 
 Get it from pypi:
 
-    pip install rcsbsearch
+    pip install rcsbsearchapi
 
 Or, download from [github](https://github.com/rcsb/py-rcsb_api_search)
 
@@ -15,10 +15,10 @@ constructing queries: an "operator" API using python's comparators, and a "fluen
 syntax where terms are chained together. Which to use is a matter of preference.
 
 A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using binder:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fquickstart.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearchapi/master?filepath=notebooks%2Fquickstart.ipynb)
 
 An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fcovid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearchapi/master?filepath=notebooks%2Fcovid.ipynb)
 
 ### Operator example
 
@@ -27,8 +27,8 @@ API](http://search.rcsb.org/#search-example-1) page, using the operator syntax. 
 query finds symmetric dimers having a twofold rotation with the DNA-binding domain of
 a heat-shock transcription factor.
 
-    from rcsbsearch import TextQuery
-    from rcsbsearch import rcsb_attributes as attrs
+    from rcsbsearchapi import TextQuery
+    from rcsbsearchapi import rcsb_attributes as attrs
 
     # Create terminals for each query
     q1 = TextQuery('"heat-shock transcription factor"')
@@ -50,7 +50,7 @@ schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 
 Here is the same example using the fluent syntax
 
-    from rcsbsearch import Attr, TextQuery
+    from rcsbsearchapi import Attr, TextQuery
 
     # Start with a Attr or TextQuery, then add terms
     results = TextQuery('"heat-shock transcription factor"') \

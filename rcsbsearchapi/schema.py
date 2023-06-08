@@ -25,7 +25,7 @@ def _get_json_schema(download=None):
 
     The RCSBSEARCH_DOWNLOAD_SCHEMA environmental variable controls whether
     to download the schema from the web each time vs using the version shipped
-    with rcsbsearch
+    with rcsbsearchapi
     """
     if download is True or (
         download is None

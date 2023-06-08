@@ -4,7 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearch/master?filepath=notebooks%2Fcovid.ipynb)
 
-# rcsbsearch
+# rcsbsearchapi
 
 Python interface for the RCSB PDB Search API.
 
@@ -32,8 +32,8 @@ API](http://search.rcsb.org/#search-example-1) page, using the operator syntax. 
 query finds symmetric dimers having a twofold rotation with the DNA-binding domain of
 a heat-shock transcription factor.
 
-    from rcsbsearch import TextQuery
-    from rcsbsearch import rcsb_attributes as attrs
+    from rcsbsearchapi import TextQuery
+    from rcsbsearchapi import rcsb_attributes as attrs
 
     # Create terminals for each query
     q1 = TextQuery('"heat-shock transcription factor"')
@@ -56,7 +56,7 @@ schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 Here is the same example using the
 [fluent](https://en.wikipedia.org/wiki/Fluent_interface) syntax.
 
-    from rcsbsearch import TextQuery
+    from rcsbsearchapi import TextQuery
 
     # Start with a Attr or TextQuery, then add terms
     results = TextQuery('"heat-shock transcription factor"') \
@@ -90,23 +90,23 @@ Contributions are welcome for unchecked items!
 
 Get it from pypi:
 
-    pip install rcsbsearch
+    pip install rcsbsearchapi
 
 Or, download from [github](https://github.com/rcsb/py-rcsb_api_search)
 
 ## Documentation
 
-Detailed documentation is at [rcsbsearch.readthedocs.io](https://rcsbsearch.readthedocs.io/en/latest/)
+Detailed documentation is at [rcsbsearchapi.readthedocs.io](https://rcsbsearchapi.readthedocs.io/en/latest/)
 
 ## License
 
 Code is licensed under the BSD 3-clause license. See [LICENSE](LICENSE) for details.
 
-## Citing rcsbsearch
+## Citing rcsbsearchapi
 
-Please cite the rcsbsearch package by URL:
+Please cite the rcsbsearchapi package by URL:
 
-> https://rcsbsearch.readthedocs.io
+> https://rcsbsearchapi.readthedocs.io
 
 You should also cite the RCSB PDB service this package utilizes:
 
@@ -119,5 +119,5 @@ You should also cite the RCSB PDB service this package utilizes:
 
 ## Developers
 
-For information about building and developing `rcsbsearch`, see
+For information about building and developing `rcsbsearchapi`, see
 [CONTRIBUTING.md](CONTRIBUTING.md)
