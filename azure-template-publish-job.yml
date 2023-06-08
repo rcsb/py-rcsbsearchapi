@@ -1,47 +1,58 @@
 # File: azure-template-publish-job.yml
 # Date: 8-Jun-2023
 #
-name: $(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.rr)
-
-trigger:
-- master
-
-pr:
-- master
-
-schedules:
-- cron: "0 12 * * 0"
-  displayName: Weekly Sunday build
-  branches:
-    include:
-    - master
-  always: true
+##
+parameters:
+  tox: ""
+  python: ""
+  os: "linux"
+  fixtures: ""
 
 jobs:
-  - template: azure-template-tox-job.yml
-    parameters: {tox: 'format_pep8', python: '3.9', os: 'linux'}
-  - template: azure-template-tox-job.yml
-    parameters: {tox: 'lint_pylint', python: '3.9', os: 'linux'}
-  - template: azure-template-tox-job.yml
-    parameters: {tox: 'test_coverage', python: '3.9', os: 'linux'}
+- job: ${{ format('publish_{0}_{1}', parameters.tox, parameters.os) }}
+  pool:
+    ${{ if eq(parameters.os, 'macos') }}:
+      vmImage: 'macOS-11'
+    ${{ if eq(parameters.os, 'linux') }}:
+      vmImage: 'ubuntu-20.04'
+  dependsOn:
+  - ${{ format('build_test_{0}_{1}', parameters.tox, parameters.os) }}
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+  #
+  steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: ${{ parameters.python }}
+        addToPath: true
+      displayName: setup python
     #
-  - template: azure-template-tox-job.yml
-    parameters: {tox: 'py39', python: '3.9', os: 'linux'}
-  # - template: azure-template-tox-job.yml
-  #  parameters: {tox: 'py27', python: '2.7', os: 'linux'}
-  #
-  - template: azure-template-tox-job.yml
-    parameters: {tox: 'py39', python: '3.9', os: 'macos'}
-  # - template: azure-template-tox-job.yml
-  #  parameters: {tox: 'py27', python: '2.7', os: 'macos'}
-  #
-  #- template: azure-template-publish-job.yml
-  #  parameters: {tox: 'py39', python: '3.9', os: 'macos'}
-  - template: azure-template-publish-job.yml
-    parameters: {tox: 'py39', python: '3.9', os: 'linux'}
-  #
-  # - template: azure-template-publish-job.yml
-  #  parameters: {tox: 'py27', python: '2.7', os: 'macos'}
-  #- template: azure-template-publish-job.yml
-  #  parameters: {tox: 'py27', python: '2.7', os: 'linux'}
-  #
+    #- checkout: self
+    #  submodules: true
+    #
+    - download: current
+      artifact: ${{ format('sw_{0}_{1}', parameters.tox,  parameters.os) }}
+
+    - download: current
+      artifact: ${{ format('sw_u_{0}_{1}', parameters.tox,  parameters.os) }}
+    #
+    - script: ls -lR $(Pipeline.Workspace)/${{ format('sw_{0}_{1}', parameters.tox, parameters.os) }}
+      displayName: "Listing of downloaded artifacts"
+    #
+    - script: python -m pip install --upgrade pip twine setuptools wheel
+      displayName: 'Install packaging tools'
+    #
+    - task: DownloadSecureFile@1
+      name: pypicred
+      displayName: 'Download PyPI credentials'
+      inputs:
+        secureFile: 'PYPIRC-AZURE'
+
+    - ${{ if startsWith(parameters.os, 'linux') }}:
+      - script: twine upload --verbose --skip-existing -r pypi  --config-file $(pypicred.secureFilePath) $(Pipeline.Workspace)/${{ format('sw_u_{0}_{1}', parameters.tox, parameters.os) }}/*
+        displayName: "Linux upload sdist and source wheel to PyPi ..."
+        continueOnError: true
+    #
+    - ${{ if startsWith(parameters.os, 'macos') }}:
+      - script: twine upload --verbose --skip-existing -r pypi  --config-file $(pypicred.secureFilePath) $(Pipeline.Workspace)/${{ format('sw_{0}_{1}', parameters.tox, parameters.os) }}/*
+        displayName: "Mac upload sdist and binary wheel to PyPi ..."
+        continueOnError: true

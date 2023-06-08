@@ -117,6 +117,13 @@ You should also cite the RCSB PDB service this package utilizes:
 > from the PDB Archive, Journal of Molecular Biology, 2020.
 > DOI: [10.1016/j.jmb.2020.11.003](https://doi.org/10.1016/j.jmb.2020.11.003)
 
+## Attributions
+
+The source code for this project was originally written by [Spencer Bliven](https://github.com/sbliven) and forked
+from https://github.com/sbliven/rcsbsearch. We would like to express our tremendous
+gratitude for his generous efforts in designing such a comprehensive public utility
+Python package for interacting with the RCSB PDB search API, [rcsbsearch](https://rcsbsearchapi.readthedocs.io).
+
 ## Developers
 
 For information about building and developing `rcsbsearchapi`, see

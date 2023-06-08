@@ -1,8 +1,6 @@
 # File: azure-template-tox-job.yml
 # Date: 8-Jun-2023
 #
-# Updates:
-#
 ##
 parameters:
   tox: ""

@@ -8,6 +8,7 @@ trigger:
 
 pr:
 - master
+- staging
 
 schedules:
 - cron: "0 12 * * 0"

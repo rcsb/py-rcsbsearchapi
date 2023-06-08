@@ -136,11 +136,11 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def exec(self, return_type: ReturnType = "entry", rows: int = 100) -> "Session":
+    def exec(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
         return Session(self, return_type, rows)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 100) -> "Session":
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
         return self.exec(return_type, rows)
 
@@ -964,7 +964,7 @@ class Session(Iterable[str]):
     rows: int
 
     def __init__(
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 100
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
