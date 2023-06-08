@@ -1,0 +1,107 @@
+# File: azure-template-tox-job.yml
+# Date: 8-Jun-2023
+#
+##
+parameters:
+  tox: ""
+  python: ""
+  os: "linux"
+  fixtures: ""
+
+jobs:
+- job: ${{ format('build_test_{0}_{1}', parameters.tox, parameters.os) }}
+  timeoutInMinutes: 0
+  pool:
+    ${{ if eq(parameters.os, 'macos') }}:
+      vmImage: 'macOS-11'
+    ${{ if eq(parameters.os, 'linux') }}:
+      vmImage: 'ubuntu-20.04'
+
+  variables:
+    - group: py-shared-variables
+
+  steps:
+    #
+    # ensure the required Python versions are available
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: ${{ parameters.python }}
+        addToPath: true
+      displayName: setup python
+    #
+    - checkout: self
+      submodules: true
+    #
+    - ${{ if startsWith(parameters.os, 'macos') }}:
+      - bash: |
+          set -e
+          ls -la /Applications/Xcode*
+          sudo xcode-select --switch /Applications/Xcode_12.5.1.app/Contents/Developer
+          which g++
+          c++ --version
+        displayName: "setup Xcode"
+    # ----------------------------------------------
+    - ${{ if startsWith(parameters.os, 'linux') }}:
+      - script: which apt
+        displayName: 'Installing OS dependencies'
+      - script: apt-cache policy | grep http | awk '{print $2 $3}' | sort -u
+        displayName: 'Checking for repos'
+    #
+    - script: "python -c \"import sys; print(sys.version); print(sys.executable)\""
+      displayName: show python information
+    #
+    - script: python -m pip install --upgrade pip tox
+      displayName: 'Install tools'
+      #
+    - script: pip install -r requirements.txt
+      displayName: 'Install dependencies'
+    #
+    - ${{ if startsWith(parameters.tox, 'py') }}:
+      - script: |
+          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+          ${{ format('python -m tox -e {0}', parameters.tox) }}
+        displayName: 'Running tox task'
+    - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.9')) }}:
+      - script: |
+          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+          ${{ format('python -m tox -e {0}-py39', parameters.tox) }}
+        displayName: 'Running tox task'
+    - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.8')) }}:
+      - script: |
+          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+          ${{ format('python -m tox -e {0}-py38', parameters.tox) }}
+        displayName: 'Running tox task'
+    - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.7')) }}:
+      - script: |
+          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+          ${{ format('python -m tox -e {0}-py37', parameters.tox) }}
+        displayName: 'Running tox task'
+    # - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '2.7')) }}:
+    #   - script: |
+    #       export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+    #       ${{ format('python -m tox -e {0}-py27', parameters.tox) }}
+    #     displayName: 'Runing tox task'
+    #
+    #  Build artifacts if this is a test target (i.e. labeled as py##)
+    #
+    - ${{ if startsWith(parameters.tox, 'py') }}:
+      - script: pip install --upgrade pip twine setuptools wheel
+        displayName: "Acquire build tools"
+      - script: python setup.py  sdist --dist-dir "$(System.DefaultWorkingDirectory)/dist"
+        displayName: "Build source dist"
+      - script: python setup.py  bdist_wheel --dist-dir "$(System.DefaultWorkingDirectory)/dist"
+        displayName: "Build wheel"
+    #
+      - script: python setup.py  sdist --dist-dir "$(System.DefaultWorkingDirectory)/udist"
+        displayName: "Build source dist"
+      #
+      # Check the install artifacts
+      - script: ls -lR "$(System.DefaultWorkingDirectory)/dist" "$(System.DefaultWorkingDirectory)/udist"
+        displayName: "Listing of installed software"
+      #
+      - publish: $(System.DefaultWorkingDirectory)/dist
+        artifact: ${{ format('sw_{0}_{1}', parameters.tox, parameters.os) }}
+      #
+      - publish: $(System.DefaultWorkingDirectory)/udist
+        artifact: ${{ format('sw_u_{0}_{1}', parameters.tox, parameters.os) }}
+      #

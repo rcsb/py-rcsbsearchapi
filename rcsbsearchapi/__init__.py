@@ -1,10 +1,10 @@
-"""RCSB Search API"""
+"""RCSB PDB Search API"""
 from typing import TYPE_CHECKING, Any, List
 
 from .search import Terminal  # noqa: F401
 from .search import Attr, Group, Query, Session, TextQuery, Value
 
-__version__ = "0.3.0-dev0"
+__version__ = "1.0.0"
 
 
 # loading rcsb_attributes can cause errors, so load it lazily
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 # Set docstring at top level too. Keep synchronized with schema.rcsb_attributes
 rcsb_attributes: "SchemaGroup"
-"""Object with all known RCSB attributes.
+"""Object with all known RCSB PDB attributes.
 
 This is provided to ease autocompletion as compared to creating Attr objects from
 strings. For example,

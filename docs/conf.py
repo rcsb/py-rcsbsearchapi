@@ -14,22 +14,22 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
-import rcsbsearch  # noqa: E402
+import rcsbsearchapi  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-project = "rcsbsearch"
-copyright = "2020, Spencer Bliven"
-author = "Spencer Bliven"
+project = "rcsbsearchapi"
+copyright = "2023, RCSB PDB"
+author = "Dennis Piehl"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = rcsbsearch.__version__.split("-")[0]
+version = rcsbsearchapi.__version__.split("-")[0]
 # The full version, including alpha/beta/rc tags
-release = rcsbsearch.__version__
+release = rcsbsearchapi.__version__
 
 
 # -- General configuration ---------------------------------------------------
