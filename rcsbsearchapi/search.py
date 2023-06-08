@@ -136,11 +136,11 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def exec(self, return_type: ReturnType = "entry", rows: int = 100) -> "Session":
+    def exec(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
         return Session(self, return_type, rows)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 100) -> "Session":
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
         return self.exec(return_type, rows)
 
@@ -391,7 +391,7 @@ class Attr:
     Rather than their normal bool return values, operators return Terminals.
 
     Pre-instantiated attributes are available from the
-    :py:data:`rcsbsearch.rcsb_attributes` object. These are generally easier to use
+    :py:data:`rcsbsearchapi.rcsb_attributes` object. These are generally easier to use
     than constructing Attr objects by hand. A complete list of valid attributes is
     available in the `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
 
@@ -964,7 +964,7 @@ class Session(Iterable[str]):
     rows: int
 
     def __init__(
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 100
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
@@ -1017,6 +1017,7 @@ class Session(Iterable[str]):
     def __iter__(self) -> Iterator[str]:
         "Generator for all results as a list of identifiers"
         start = 0
+        req_count = 0
         response = self._single_query(start=start)
         if response is None:
             return  # be explicit for mypy
@@ -1032,7 +1033,10 @@ class Session(Iterable[str]):
 
         while start < total:
             assert len(identifiers) == self.rows
-            time.sleep(0.10) # This prevents the user from bottlenecking the server with requests. 
+            req_count += 1
+            if req_count == 10: 
+                time.sleep(1.2) # This prevents the user from bottlenecking the server with requests. 
+                req_count = 0
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
             logging.debug(f"Got {len(identifiers)} ids")

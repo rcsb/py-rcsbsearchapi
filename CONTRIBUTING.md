@@ -17,7 +17,7 @@ Code conforms to the `black` and PEP8 style guides. Before checking in code, ple
 
     black .
     flake8
-    mypy rcsbsearch
+    mypy rcsbsearchapi
 
 These are tested by the 'lint' tox environment:
 
@@ -48,7 +48,7 @@ For live updates, you can also install the `sphinx-autobuild` tool (pip or conda
 
 Which runs:
 
-    sphinx-autobuild -z rcsbsearch docs docs/_build/html
+    sphinx-autobuild -z rcsbsearchapi docs docs/_build/html
 
 ## Making a release
 

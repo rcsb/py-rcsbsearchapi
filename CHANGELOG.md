@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.0 (2023-06-08)
+
+- Project forked from [sbliven/rcsbsearch](https://github.com/sbliven/rcsbsearch) into RCSB PDB GitHub organization as `rcsbsearchapi`
+- Updated schema from v1 to v2
+- Additional bug fixes
+
 ## v0.2.3 (2021-04-28)
 
 - Fix mug with missing schema files when installed via pip

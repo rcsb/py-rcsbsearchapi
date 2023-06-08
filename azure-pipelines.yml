@@ -1,0 +1,48 @@
+# File: azure-pipelines.yml
+# Date: 8-Jun-2023
+#
+name: $(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.rr)
+
+trigger:
+- master
+
+pr:
+- master
+- staging
+
+schedules:
+- cron: "0 12 * * 0"
+  displayName: Weekly Sunday build
+  branches:
+    include:
+    - master
+  always: true
+
+jobs:
+  - template: azure-template-tox-job.yml
+    parameters: {tox: 'format_pep8', python: '3.9', os: 'linux'}
+  - template: azure-template-tox-job.yml
+    parameters: {tox: 'lint_pylint', python: '3.9', os: 'linux'}
+  - template: azure-template-tox-job.yml
+    parameters: {tox: 'test_coverage', python: '3.9', os: 'linux'}
+    #
+  - template: azure-template-tox-job.yml
+    parameters: {tox: 'py39', python: '3.9', os: 'linux'}
+  # - template: azure-template-tox-job.yml
+  #  parameters: {tox: 'py27', python: '2.7', os: 'linux'}
+  #
+  - template: azure-template-tox-job.yml
+    parameters: {tox: 'py39', python: '3.9', os: 'macos'}
+  # - template: azure-template-tox-job.yml
+  #  parameters: {tox: 'py27', python: '2.7', os: 'macos'}
+  #
+  #- template: azure-template-publish-job.yml
+  #  parameters: {tox: 'py39', python: '3.9', os: 'macos'}
+  - template: azure-template-publish-job.yml
+    parameters: {tox: 'py39', python: '3.9', os: 'linux'}
+  #
+  # - template: azure-template-publish-job.yml
+  #  parameters: {tox: 'py27', python: '2.7', os: 'macos'}
+  #- template: azure-template-publish-job.yml
+  #  parameters: {tox: 'py27', python: '2.7', os: 'linux'}
+  #

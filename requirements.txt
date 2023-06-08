@@ -1,4 +1,2 @@
-# Minimial dependencies
---index-url https://pypi.python.org/simple/
-
--e .
+requests >= 2.0.0
+# progressbar

@@ -1,6 +1,6 @@
 # Create conda environment
 # This file is used for mybinder.org, so it includes all optional dependencies
-name: rcsbsearch
+name: rcsbsearchapi
 channels:
   - conda-forge
   - defaults
@@ -31,5 +31,5 @@ dependencies:
   - pip
   - pip:
     - sphinx-rtd-theme
-    # Install rcsbsearch from local directory
+    # Install rcsbsearchapi from local directory
     - .
