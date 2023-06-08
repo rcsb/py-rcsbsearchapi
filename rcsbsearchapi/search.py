@@ -9,7 +9,7 @@ import sys
 import urllib.parse
 import uuid
 import time
-from .const import REQUESTS_PER_SECOND
+from const import *
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
@@ -963,17 +963,15 @@ class Session(Iterable[str]):
     return_type: ReturnType
     start: int
     rows: int
-    requests_per_second: int
 
     def __init__(
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 100, requests_per_second: int = 10
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 100
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
         self.return_type = return_type
         self.start = 0
         self.rows = rows
-        self.requests_per_second = requests_per_second
 
     @staticmethod
     def make_uuid() -> str:
@@ -1020,7 +1018,7 @@ class Session(Iterable[str]):
     def __iter__(self) -> Iterator[str]:
         "Generator for all results as a list of identifiers"
         start = 0
-        count = 0
+        req_count = 0
         response = self._single_query(start=start)
         if response is None:
             return  # be explicit for mypy
@@ -1036,17 +1034,15 @@ class Session(Iterable[str]):
 
         while start < total:
             assert len(identifiers) == self.rows
-            #if count < self.requests_per_second:
-            time.sleep(0.1)
+            req_count += 1
+            if req_count == REQUESTS_PER_SECOND: 
+                time.sleep(1.2) # This prevents the user from bottlenecking the server with requests. 
+                req_count = 0
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
             logging.debug(f"Got {len(identifiers)} ids")
             start += self.rows
             yield from identifiers
-                #count += 1
-            #else:
-                #time.sleep(1.1)
-                #count = 0
 
     def iquery(self, limit: Optional[int] = None) -> List[str]:
         """Evaluate the query and display an interactive progress bar.

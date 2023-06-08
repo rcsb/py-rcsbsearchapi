@@ -76,7 +76,7 @@ jobs:
         displayName: 'Install flex'
       - script: sudo apt-get install bison
         displayName: 'Install bison'
-  #
+  # somehow I doubt the stuff below is necessary. 
     - ${{ if and(contains(parameters.fixtures, 'mmseqs2'), startsWith(parameters.os, 'linux')) }}:
       - bash: |
           [ $(uname -m) = "x86_64" ] && echo "64bit: Yes" || echo "64bit: No"
