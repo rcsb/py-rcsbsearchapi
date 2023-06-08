@@ -9,7 +9,6 @@ import sys
 import urllib.parse
 import uuid
 import time
-from const import *
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
@@ -1035,7 +1034,7 @@ class Session(Iterable[str]):
         while start < total:
             assert len(identifiers) == self.rows
             req_count += 1
-            if req_count == REQUESTS_PER_SECOND: 
+            if req_count == 10: 
                 time.sleep(1.2) # This prevents the user from bottlenecking the server with requests. 
                 req_count = 0
             response = self._single_query(start=start)
