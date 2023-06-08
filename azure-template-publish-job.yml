@@ -1,10 +1,5 @@
-# File: azure-pipelines.yml
-# Date: 4-Jul-2019 jdw Created pipeline
-#       8-Jul-2019 jdw add macos test/publish
-#       8-Jul-2019 jdw templatize
-#       9-Jul-2019 jdw add publish jobs
-#      21-Jul-2019 jdw update to Py38
-#      28-Oct-2020 jdw update to Py39
+# File: azure-template-publish-job.yml
+# Date: 8-Jun-2023
 #
 name: $(BuildDefinitionName)_$(Date:yyyyMMdd)$(Rev:.rr)
 
@@ -24,19 +19,19 @@ schedules:
 
 jobs:
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'format_pep8', python: '3.9', os: 'linux', fixtures: 'mmseqs2'}
+    parameters: {tox: 'format_pep8', python: '3.9', os: 'linux'}
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'lint_pylint', python: '3.9', os: 'linux', fixtures: 'mmseqs2'}
+    parameters: {tox: 'lint_pylint', python: '3.9', os: 'linux'}
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'test_coverage', python: '3.9', os: 'linux', fixtures: 'mmseqs2'}
+    parameters: {tox: 'test_coverage', python: '3.9', os: 'linux'}
     #
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'py39', python: '3.9', os: 'linux', fixtures: 'mmseqs2'}
+    parameters: {tox: 'py39', python: '3.9', os: 'linux'}
   # - template: azure-template-tox-job.yml
   #  parameters: {tox: 'py27', python: '2.7', os: 'linux'}
   #
   - template: azure-template-tox-job.yml
-    parameters: {tox: 'py39', python: '3.9', os: 'macos', fixtures: 'mmseqs2'}
+    parameters: {tox: 'py39', python: '3.9', os: 'macos'}
   # - template: azure-template-tox-job.yml
   #  parameters: {tox: 'py27', python: '2.7', os: 'macos'}
   #

@@ -1,7 +1,2 @@
-# Minimial dependencies
-#--index-url https://pypi.python.org/simple/
-
-#-e .
-
-python > 3.7.0
-# not sure what to change here
+requests >= 2.0.0
+# progressbar

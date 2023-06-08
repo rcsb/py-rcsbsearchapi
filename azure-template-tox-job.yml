@@ -1,11 +1,7 @@
 # File: azure-template-tox-job.yml
-# Date: 8-Jul-2019 jdw split out from original pipeline
-# Supports: fixtures=mysql,mongodb (linux)
+# Date: 8-Jun-2023
 #
 # Updates:
-#  6-Aug-2019  jdw build source and binary wheels by default.
-# 13-Aug-2019  jdw export config support token prior to launching tox runner
-#  9-Sep-2019  jdw set unlimited timeout
 #
 ##
 parameters:
@@ -46,108 +42,12 @@ jobs:
           which g++
           c++ --version
         displayName: "setup Xcode"
-      #
-      - script: which brew
-        displayName: 'Check package manager'
-      - script: brew install flex
-        displayName: 'Install flex'
-      - script: which flex
-        displayName: 'Check flex'
-      - script: brew install bison
-        displayName: 'Install bison'
-      - script: which bison
-        displayName: 'Check bison'
-      #
-      - script: brew install mmseqs2
-        displayName: 'Install mmseqs2'
-      - script: which mmseqs
-        displayName: 'Check mmseqs2'
-      #
-      - script: brew install mariadb
-        displayName: 'Install mariadb'
     # ----------------------------------------------
     - ${{ if startsWith(parameters.os, 'linux') }}:
       - script: which apt
         displayName: 'Installing OS dependencies'
       - script: apt-cache policy | grep http | awk '{print $2 $3}' | sort -u
         displayName: 'Checking for repos'
-      #
-      - script: sudo apt-get install flex
-        displayName: 'Install flex'
-      - script: sudo apt-get install bison
-        displayName: 'Install bison'
-  # somehow I doubt the stuff below is necessary. 
-    - ${{ if and(contains(parameters.fixtures, 'mmseqs2'), startsWith(parameters.os, 'linux')) }}:
-      - bash: |
-          [ $(uname -m) = "x86_64" ] && echo "64bit: Yes" || echo "64bit: No"
-          grep -q sse4_1 /proc/cpuinfo && echo "SSE4.1: Yes" || echo "SSE4.1: No"
-          grep -q avx2 /proc/cpuinfo && echo "AVX2: Yes" || echo "AVX2: No"
-        displayName: 'Check architecture'
-      - bash: |
-          echo "Downloading latest MMseqs2 static build"
-          attempt=1
-          while [[ $attempt -le 5 ]]; do
-              wget https://mmseqs.com/latest/mmseqs-linux-avx2.tar.gz
-              if [[ $? -eq 0 ]]; then
-                  echo "Download successful."
-                  break
-              else
-                  echo "Download failed. Retrying in 5 seconds..."
-                  sleep 5
-                  attempt=$((attempt + 1))
-              fi
-          done
-          tar xvzf mmseqs-linux-avx2.tar.gz
-          sudo cp mmseqs/bin/mmseqs /usr/local/bin/mmseqs
-        displayName: 'Install mmseqs2 binary'
-    - ${{ if and(contains(parameters.fixtures, 'mysql'), startsWith(parameters.os, 'linux')) }}:
-      - bash: |
-          sudo apt-get install libmysqlclient-dev python-mysqldb
-          sudo apt list --installed | grep -i mysql
-        displayName: 'Install mysql development libraries'
-      - bash: |
-          echo "Retarting mysql service"
-          sudo systemctl restart mysql.service
-          mysql -V
-          mysql --user=root --password=root -e "use mysql; select * from user;"
-          #
-          echo "Try resetting password"
-          mysqladmin --user=root --password=root password 'ChangeMeSoon'
-          #
-          # mysql -u root  -p root -e "SET PASSWORD FOR root@'localhost' = PASSWORD(‘ChangeMeSoon’);"
-          # mysql -u root  -p root -e "FLUSH PRIVILEGES; update mysql.user set password=password('ChangeMeSoon') where user='root'; FLUSH PRIVILEGES;"
-          # UPDATE mysql.user SET Password=PASSWORD('ChangeMeSoon') WHERE User='root';
-
-          echo "Running preliminary mysql setup"
-          mysql --user=root --password=ChangeMeSoon <<_EOF_
-            DELETE FROM mysql.user WHERE User='';
-            DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-            DROP DATABASE IF EXISTS test;
-            DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-            FLUSH PRIVILEGES;
-          _EOF_
-          ps -ef | grep -i my
-          mysql --user=root --password=ChangeMeSoon -e "show databases;"
-          #
-        displayName: 'Start and configure mysql ...'
-      # -----
-
-    - ${{ if and(contains(parameters.fixtures, 'mongodb'), startsWith(parameters.os, 'linux')) }}:
-      # Mongo install
-      - script: |
-          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
-          sudo apt list --installed | grep mongodb
-          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
-          sudo apt-get update
-          sudo apt-get install -y mongodb-org
-          sudo apt list --installed | grep mongo
-        displayName: "Installing mongodb"
-      #
-      - script:  |
-          sudo service mongod start
-          sudo ss -tulpn
-        displayName: "Start Mongo service"
-      #
     #
     - script: "python -c \"import sys; print(sys.version); print(sys.executable)\""
       displayName: show python information
@@ -178,11 +78,11 @@ jobs:
           export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
           ${{ format('python -m tox -e {0}-py37', parameters.tox) }}
         displayName: 'Running tox task'
-    - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '2.7')) }}:
-      - script: |
-          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
-          ${{ format('python -m tox -e {0}-py27', parameters.tox) }}
-        displayName: 'Runing tox task'
+    # - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '2.7')) }}:
+    #   - script: |
+    #       export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+    #       ${{ format('python -m tox -e {0}-py27', parameters.tox) }}
+    #     displayName: 'Runing tox task'
     #
     #  Build artifacts if this is a test target (i.e. labeled as py##)
     #
