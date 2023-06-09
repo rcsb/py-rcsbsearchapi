@@ -29,7 +29,7 @@ from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery
 from itertools import islice
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
 logger = logging.getLogger()
 
 
