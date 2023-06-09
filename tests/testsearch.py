@@ -379,9 +379,8 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Sctructure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "symmetric", len(results), ok)
 
-    def testLargePagination(self):  # Give each test a unique name (and remember to add to suiteSelect at bottom of script)
+    def testLargePagination(self):
         """Test server throttling (avoidance of 429s) - using generic text query with many results to paginate over"""
-        # Add description in doc string (^) -- ends up showing up in Azure logs
         try:
             q1 = TextQuery("coli")
             resultL = list(q1())
@@ -389,7 +388,7 @@ class SearchTests(unittest.TestCase):
             logger.info("Large search resultL length: (%d) ok: (%r)", len(resultL), ok)
         except requests.exceptions.HTTPError:
             ok = False
-        self.assertTrue(ok)  # end each test with this
+        self.assertTrue(ok)
 
 
 def buildSearch():
