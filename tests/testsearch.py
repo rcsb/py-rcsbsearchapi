@@ -30,8 +30,9 @@ from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class SearchTests(unittest.TestCase):
@@ -70,16 +71,16 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = either.nodes[1] == q2
         self.assertTrue(ok)
+        logger.info("Construction test results: ok : (%r)", ok)
 
     def testSingleQuery(self):
-        """Test firing off a single query, making sure the result is not None.
-        Pylint takes issue with this test, as _single_query is a protected member
-        being accessed, but it should not affect Azure."""
+        """Test firing off a single query, making sure the result is not None."""
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         session = Session(Group("and", [q1]))
-        result = session._single_query()
+        result = session._single_query()  # pylint takes issue with this as this is a protected method
         ok = result is not None
         self.assertTrue(ok)
+        logger.info("Single query test results: ok : (%r)", ok)
 
     def testIquery(self):
         """Tests the iquery function, which evaluates a query with a progress bar.
@@ -89,6 +90,7 @@ class SearchTests(unittest.TestCase):
         result = session.iquery()
         ok = len(result) == 2
         self.assertTrue(ok)
+        logger.info("Iquery test results: ok : (%r)", ok)
 
     def testIterable(self):
         """Take a query, make it iterable and then test that its attributes remain unchanged as a result. """
@@ -99,6 +101,7 @@ class SearchTests(unittest.TestCase):
         ok2 = result == set(ids)
         self.assertTrue(ok)
         self.assertTrue(ok2)
+        logger.info("Iterable test results: ok : (%r), ok2 = (%r)", ok, ok2)
 
     def testInversion(self):
         """Test the overloaded inversion operator in a query. """
@@ -111,6 +114,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = first != "5T89"
         self.assertTrue(ok)
+        logger.info("Inversion test results: ok : (%r)", ok)
 
     def testXor(self):
         """Test the overloaded XOR operator in a query. """
@@ -124,6 +128,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = result == {ids1[0], ids2[0]}
         self.assertTrue(ok)
+        logger.info("Xor test results: ok : (%r)", ok)
 
     def testPagination(self):
         """Test the pagination of the query. Note that this test differs from
@@ -154,6 +159,7 @@ class SearchTests(unittest.TestCase):
         result = set(session)
         ok = len(result) == 0
         self.assertTrue(ok)
+        logger.info("Pagination test results: ok : (%r)", ok)
 
     def testMalformedQuery(self):
         """Attempt to make an invalid, malformed query. Upon finding an error,
@@ -167,6 +173,7 @@ class SearchTests(unittest.TestCase):
         except requests.HTTPError:
             ok = True
         self.assertTrue(ok)
+        logger.info("Malformed query test results: ok : (%r)", ok)
 
     def exampleQuery1(self):
         """Make an example query, and make sure it performs correctly.
@@ -205,6 +212,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = "1FYL-1" in results
         self.assertTrue(ok)
+        logger.info("Example1 Test Results: length: (%d) ok: (%r)", len(results), ok)
 
     def exampleQuery2(self):
         """Make another example query, and make sure that it performs successfully. """
@@ -233,6 +241,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = "1KI6" in results  # make sure that the right information is pulled
         self.assertTrue(ok)
+        logger.info("Example2 Test Results: length: (%d) ok: (%r)", len(results), ok)
 
     def testAttribute(self):
         """Test the attributes - make sure that they are assigned correctly, etc. """
@@ -255,6 +264,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = term.operator == "exact_match"
         self.assertTrue(ok)
+        logger.info("Attribute tests results: ok: (%d)", ok)
 
     def testFreeText(self):
         """Test the free text search function"""
@@ -262,6 +272,7 @@ class SearchTests(unittest.TestCase):
         results = set(query())  # make it an iterable set
         ok = len(results) > 0  # assert the result isn't blank
         self.assertTrue(ok)
+        logger.info("FreeText test results: length (%d) ok (%r)", len(results), ok)
 
     def testPartialQuery(self):
         """Test the ability to perform partial queries. """
@@ -325,12 +336,14 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = query.nodes[1].value == "dval"
         self.assertTrue(ok)
+        logger.info("Partial Query results: ok: (%r)", ok)
 
     def testOperators(self):
         """Test operators such as contain and in. """
         q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])  # test in
         results = list(q1())
         ok = len(results) == 2
+        logger.info("In search results length: (%d) ok: (%r)", len(results), ok)
         self.assertTrue(ok)
 
         q1 = attrs.citation.rcsb_authors.contains_words("kisko bliven")  # test contains_Words
@@ -338,11 +351,13 @@ class SearchTests(unittest.TestCase):
         ok = results[0] == "5T89"  # first hit has both authors
         self.assertTrue(ok)
         ok = "3V6B" in results  # only a single author
+        logger.info("Aurhor contains words search results: (%s) ok: (%r)", "3V6B", ok)
 
         q1 = attrs.citation.rcsb_authors.contains_phrase("kisko bliven")  # test contains_phrase
         results = list(q1())
         ok = len(results) == 0
         self.assertTrue(ok)
+        logger.info("Author contains phrase results: phrase: (%s) length: (%d) ok: (%r)", "kikso bliven", len(results), ok)
 
         q1 = attrs.struct.title.contains_phrase(
             "VEGF-A in complex with VEGFR-1 domains D1-6"
@@ -350,18 +365,19 @@ class SearchTests(unittest.TestCase):
         results = list(q1())
         ok = "5T89" in results
         self.assertTrue(ok)
+        logger.info("Sctructure title contains phrase: (%s), (%s) in results, ok: (%r)", "VEGF-A in complex with VEGFR-1 domains D1-6", "5T89", ok)
 
         q1 = attrs.rcsb_struct_symmetry.type.exact_match("Asymmetric")
         results = list(islice(q1(), 5))
         ok = len(results) == 5
         self.assertTrue(ok)
+        logger.info("Sctructure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "Asymmetric", len(results), ok)
 
         q1 = attrs.rcsb_struct_symmetry.type.exact_match("symmetric")
         results = list(islice(q1(), 5))
         ok = len(results) == 0
         self.assertTrue(ok)
-
-        # test server throttling
+        logger.info("Sctructure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "symmetric", len(results), ok)
 
     def testLargePagination(self):  # Give each test a unique name (and remember to add to suiteSelect at bottom of script)
         """Test server throttling (avoidance of 429s) - using generic text query with many results to paginate over"""
@@ -369,8 +385,8 @@ class SearchTests(unittest.TestCase):
         try:
             q1 = TextQuery("coli")
             resultL = list(q1())
-            ok = len(resultL) > 100000  # Get OK value for success or failure, using rational conditions
-            logger.info("Large search resultL length (%d) ok (%r)", len(resultL), ok)  # Logging added (obviously don't log all 100k results...)
+            ok = len(resultL) > 100000
+            logger.info("Large search resultL length: (%d) ok: (%r)", len(resultL), ok)
         except requests.exceptions.HTTPError:
             ok = False
         self.assertTrue(ok)  # end each test with this

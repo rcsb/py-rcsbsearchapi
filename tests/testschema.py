@@ -26,8 +26,9 @@ import unittest
 from rcsbsearchapi import rcsb_attributes as attrs
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class SchemaTests(unittest.TestCase):
@@ -46,8 +47,9 @@ class SchemaTests(unittest.TestCase):
         ok = attrs.rcsb_id.attribute == "rcsb_id"
         self.assertTrue(ok)
 
-        ok = attrs.rcsb_struct_symmetry.symbol.attribute == "rcsb_struct_symmetry.symbol"
-        self.assertTrue(ok)
+        ok2 = attrs.rcsb_struct_symmetry.symbol.attribute == "rcsb_struct_symmetry.symbol"
+        self.assertTrue(ok2)
+        logger.info("Schema test results: ok : (%r), ok2: (%r)", ok, ok2)
 
 
 def buildSchema():
