@@ -18,7 +18,6 @@ __email__ = "santiago.blaumann@rcsb.org"
 __license__ = "BSD 3-Clause"
 
 import logging
-import os
 import platform
 import resource
 import time
@@ -348,19 +347,23 @@ class SearchTests(unittest.TestCase):
         ok = len(results) == 0
         self.assertTrue(ok)
 
-        #test server throttling
+    def testLargePagination(self):  # Give each test a unique name (and remember to add to suiteSelect at bottom of script)
+        """Test server throttling (avoidance of 429s) - using generic text query with many results to paginate over"""
+        # Add description in doc string (^) -- ends up showing up in Azure logs
         try:
-            q1 = TextQuery("protease")
+            q1 = TextQuery("coli")
             resultL = list(q1())
-            logger.info("resultL: %r", resultL)
-        except requests.exceptions.HTTPError: 
+            ok = len(resultL) > 100000  # Get OK value for success or failure, using rational conditions
+            logger.info("Large search resultL length (%d) ok (%r)", len(resultL), ok)  # Logging added (obviously don't log all 100k results...)
+        except requests.exceptions.HTTPError:
             ok = False
-            self.assertTrue(ok)
+        self.assertTrue(ok)  # end each test with this
 
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
     suiteSelect.addTest(SearchTests("testBuildSearch"))
+    suiteSelect.addTest(SearchTests("testLargePagination"))
     return suiteSelect
 
 
