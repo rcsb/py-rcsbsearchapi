@@ -997,9 +997,6 @@ class Session(Iterable[str]):
     def _single_query(self, start=0) -> Optional[Dict]:
         "Fires a single query"
         params = self._make_params(start)
-        # logging.debug(
-        # f"Querying {self.url} for results {start}-{start + self.rows - 1}"
-        # )
         logging.debug(
             "Querying %s for results %s-%s", self.url, start, start + self.rows - 1
         )
@@ -1012,7 +1009,6 @@ class Session(Iterable[str]):
         elif response.status_code == requests.codes.no_content:
             return None
         else:
-            # raise Exception(f"Unexpected status: {response.status_code}")
             raise requests.HTTPError(f"Unexpected status: {response.status_code}")
 
     def __iter__(self) -> Iterator[str]:
@@ -1024,7 +1020,6 @@ class Session(Iterable[str]):
             return  # be explicit for mypy
         identifiers = self._extract_identifiers(response)
         start += self.rows
-        # logging.debug(f"Got {len(identifiers)} ids")
         logging.debug("Got %s ids", len(identifiers))
 
         if len(identifiers) == 0:
@@ -1041,7 +1036,6 @@ class Session(Iterable[str]):
                 req_count = 0
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
-            # logging.debug(f"Got {len(identifiers)} ids")
             logging.debug("Got %s ids", len(identifiers))
             start += self.rows
             yield from identifiers
