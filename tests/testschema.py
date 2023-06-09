@@ -25,9 +25,9 @@ import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
 
-
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class SchemaTests(unittest.TestCase):
