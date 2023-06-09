@@ -13,7 +13,7 @@ Tests for all functions of the schema file.
 """
 
 __docformat__ = "google en"
-__author__ = "Spencer Bliven/Santiago Blaumann"
+__author__ = "Santiago Blaumann"
 __email__ = "santiago.blaumann@rcsb.org"
 __license__ = "BSD 3-Clause"
 
@@ -42,7 +42,7 @@ class SchemaTests(unittest.TestCase):
         endTime = time.time()
         logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
-    def testBuildSchema(self):
+    def testSchema(self):
         ok = attrs.rcsb_id.attribute == "rcsb_id"
         self.assertTrue(ok)
 
@@ -52,7 +52,7 @@ class SchemaTests(unittest.TestCase):
 
 def buildSchema():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(SchemaTests("testBuildSchema"))
+    suiteSelect.addTest(SchemaTests("testSchema"))
     return suiteSelect
 
 

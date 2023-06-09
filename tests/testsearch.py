@@ -46,10 +46,9 @@ class SearchTests(unittest.TestCase):
         endTime = time.time()
         logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
-    def testBuildSearch(self):
-
-        # Test construction
-
+    def testConstruction(self):
+        """Test the construction of queries, and check that the query is what
+        you'd expect. """
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "5T89"])
 
@@ -72,24 +71,27 @@ class SearchTests(unittest.TestCase):
         ok = either.nodes[1] == q2
         self.assertTrue(ok)
 
-        # test single_query
-
+    def testSingleQuery(self):
+        """Test firing off a single query, making sure the result is not None.
+        Pylint takes issue with this test, as _single_query is a protected member
+        being accessed, but it should not affect Azure."""
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         session = Session(Group("and", [q1]))
         result = session._single_query()
         ok = result is not None
         self.assertTrue(ok)
 
-        # test iquery
-
+    def testIquery(self):
+        """Tests the iquery function, which evaluates a query with a progress bar.
+        The progress bar requires tqdm to run. """
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         session = Session(q1)
         result = session.iquery()
         ok = len(result) == 2
         self.assertTrue(ok)
 
-        # test iterable
-
+    def testIterable(self):
+        """Take a query, make it iterable and then test that its attributes remain unchanged as a result. """
         ids = ["4HHB", "2GS2"]
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
         result = set(q1())
@@ -98,10 +100,9 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         self.assertTrue(ok2)
 
-        # test_inv
-
+    def testInversion(self):
+        """Test the overloaded inversion operator in a query. """
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         q3 = ~q1
         # Lots of results
         first = next(iter(q3()))
@@ -111,21 +112,23 @@ class SearchTests(unittest.TestCase):
         ok = first != "5T89"
         self.assertTrue(ok)
 
-        # test xor
-
+    def testXor(self):
+        """Test the overloaded XOR operator in a query. """
         ids1 = ["5T89", "2GS2"]
         ids2 = ["4HHB", "2GS2"]
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids1)
         q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids2)
-        q3 = q1 ^ q2
+        q3 = q1 ^ q2  # overloaded xor operator used on results.
         result = set(q3())
         ok = len(result) == 2
         self.assertTrue(ok)
         ok = result == {ids1[0], ids2[0]}
         self.assertTrue(ok)
 
-        # test pagination
-
+    def testPagination(self):
+        """Test the pagination of the query. Note that this test differs from
+        the large pagination tests below, which test avoiding a 429 error,
+        while this exists to make sure the feature behaves as intended. """
         ids = ["4HHB", "2GS2", "5T89", "1TIM"]
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
 
@@ -152,25 +155,23 @@ class SearchTests(unittest.TestCase):
         ok = len(result) == 0
         self.assertTrue(ok)
 
-        # test errors
+    def testMalformedQuery(self):
+        """Attempt to make an invalid, malformed query. Upon finding an error,
+        catch the error and pass, continuing tests. An exception is only thrown
+        if the query somehow completes successfully. """
+        q1 = Terminal("invalid_identifier", "exact_match", "ERROR")
+        session = Session(q1)
+        try:
+            set(session)
+            ok = False
+        except requests.HTTPError:
+            ok = True
+        self.assertTrue(ok)
 
-        # Malformed
-        # I want to rewrite this
-        # q1 = Terminal("invalid_identifier", "exact_match", "ERROR")
-        # session = Session(q1)
-        # try:
-        #     set(session)
-        #     assert False, "Should raise error"
-        # except requests.HTTPError:
-        #     pass
-
-        # example test
-
-        # 'Biological Assembly Search' from http://search.rcsb.org/#examples
-
-        # (Also used in the README)
-        #
-        # Create terminals for each query
+    def exampleQuery1(self):
+        """Make an example query, and make sure it performs correctly.
+        This example is pulled directly from the 'Biological Assembly Search'
+        example found at http://search.rcsb.org/#examples"""
         q1 = TextQuery('"heat-shock transcription factor"')
         q2 = attrs.rcsb_struct_symmetry.symbol == "C2"
         q3 = attrs.rcsb_struct_symmetry.kind == "Global Symmetry"
@@ -205,8 +206,8 @@ class SearchTests(unittest.TestCase):
         ok = "1FYL-1" in results
         self.assertTrue(ok)
 
-        # example 2
-
+    def exampleQuery2(self):
+        """Make another example query, and make sure that it performs successfully. """
         q1 = (
             TextQuery('"thymidine kinase"')
             & Terminal(
@@ -230,11 +231,11 @@ class SearchTests(unittest.TestCase):
         results = set(q1("entry"))
         ok = len(results) > 0  # 224 results 2020-06
         self.assertTrue(ok)
-        ok = "1KI6" in results
+        ok = "1KI6" in results  # make sure that the right information is pulled
         self.assertTrue(ok)
 
-        # test attribute
-
+    def testAttribute(self):
+        """Test the attributes - make sure that they are assigned correctly, etc. """
         attr = Attr("attr")
 
         term = attr == "value"
@@ -255,15 +256,15 @@ class SearchTests(unittest.TestCase):
         ok = term.operator == "exact_match"
         self.assertTrue(ok)
 
-        # test freetext
-
-        query = TextQuery("tubulin")
-        results = set(query())
-        ok = len(results) > 0
+    def testFreeText(self):
+        """Test the free text search function"""
+        query = TextQuery("tubulin")  # make a TextQuery
+        results = set(query())  # make it an iterable set
+        ok = len(results) > 0  # assert the result isn't blank
         self.assertTrue(ok)
 
-        # test partial_query
-
+    def testPartialQuery(self):
+        """Test the ability to perform partial queries. """
         query = Attr("a").equals("aval").and_("b")
 
         ok = isinstance(query, PartialQuery)
@@ -325,20 +326,20 @@ class SearchTests(unittest.TestCase):
         ok = query.nodes[1].value == "dval"
         self.assertTrue(ok)
 
-        # test operators
-
-        q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])
+    def testOperators(self):
+        """Test operators such as contain and in. """
+        q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])  # test in
         results = list(q1())
         ok = len(results) == 2
         self.assertTrue(ok)
 
-        q1 = attrs.citation.rcsb_authors.contains_words("kisko bliven")
+        q1 = attrs.citation.rcsb_authors.contains_words("kisko bliven")  # test contains_Words
         results = list(q1())
         ok = results[0] == "5T89"  # first hit has both authors
         self.assertTrue(ok)
         ok = "3V6B" in results  # only a single author
 
-        q1 = attrs.citation.rcsb_authors.contains_phrase("kisko bliven")
+        q1 = attrs.citation.rcsb_authors.contains_phrase("kisko bliven")  # test contains_phrase
         results = list(q1())
         ok = len(results) == 0
         self.assertTrue(ok)
@@ -362,18 +363,36 @@ class SearchTests(unittest.TestCase):
 
         # test server throttling
 
+    def testLargePagination(self):  # Give each test a unique name (and remember to add to suiteSelect at bottom of script)
+        """Test server throttling (avoidance of 429s) - using generic text query with many results to paginate over"""
+        # Add description in doc string (^) -- ends up showing up in Azure logs
         try:
-            q1 = TextQuery("protease")
+            q1 = TextQuery("coli")
             resultL = list(q1())
-            logger.info("resultL %r", resultL)
+            ok = len(resultL) > 100000  # Get OK value for success or failure, using rational conditions
+            logger.info("Large search resultL length (%d) ok (%r)", len(resultL), ok)  # Logging added (obviously don't log all 100k results...)
         except requests.exceptions.HTTPError:
             ok = False
-            self.assertTrue(ok)
+        self.assertTrue(ok)  # end each test with this
 
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(SearchTests("testBuildSearch"))
+    suiteSelect.addTest(SearchTests("testConstruction"))
+    suiteSelect.addTest(SearchTests("testLargePagination"))
+    suiteSelect.addTest(SearchTests("testOperators"))
+    suiteSelect.addTest(SearchTests("testPartialQuery"))
+    suiteSelect.addTest(SearchTests("testFreeText"))
+    suiteSelect.addTest(SearchTests("testAttribute"))
+    suiteSelect.addTest(SearchTests("exampleQuery2"))
+    suiteSelect.addTest(SearchTests("exampleQuery1"))
+    suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    suiteSelect.addTest(SearchTests("testPagination"))
+    suiteSelect.addTest(SearchTests("testXor"))
+    suiteSelect.addTest(SearchTests("testInversion"))
+    suiteSelect.addTest(SearchTests("testIterable"))
+    suiteSelect.addTest(SearchTests("testIquery"))
+    suiteSelect.addTest(SearchTests("testSingleQuery"))
     return suiteSelect
 
 
