@@ -83,7 +83,6 @@ class Query(ABC):
     @abstractmethod
     def to_dict(self) -> Dict:
         """Get dictionary representing this query"""
-        ...
 
     def to_json(self) -> str:
         """Get JSON string of this query"""
@@ -103,7 +102,6 @@ class Query(ABC):
             node_id: The next available node_id
 
         """
-        ...
 
     def assign_ids(self) -> "Query":
         """Assign node_ids sequentially for all terminal nodes
@@ -116,7 +114,6 @@ class Query(ABC):
     @abstractmethod
     def __invert__(self) -> "Query":
         """Negation: `~a`"""
-        ...
 
     def __and__(self, other: "Query") -> "Query":
         """Intersection: `a & b`"""
@@ -208,7 +205,7 @@ class Terminal(Query):
     operator: Optional[str] = None
     value: Optional[TValue] = None
     service: str = "text"
-    negation: Optional[bool] = False #investigate whether this can be changed to None
+    negation: Optional[bool] = False  # investigate whether this can be changed to None
     node_id: int = 0
 
     def to_dict(self):
@@ -611,7 +608,7 @@ class Attr:
             value = value.value
         return self.greater_or_equal(value)
 
-    def __bool__(self) -> Terminal:
+    def __bool__(self) -> Terminal:  # pylint: disable=invalid-bool-returned
         return self.exists()
 
     def __contains__(
@@ -993,26 +990,30 @@ class Session(Iterable[str]):
         return dict(
             query=self.query.to_dict(),
             return_type=self.return_type,
-            request_info=dict(query_id=self.query_id, src="ui"),  # TODO src deprecated?
-            request_options=dict(paginate=dict(start=start, rows=self.rows)), # v1 -> v2: pager parameter is renamed to paginate
+            request_info=dict(query_id=self.query_id, src="ui"),  # "TODO" src deprecated?
+            request_options=dict(paginate=dict(start=start, rows=self.rows)),  # v1 -> v2: pager parameter is renamed to paginate
         )
 
     def _single_query(self, start=0) -> Optional[Dict]:
         "Fires a single query"
         params = self._make_params(start)
+        # logging.debug(
+        # f"Querying {self.url} for results {start}-{start + self.rows - 1}"
+        # )
         logging.debug(
-            f"Querying {self.url} for results {start}-{start + self.rows - 1}"
+            "Querying %s for results %s-%s", self.url, start, start + self.rows - 1
         )
         response = requests.get(
-            self.url, {"json": json.dumps(params, separators=(",", ":"))}
+            self.url, {"json": json.dumps(params, separators=(",", ":"))}, timeout=None
         )
         response.raise_for_status()
-        if response.status_code == requests.codes.OK:
+        if response.status_code == requests.codes.ok:
             return response.json()
-        elif response.status_code == requests.codes.NO_CONTENT:
+        elif response.status_code == requests.codes.no_content:
             return None
         else:
-            raise Exception(f"Unexpected status: {response.status_code}")
+            # raise Exception(f"Unexpected status: {response.status_code}")
+            raise requests.HTTPError(f"Unexpected status: {response.status_code}")
 
     def __iter__(self) -> Iterator[str]:
         "Generator for all results as a list of identifiers"
@@ -1023,7 +1024,8 @@ class Session(Iterable[str]):
             return  # be explicit for mypy
         identifiers = self._extract_identifiers(response)
         start += self.rows
-        logging.debug(f"Got {len(identifiers)} ids")
+        # logging.debug(f"Got {len(identifiers)} ids")
+        logging.debug("Got %s ids", len(identifiers))
 
         if len(identifiers) == 0:
             return
@@ -1034,12 +1036,13 @@ class Session(Iterable[str]):
         while start < total:
             assert len(identifiers) == self.rows
             req_count += 1
-            if req_count == 10: 
-                time.sleep(1.2) # This prevents the user from bottlenecking the server with requests. 
+            if req_count == 10:
+                time.sleep(1.2)  # This prevents the user from bottlenecking the server with requests.
                 req_count = 0
             response = self._single_query(start=start)
             identifiers = self._extract_identifiers(response)
-            logging.debug(f"Got {len(identifiers)} ids")
+            # logging.debug(f"Got {len(identifiers)} ids")
+            logging.debug("Got %s ids", len(identifiers))
             start += self.rows
             yield from identifiers
 

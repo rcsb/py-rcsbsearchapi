@@ -42,8 +42,9 @@ def _download_json_schema():
     "Get the current JSON schema from the web"
     url = METADATA_SCHEMA_URL
 
-    logging.info(f"Downloading {url}")
-    response = requests.get(url)
+    # logging.info(f"Downloading {url}")
+    logging.info("Downloading %s", url)
+    response = requests.get(url, timeout=None)
     response.raise_for_status()
     return response.json()
 
@@ -133,8 +134,8 @@ def _make_group(fullname: str, node) -> Union[SchemaGroup, Attr]:
 
 
 def _make_schema() -> SchemaGroup:
-    json = _get_json_schema()
-    schema = _make_group("", json)
+    json1 = _get_json_schema()
+    schema = _make_group("", json1)
     assert isinstance(schema, SchemaGroup)  # for type checking
     return schema
 
