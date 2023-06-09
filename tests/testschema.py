@@ -18,13 +18,12 @@ __email__ = "santiago.blaumann@rcsb.org"
 __license__ = "BSD 3-Clause"
 
 import logging
-import os
 import platform
 import resource
 import time
 import unittest
 
-from rcsbsearchapi.search import rcsb_attributes as attrs
+from rcsbsearchapi import rcsb_attributes as attrs
 
 
 logging.basicConfig(level=logging.INFO)
@@ -37,11 +36,11 @@ class SchemaTests(unittest.TestCase):
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
 
     def tearDown(self):
-       unitS = "MB" if platform.system() == "Darwin" else "GB"
-       rusageMax = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-       logger.info("Maximum resident memory size %.4f %s", rusageMax / 10 ** 6, unitS)
-       endTime = time.time()
-       logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
+        unitS = "MB" if platform.system() == "Darwin" else "GB"
+        rusageMax = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        logger.info("Maximum resident memory size %.4f %s", rusageMax / 10 ** 6, unitS)
+        endTime = time.time()
+        logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
     def testBuildSchema(self):
         ok = attrs.rcsb_id.attribute == "rcsb_id"
@@ -50,11 +49,13 @@ class SchemaTests(unittest.TestCase):
         ok = attrs.rcsb_struct_symmetry.symbol.attribute == "rcsb_struct_symmetry.symbol"
         self.assertTrue(ok)
 
-    def buildSchema():
-        suiteSelect = unittest.TestSuite()
-        suiteSelect.addTest(SchemaTests("testBuildSchema"))
-        return suiteSelect
-    
-    if __name__ == "__main__":
-        mySuite = buildSchema()
-        unittest.TextTestRunner(verbosity=2).run(mySuite)
+
+def buildSchema():
+    suiteSelect = unittest.TestSuite()
+    suiteSelect.addTest(SchemaTests("testBuildSchema"))
+    return suiteSelect
+
+
+if __name__ == "__main__":
+    mySuite = buildSchema()
+    unittest.TextTestRunner(verbosity=2).run(mySuite)

@@ -30,8 +30,6 @@ from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery
 from itertools import islice
 
-
-
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
@@ -42,18 +40,14 @@ class SearchTests(unittest.TestCase):
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
 
     def tearDown(self):
-       unitS = "MB" if platform.system() == "Darwin" else "GB"
-       rusageMax = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-       logger.info("Maximum resident memory size %.4f %s", rusageMax / 10 ** 6, unitS)
-       endTime = time.time()
-       logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
+        unitS = "MB" if platform.system() == "Darwin" else "GB"
+        rusageMax = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        logger.info("Maximum resident memory size %.4f %s", rusageMax / 10 ** 6, unitS)
+        endTime = time.time()
+        logger.info("Completed %s at %s (%.4f seconds)", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()), endTime - self.__startTime)
 
     def testBuildSearch(self):
-
-
         #Test construction
-
-
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "5T89"])
 
@@ -66,7 +60,6 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = both.nodes[1] == q2
 
-
         either = q1 | q2
         ok = isinstance(either, Group)
         self.assertTrue(ok)
@@ -77,30 +70,21 @@ class SearchTests(unittest.TestCase):
         ok = either.nodes[1] == q2
         self.assertTrue(ok)
 
-
         # test single_query
-
-
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         session = Session(Group("and", [q1]))
         result = session._single_query()
         ok = result is not None
         self.assertTrue(ok)
 
-
         # test iquery
-
-
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         session = Session(q1)
         result = session.iquery()
         ok = len(result) == 2
         self.assertTrue(ok)
 
-
         #test iterable
-
-
         ids = ["4HHB", "2GS2"]
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
         result = set(q1())
@@ -109,10 +93,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         self.assertTrue(ok2)
 
-
         #test_inv
-
-
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
         q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
         q = ~q1
@@ -126,10 +107,7 @@ class SearchTests(unittest.TestCase):
         ok = first != "5T89"
         self.assertTrue(ok)
 
-
         #test xor
-
-
         ids1 = ["5T89", "2GS2"]
         ids2 = ["4HHB", "2GS2"]
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids1)
@@ -141,10 +119,7 @@ class SearchTests(unittest.TestCase):
         ok = result == {ids1[0], ids2[0]}
         self.assertTrue(ok)
 
-
         #test pagination
-
-
         ids = ["4HHB", "2GS2", "5T89", "1TIM"]
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
 
@@ -171,9 +146,7 @@ class SearchTests(unittest.TestCase):
         ok = len(result) == 0
         self.assertTrue(ok)
 
-
         # test errors
-
 
         # Malformed
         # I want to rewrite this 
@@ -184,13 +157,9 @@ class SearchTests(unittest.TestCase):
         #     assert False, "Should raise error"
         # except requests.HTTPError:
         #     pass
-        
 
         #example test
-
-
         """'Biological Assembly Search' from http://search.rcsb.org/#examples
-
         (Also used in the README)
         """
         # Create terminals for each query
@@ -228,10 +197,7 @@ class SearchTests(unittest.TestCase):
         ok = "1FYL-1" in results
         self.assertTrue(ok)
 
-
         # example 2
-
-
         "'X-Ray Structures Search' from http://search.rcsb.org/#examples"
         q = (
             TextQuery('"thymidine kinase"')
@@ -260,7 +226,6 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
 
         #test attribute
-        
         attr = Attr("attr")
 
         term = attr == "value"
@@ -281,19 +246,13 @@ class SearchTests(unittest.TestCase):
         ok = term.operator == "exact_match"
         self.assertTrue(ok)
 
-
         #test freetext
-
-
         query = TextQuery("tubulin")
         results = set(query())
         ok = len(results) > 0
         self.assertTrue(ok)
 
-
         #test partial_query
-
-
         query = Attr("a").equals("aval").and_("b")
 
         ok = isinstance(query, PartialQuery)
@@ -355,10 +314,7 @@ class SearchTests(unittest.TestCase):
         ok = query.nodes[1].value == "dval"
         self.assertTrue(ok)
 
-
         #test operators
-
-
         q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])
         results = list(q1())
         ok = len(results) == 2
@@ -392,22 +348,22 @@ class SearchTests(unittest.TestCase):
         ok = len(results) == 0
         self.assertTrue(ok)
 
-
         #test server throttling
-
-
         try:
             q1 = TextQuery("protease")
             resultL = list(q1())
+            logger.info("resultL: %r", resultL)
         except requests.exceptions.HTTPError: 
             ok = False
             self.assertTrue(ok)
 
-    def buildSearch():
-        suiteSelect = unittest.TestSuite()
-        suiteSelect.addTest(SearchTests("testBuildSearch"))
-        return suiteSelect
-    
-    if __name__ == "__main__":
-        mySuite = buildSearch()
-        unittest.TextTestRunner(verbosity=2).run(mySuite)
+
+def buildSearch():
+    suiteSelect = unittest.TestSuite()
+    suiteSelect.addTest(SearchTests("testBuildSearch"))
+    return suiteSelect
+
+
+if __name__ == "__main__":
+    mySuite = buildSearch()
+    unittest.TextTestRunner(verbosity=2).run(mySuite)
