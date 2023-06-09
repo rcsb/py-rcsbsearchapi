@@ -11,6 +11,6 @@ except Exception:
 if __name__ == "__main__":
     path = Path(__file__).parent.joinpath("resources", "metadata_schema.json")
     print(path)
-    with open(path, "wt") as file:
+    with open(path, "wt", encoding="utf-8") as file:
         latest = _download_json_schema()
         json.dump(latest, file)
