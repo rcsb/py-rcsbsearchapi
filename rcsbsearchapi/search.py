@@ -133,13 +133,13 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def exec(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
+    def exec(self, return_type: ReturnType = "entry", rows: int = 10000, computational: bool = False) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
-        return Session(self, return_type, rows)
+        return Session(self, return_type, rows, computational)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, computational: bool = False) -> "Session":
         """Evaluate this query and return an iterator of all result IDs"""
-        return self.exec(return_type, rows)
+        return self.exec(return_type, rows, computational)
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -959,15 +959,17 @@ class Session(Iterable[str]):
     return_type: ReturnType
     start: int
     rows: int
+    computational: bool
 
     def __init__(
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000, computational: bool = False  # parameter for computed model inclusion
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
         self.return_type = return_type
         self.start = 0
         self.rows = rows
+        self.computational = computational
 
     @staticmethod
     def make_uuid() -> str:
@@ -987,11 +989,15 @@ class Session(Iterable[str]):
 
     def _make_params(self, start=0):
         "Generate GET parameters as a dict"
+        results_content_type_list = ["experimental"]
+        if self.computational is True:
+            results_content_type_list.insert(0, "computational")  # includes computational in results_content_type parameter
         return dict(
             query=self.query.to_dict(),
             return_type=self.return_type,
             request_info=dict(query_id=self.query_id, src="ui"),  # "TODO" src deprecated?
-            request_options=dict(paginate=dict(start=start, rows=self.rows)),  # v1 -> v2: pager parameter is renamed to paginate
+            # v1 -> v2: pager parameter is renamed to paginate and results_content_type parameter added (which has a list as its value)
+            request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=results_content_type_list),
         )
 
     def _single_query(self, start=0) -> Optional[Dict]:
