@@ -5,52 +5,26 @@ Provides access to all valid attributes for search queries.
 
 import json
 import logging
-import os
 import pkgutil
 import re
 from typing import Any, Iterator, List, Union
-
-import requests
-
 from .search import Attr
 
 METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v2/metadata/schema"
+CHEMICAL_SCHEMA_URL = "https://search.rcsb.org/rcsbsearch/v2/metadata/chemical/schema"
 SEARCH_SCHEMA_URL = "http://search.rcsb.org/json-schema-rcsb_search_query.json"
-
-ENV_RCSBSEARCH_DOWNLOAD_SCHEMA = "RCSBSEARCH_DOWNLOAD_SCHEMA"
-
-
-def _get_json_schema(download=None):
-    """Get the JSON schema
-
-    The RCSBSEARCH_DOWNLOAD_SCHEMA environmental variable controls whether
-    to download the schema from the web each time vs using the version shipped
-    with rcsbsearchapi
-    """
-    if download is True or (
-        download is None
-        and (
-            os.environ.get(ENV_RCSBSEARCH_DOWNLOAD_SCHEMA, "no").lower()
-            in ("1", "yes", "y")
-        )
-    ):
-        return _download_json_schema()
-    return _load_json_schema()
-
-
-def _download_json_schema():
-    "Get the current JSON schema from the web"
-    url = METADATA_SCHEMA_URL
-
-    logging.info("Downloading %s", url)
-    response = requests.get(url, timeout=None)
-    response.raise_for_status()
-    return response.json()
+# I would like for these to eventually go to the const file.
 
 
 def _load_json_schema():
-    logging.info("Loading schema from file")
+    logging.info("Loading structure schema from file")
     latest = pkgutil.get_data(__package__, "resources/metadata_schema.json")
+    return json.loads(latest)
+
+
+def _load_chem_schema():
+    logging.info("Loading chemical schema from file")
+    latest = pkgutil.get_data(__package__, "resources/chemical_schema.json")
     return json.loads(latest)
 
 
@@ -85,14 +59,14 @@ class SchemaGroup:
                 else:
                     # Shouldn't happen
                     raise TypeError(f"Unrecognized member {k!r}: {v!r}")
-
+        # print(f'leaves self is {leaves(self)}')
         return leaves(self)
 
     def __str__(self):
         return "\n".join((str(c) for c in self.__dict__.values()))
 
 
-def _make_group(fullname: str, node) -> Union[SchemaGroup, Attr]:
+def _make_group(fullname: str, nodeL) -> Union[SchemaGroup, Attr]:
     """Represent this node of the schema as a python object
 
     Params:
@@ -101,40 +75,64 @@ def _make_group(fullname: str, node) -> Union[SchemaGroup, Attr]:
     Returns:
     An Attr (Leaf nodes) or SchemaGroup (object nodes)
     """
-    if "anyOf" in node:
-        children = {_make_group(fullname, n) for n in node["anyOf"]}
-        # Currently only deal with anyOf in leaf nodes
-        assert len(children) == 1, f"type of {fullname} couldn't be determined"
-        return next(iter(children))
-    if "oneOf" in node:
-        children = {_make_group(fullname, n) for n in node["oneOf"]}
-        # Currently only deal with oneOf in leaf nodes
-        assert len(children) == 1, f"type of {fullname} couldn't be determined"
-        return next(iter(children))
-    if "allOf" in node:
-        children = {_make_group(fullname, n) for n in node["allOf"]}
-        # Currently only deal with allOf in leaf nodes
-        assert len(children) == 1, f"type of {fullname} couldn't be determined"
-        return next(iter(children))
-    if node["type"] in ("string", "number", "integer", "date"):
-        return Attr(fullname)
-    elif node["type"] == "array":
-        # skip to items
-        return _make_group(fullname, node["items"])
-    elif node["type"] == "object":
-        group = SchemaGroup()  # parent, name)
-        for childname, childnode in node["properties"].items():
-            fullchildname = f"{fullname}.{childname}" if fullname else childname
-            childgroup = _make_group(fullchildname, childnode)
-            setattr(group, childname, childgroup)
-        return group
-    else:
-        raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
+    # print(f'Node is: {node}')
+    accum = 0
+    group = SchemaGroup()
+    for node in nodeL:
+        accum += 1
+        print(f'This is iteration {accum} of the loop')
+        print(f'Node {node}')
+        print(f'Node is type {type(node)}')
+        if "anyOf" in node:
+            print("In branch anyOf...")
+            children = {_make_group(fullname, [n]) for n in node["anyOf"]}
+            # Currently only deal with anyOf in leaf nodes
+            assert len(children) == 1, f"type of {fullname} couldn't be determined"
+            return next(iter(children))
+        if "oneOf" in node:
+            print("In branch oneOf...")
+            children = {_make_group(fullname, [n]) for n in node["oneOf"]}
+            # Currently only deal with oneOf in leaf nodes
+            assert len(children) == 1, f"type of {fullname} couldn't be determined"
+            return next(iter(children))
+        if "allOf" in node:
+            print("in branch allOf...")
+            children = {_make_group(fullname, [n]) for n in node["allOf"]}
+            # Currently only deal with allOf in leaf nodes
+            assert len(children) == 1, f"type of {fullname} couldn't be determined"
+            return next(iter(children))
+        if node["type"] in ("string", "number", "integer", "date"):
+            print("In node[type] in branch...")
+            return Attr(fullname)
+        elif node["type"] == "array":
+            print("in node[type] == array branch...")
+            # skip to items
+            return _make_group(fullname, [node["items"]])
+        elif node["type"] == "object":
+            print("in node[type] == object branch...")
+            print("generating new SchemaGroup() object...")
+            # group = SchemaGroup()  # parent, name)
+            for childname, childnode in node["properties"].items():
+                fullchildname = f"{fullname}.{childname}" if fullname else childname
+                childgroup = _make_group(fullchildname, [childnode])
+                print("setting attrubute...")
+                setattr(group, childname, childgroup)
+            print("returning group...")
+            # return group
+        else:
+            raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
+    return group
 
 
-def _make_schema() -> SchemaGroup:
-    json1 = _get_json_schema()
-    schema = _make_group("", json1)
+def _make_schema(structure=True) -> SchemaGroup:
+    json1 = _load_json_schema()
+    json2 = _load_chem_schema()
+    schemas = [json1, json2]
+    print("making joint schema...")
+    schema = _make_group("", schemas)
+    print("complete!")
+    # print("making chem schema...")
+    # print("complete!")
     assert isinstance(schema, SchemaGroup)  # for type checking
     return schema
 
@@ -170,6 +168,8 @@ def __getattr__(name: str) -> Any:
     # delay instantiating rcsb_attributes until it is needed
     if name == "rcsb_attributes":
         if "rcsb_attributes" not in globals():
+            print("Attempting to instantiate attribute lists...")
+            # print(globals())
             globals()["rcsb_attributes"] = _make_schema()
         return globals()["rcsb_attributes"]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
@@ -182,7 +182,7 @@ def __dir__() -> List[str]:
 __all__ = [  # noqa: F822
     "METADATA_SCHEMA_URL",
     "SEARCH_SCHEMA_URL",
-    "ENV_RCSBSEARCH_DOWNLOAD_SCHEMA",
+    "CHEMICAL_SCHEMA_URL",
     "rcsb_attributes",
     "SchemaGroup",
 ]

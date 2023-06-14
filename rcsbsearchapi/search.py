@@ -204,7 +204,7 @@ class Terminal(Query):
     attribute: Optional[str] = None
     operator: Optional[str] = None
     value: Optional[TValue] = None
-    service: str = "text"
+    service: str = "text"  # eventually this should be based on whether or not search is chem or struct
     negation: Optional[bool] = False  # investigate whether this can be changed to None
     node_id: int = 0
 
@@ -400,6 +400,7 @@ class Attr:
     """
 
     attribute: str
+    type: Optional[str] = None  # this will be changed later, this is to allow the program to still run. Will not be optional.
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> Terminal:
         """Exact match with the value"""

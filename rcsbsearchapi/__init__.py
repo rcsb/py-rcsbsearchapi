@@ -45,8 +45,8 @@ def __getattr__(name: str) -> Any:
     if name == "rcsb_attributes":
         if "rcsb_attributes" not in globals():
             from .schema import rcsb_attributes as attrs
-
             globals()["rcsb_attributes"] = attrs
+        # print(globals()["rcsb_attributes"])
         return globals()["rcsb_attributes"]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
