@@ -24,6 +24,7 @@ import time
 import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
+from rcsbsearchapi.schema import _download_json_schema, _load_json_schema
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -50,10 +51,18 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(ok2)
         logger.info("Schema test results: ok : (%r), ok2: (%r)", ok, ok2)
 
+    def testSchemaVersion(self):
+        web_schema = _download_json_schema()
+        local_schema = _load_json_schema()
+        ok = web_schema == local_schema
+        self.assertTrue(ok)
+        logger.info("Schema tests results: versions locally and on the web are the same: ok : (%s)", ok)
+
 
 def buildSchema():
     suiteSelect = unittest.TestSuite()
     suiteSelect.addTest(SchemaTests("testSchema"))
+    suiteSelect.addTest(SchemaTests("testSchemaVersion"))
     return suiteSelect
 
 
