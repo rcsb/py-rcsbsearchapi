@@ -2,7 +2,7 @@
 [![Build Status](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_apis/build/status/rcsb.py-rcsb_api_search?branchName=master)](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_build/latest?definitionId=38&branchName=master)
 [![Documentation Status](https://readthedocs.org/projects/py-rcsb-api-search/badge/?version=latest)](https://py-rcsb-api-search.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsb_api_search/master?filepath=notebooks/covid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsb_api_search/master?labpath=notebooks%2Fcovid.ipynb)
 
 # rcsbsearchapi
 
