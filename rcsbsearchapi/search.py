@@ -37,8 +37,10 @@ else:
 # tqdm is optional
 # Allowed return types for searches. http://search.rcsb.org/#return-type
 ReturnType = Literal[
-    "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance"
+    "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance",
+    "mol_definition"
 ]
+ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -133,13 +135,15 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def exec(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
+    def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
+        # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return Session(self, return_type, rows)
+        return Session(self, return_type, rows, return_content_type)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000) -> "Session":
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
+        # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return self.exec(return_type, rows)
+        return self.exec(return_type, rows, return_content_type)
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -961,15 +965,19 @@ class Session(Iterable[str]):
     return_type: ReturnType
     start: int
     rows: int
+    computational: bool
 
     def __init__(
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000
+        # parameter added below for computed model inclusion
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]
+        # pylint: disable=dangerous-default-value
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
         self.return_type = return_type
         self.start = 0
         self.rows = rows
+        self.return_content_type = return_content_type
 
     @staticmethod
     def make_uuid() -> str:
@@ -993,7 +1001,8 @@ class Session(Iterable[str]):
             query=self.query.to_dict(),
             return_type=self.return_type,
             request_info=dict(query_id=self.query_id, src="ui"),  # "TODO" src deprecated?
-            request_options=dict(paginate=dict(start=start, rows=self.rows)),  # v1 -> v2: pager parameter is renamed to paginate
+            # v1 -> v2: pager parameter is renamed to paginate and results_content_type parameter added (which has a list as its value)
+            request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type),
         )
 
     def _single_query(self, start=0) -> Optional[Dict]:
