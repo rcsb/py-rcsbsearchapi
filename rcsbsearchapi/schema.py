@@ -9,10 +9,13 @@ import pkgutil
 import re
 from typing import Any, Iterator, List, Union
 from .search import Attr
+from .const import METADATA_SCHEMA_URL, CHEMICAL_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE, CHEMICAL
 
-METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v2/metadata/schema"
-CHEMICAL_SCHEMA_URL = "https://search.rcsb.org/rcsbsearch/v2/metadata/chemical/schema"
-SEARCH_SCHEMA_URL = "http://search.rcsb.org/json-schema-rcsb_search_query.json"
+# METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v2/metadata/schema"
+# CHEMICAL_SCHEMA_URL = "https://search.rcsb.org/rcsbsearch/v2/metadata/chemical/schema"
+# SEARCH_SCHEMA_URL = "http://search.rcsb.org/json-schema-rcsb_search_query.json"
+# STRUCTURE = "text"
+# CHEMICAL = "text_chem"
 # I would like for these to eventually go to the const file.
 
 
@@ -59,14 +62,13 @@ class SchemaGroup:
                 else:
                     # Shouldn't happen
                     raise TypeError(f"Unrecognized member {k!r}: {v!r}")
-        # print(f'leaves self is {leaves(self)}')
         return leaves(self)
 
     def __str__(self):
         return "\n".join((str(c) for c in self.__dict__.values()))
 
 
-def _make_group(fullname: str, nodeL) -> Union[SchemaGroup, Attr]:
+def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
     """Represent this node of the schema as a python object
 
     Params:
@@ -75,64 +77,43 @@ def _make_group(fullname: str, nodeL) -> Union[SchemaGroup, Attr]:
     Returns:
     An Attr (Leaf nodes) or SchemaGroup (object nodes)
     """
-    # print(f'Node is: {node}')
-    accum = 0
     group = SchemaGroup()
-    for node in nodeL:
-        accum += 1
-        print(f'This is iteration {accum} of the loop')
-        print(f'Node {node}')
-        print(f'Node is type {type(node)}')
+    for (node, attrtype) in nodeL:
         if "anyOf" in node:
-            print("In branch anyOf...")
-            children = {_make_group(fullname, [n]) for n in node["anyOf"]}
+            children = {_make_group(fullname, [(n, attrtype)]) for n in node["anyOf"]}
             # Currently only deal with anyOf in leaf nodes
             assert len(children) == 1, f"type of {fullname} couldn't be determined"
             return next(iter(children))
         if "oneOf" in node:
-            print("In branch oneOf...")
-            children = {_make_group(fullname, [n]) for n in node["oneOf"]}
+            children = {_make_group(fullname, [(n, attrtype)]) for n in node["oneOf"]}
             # Currently only deal with oneOf in leaf nodes
             assert len(children) == 1, f"type of {fullname} couldn't be determined"
             return next(iter(children))
         if "allOf" in node:
-            print("in branch allOf...")
-            children = {_make_group(fullname, [n]) for n in node["allOf"]}
+            children = {_make_group(fullname, [(n, attrtype)]) for n in node["allOf"]}
             # Currently only deal with allOf in leaf nodes
             assert len(children) == 1, f"type of {fullname} couldn't be determined"
             return next(iter(children))
         if node["type"] in ("string", "number", "integer", "date"):
-            print("In node[type] in branch...")
-            return Attr(fullname)
+            return Attr(fullname, attrtype)
         elif node["type"] == "array":
-            print("in node[type] == array branch...")
             # skip to items
-            return _make_group(fullname, [node["items"]])
+            return _make_group(fullname, [(node["items"], attrtype)])
         elif node["type"] == "object":
-            print("in node[type] == object branch...")
-            print("generating new SchemaGroup() object...")
-            # group = SchemaGroup()  # parent, name)
             for childname, childnode in node["properties"].items():
                 fullchildname = f"{fullname}.{childname}" if fullname else childname
-                childgroup = _make_group(fullchildname, [childnode])
-                print("setting attrubute...")
+                childgroup = _make_group(fullchildname, [(childnode, attrtype)])
                 setattr(group, childname, childgroup)
-            print("returning group...")
-            # return group
         else:
             raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
     return group
 
 
-def _make_schema(structure=True) -> SchemaGroup:
+def _make_schema() -> SchemaGroup:
     json1 = _load_json_schema()
     json2 = _load_chem_schema()
-    schemas = [json1, json2]
-    print("making joint schema...")
+    schemas = [(json1, STRUCTURE), (json2, CHEMICAL)]
     schema = _make_group("", schemas)
-    print("complete!")
-    # print("making chem schema...")
-    # print("complete!")
     assert isinstance(schema, SchemaGroup)  # for type checking
     return schema
 
@@ -168,8 +149,6 @@ def __getattr__(name: str) -> Any:
     # delay instantiating rcsb_attributes until it is needed
     if name == "rcsb_attributes":
         if "rcsb_attributes" not in globals():
-            print("Attempting to instantiate attribute lists...")
-            # print(globals())
             globals()["rcsb_attributes"] = _make_schema()
         return globals()["rcsb_attributes"]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

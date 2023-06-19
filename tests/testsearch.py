@@ -24,7 +24,7 @@ import time
 import unittest
 from itertools import islice
 import requests
-
+from rcsbsearchapi.const import CHEMICAL
 from rcsbsearchapi import Attr, Group, Session, Terminal, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery
@@ -390,6 +390,26 @@ class SearchTests(unittest.TestCase):
             ok = False
         self.assertTrue(ok)
 
+    def testChemSearch(self):
+        """Test the chemical attribute search using both the operator and
+        fluent syntaxes. """
+        q1 = attrs.rcsb.drugbank_info.brand_names.contains_phrase("Tylenol")  # 111 results 19/06/23
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        ok2 = "1TYL" in result
+        logger.info("Chemical Search Operator Syntax: result length: (%d), ok: (%r), ok2: (%r)", len(result), ok, ok2)
+
+        result = TextQuery('"hemoglobin"')\
+            .and_("rcsb_chem_comp.name", CHEMICAL).contains_phrase("adenine")\
+            .exec("assembly")
+        resultL = list(result())
+        ok = len(result) > 0  # 115 as of 19/6/23
+        self.assertTrue(ok)
+        ok2 = "6FJH" in resultL
+        self.assertTrue(ok2)
+        logger.info("Chemical Search Fluent Syntax: result length: (%d), ok: (%r), ok2: (%r)", len(resultL), ok, ok2)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -408,6 +428,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testIterable"))
     suiteSelect.addTest(SearchTests("testIquery"))
     suiteSelect.addTest(SearchTests("testSingleQuery"))
+    suiteSelect.addTest(SearchTests("testChemSearch"))
     return suiteSelect
 
 
