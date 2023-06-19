@@ -56,7 +56,7 @@ class SchemaTests(unittest.TestCase):
         local_schema = _load_json_schema()
         ok = web_schema == local_schema
         self.assertTrue(ok)
-        logger.info("Schema tests results: versions locally and on the web are the same: ok : (%s)", ok)
+        logger.info("Schema tests results: local version (%r) and web version (%s)", local_schema.get("$comment"), web_schema.get("$comment"))
 
 
 def buildSchema():
