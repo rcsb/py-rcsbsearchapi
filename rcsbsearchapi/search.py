@@ -424,7 +424,7 @@ class Attr:
             value = value.value
         if isinstance(value, list):
             value = " ".join(value)
-        return Terminal(self.attribute,  self.type, "contains_words", value)
+        return Terminal(self.attribute, self.type, "contains_words", value)
 
     def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
         """Match an exact phrase"""
