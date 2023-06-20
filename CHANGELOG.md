@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.1.0 (2023-06-20)
+
+- Added support for including computed structure models (CSMs) in search (via `results_content_type`)
+- Added support for chemical attribute search
+- Documentation and code cleanup
+
 ## v1.0.0 (2023-06-08)
 
 - Project forked from [sbliven/rcsbsearch](https://github.com/sbliven/rcsbsearch) into RCSB PDB GitHub organization as `rcsbsearchapi`

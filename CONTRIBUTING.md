@@ -17,7 +17,7 @@ Code conforms to the `black` and PEP8 style guides. Before checking in code, ple
 
     black .
     flake8
-    mypy rcsbsearchapi
+    pylint rcsbsearchapi
 
 These are tested by the 'lint' tox environment:
 
