@@ -162,7 +162,7 @@ class Query(ABC):
         elif isinstance(other, Attr):
             return PartialQuery(self, "and", other)
         elif isinstance(other, str):
-            return PartialQuery(self, "or", Attr(other, qtype))  # still doesn't work
+            return PartialQuery(self, "and", Attr(other, qtype))
         else:
             raise TypeError(f"Expected Query or Attr, got {type(other)}")
 

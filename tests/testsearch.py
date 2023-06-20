@@ -400,12 +400,12 @@ class SearchTests(unittest.TestCase):
         ok2 = "1TYL" in result
         logger.info("Chemical Search Operator Syntax: result length: (%d), ok: (%r), ok2: (%r)", len(result), ok, ok2)
 
-        result = TextQuery("hemoglobin")\
+        result = TextQuery("Hemoglobin")\
             .and_("chem_comp.name", CHEMICAL).contains_phrase("adenine")
         # result = set(result("assembly"))
         q1 = TextQuery("Hemoglobin")
         q2 = attrs.chem_comp.name.contains_phrase("adenine")
-        result2 = q1 | q2
+        result2 = q1 & q2
         # result2 = set(result2("assembly"))
         ok = result == result2  # check why this doesn't work tomorrow
         logger.info("result of first query:")
@@ -424,7 +424,7 @@ class SearchTests(unittest.TestCase):
             query = TextQuery('"hemoglobin"')\
                 .and_("rcsb_chem_comp.name", STRUCTURE).contains_phrase("adenine")\
                 .exec("assembly")
-            resultL = list(query())
+            resultL = list(query)
             ok = len(resultL) < 0  # set this to false as it should fail
         except requests.exceptions.HTTPError:
             ok = True
@@ -434,21 +434,21 @@ class SearchTests(unittest.TestCase):
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
-    # suiteSelect.addTest(SearchTests("testConstruction"))
-    # suiteSelect.addTest(SearchTests("testLargePagination"))
-    # suiteSelect.addTest(SearchTests("testOperators"))
-    # suiteSelect.addTest(SearchTests("testPartialQuery"))
-    # suiteSelect.addTest(SearchTests("testFreeText"))
-    # suiteSelect.addTest(SearchTests("testAttribute"))
-    # suiteSelect.addTest(SearchTests("exampleQuery1"))
-    # suiteSelect.addTest(SearchTests("exampleQuery2"))
-    # suiteSelect.addTest(SearchTests("testMalformedQuery"))
-    # suiteSelect.addTest(SearchTests("testPagination"))
-    # suiteSelect.addTest(SearchTests("testXor"))
-    # suiteSelect.addTest(SearchTests("testInversion"))
-    # suiteSelect.addTest(SearchTests("testIterable"))
-    # suiteSelect.addTest(SearchTests("testIquery"))
-    # suiteSelect.addTest(SearchTests("testSingleQuery"))
+    suiteSelect.addTest(SearchTests("testConstruction"))
+    suiteSelect.addTest(SearchTests("testLargePagination"))
+    suiteSelect.addTest(SearchTests("testOperators"))
+    suiteSelect.addTest(SearchTests("testPartialQuery"))
+    suiteSelect.addTest(SearchTests("testFreeText"))
+    suiteSelect.addTest(SearchTests("testAttribute"))
+    suiteSelect.addTest(SearchTests("exampleQuery1"))
+    suiteSelect.addTest(SearchTests("exampleQuery2"))
+    suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    suiteSelect.addTest(SearchTests("testPagination"))
+    suiteSelect.addTest(SearchTests("testXor"))
+    suiteSelect.addTest(SearchTests("testInversion"))
+    suiteSelect.addTest(SearchTests("testIterable"))
+    suiteSelect.addTest(SearchTests("testIquery"))
+    suiteSelect.addTest(SearchTests("testSingleQuery"))
     suiteSelect.addTest(SearchTests("testChemSearch"))
     suiteSelect.addTest(SearchTests("testMismatch"))
     return suiteSelect
