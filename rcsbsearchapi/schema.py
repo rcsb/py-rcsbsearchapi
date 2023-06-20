@@ -10,7 +10,7 @@ import re
 import requests
 from typing import Any, Iterator, List, Union
 from .search import Attr
-from .const import METADATA_SCHEMA_URL, CHEMICAL_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE, CHEMICAL
+from .const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE
 
 
 def _download_schema(url: str):
@@ -115,7 +115,7 @@ def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
 def _make_schema() -> SchemaGroup:
     json1 = _load_json_schema()
     json2 = _load_chem_schema()
-    schemas = [(json1, STRUCTURE), (json2, CHEMICAL)]
+    schemas = [(json1, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (json2, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
     schema = _make_group("", schemas)
     assert isinstance(schema, SchemaGroup)  # for type checking
     return schema
@@ -162,9 +162,9 @@ def __dir__() -> List[str]:
 
 
 __all__ = [  # noqa: F822
-    "METADATA_SCHEMA_URL",
+    "STRUCTURE_ATTRIBUTE_SCHEMA_URL",
     "SEARCH_SCHEMA_URL",
-    "CHEMICAL_SCHEMA_URL",
+    "CHEMICAL_ATTRIBUTE_SCHEMA_URL",
     "rcsb_attributes",
     "SchemaGroup",
 ]
