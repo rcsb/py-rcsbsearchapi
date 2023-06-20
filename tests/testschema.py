@@ -61,7 +61,10 @@ class SchemaTests(unittest.TestCase):
 
         webSchema = _download_schema(CHEMICAL_SCHEMA_URL)
         localSchema = _load_chem_schema()
+        # logger.info("webschema: %s", webSchema)
+        # logger.info("localSchema: %s", localSchema)
         ok = webSchema == localSchema
+        logger.info("ok is %r", ok)
         self.assertTrue(ok)
         logger.info("Chemical schema tests results: local version (%r) and web version (%s)", localSchema.get("$comment"), webSchema.get("$comment"))
 

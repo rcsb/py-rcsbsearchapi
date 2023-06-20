@@ -420,7 +420,6 @@ class SearchTests(unittest.TestCase):
 
     def testMismatch(self):
         try:
-            print("what")
             query = TextQuery('"hemoglobin"')\
                 .and_("rcsb_chem_comp.name", STRUCTURE).contains_phrase("adenine")\
                 .exec("assembly")
