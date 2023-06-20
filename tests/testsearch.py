@@ -85,7 +85,7 @@ class SearchTests(unittest.TestCase):
     def testCSMquery(self):
         """Test firing off a single query that includes Computed Structure Models. Making sure the result is not None"""
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["AF_AFO87296F1"])  # entry ID for specific computed structure model of hemoglobin
-        session = Session(q1, return_content_type=["computational", "experimental"])
+        session = Session(q1, computational=True)
         result = session._single_query()
         ok = result is not None
         self.assertTrue(ok)
@@ -93,8 +93,8 @@ class SearchTests(unittest.TestCase):
 
         # Checks to see if result count changes when computed structure models included or not and if result count is expected
         q2 = Terminal("rcsb_entity_source_organism.taxonomy_lineage.name", "contains_phrase", "Arabidopsis thaliana")
-        q2_length = len(list(q2(return_content_type=["experimental"])))
-        q2_computational_length = len(list(q2(return_content_type=["computational", "experimental"])))
+        q2_length = len(list(q2(computational=False)))
+        q2_computational_length = len(list(q2(computational=True)))
         ok = q2_length > 1900
         self.assertTrue(ok)
         logger.info("Single query test results for Arabidopsis thaliana without Computed Structure Models has count greater than 1900: ok : (%s)", ok)
@@ -104,23 +104,11 @@ class SearchTests(unittest.TestCase):
 
         # full text search test with computed models
         q3 = TextQuery("hemoglobin")
-        session = Session(q3, return_content_type=["computational", "experimental"])
+        session = Session(q3, computational=True)
         result = session._single_query()
         ok = result is not None
         self.assertTrue(ok)
         logger.info("Text Query results with Computed Structure Models: ok : (%r)", ok)
-
-        # Query with only computed models
-        q4 = Terminal("rcsb_uniprot_protein.name.value", "contains_phrase", "Hemoglobin")
-        session = Session(q4, return_content_type=["computational"])
-        result = session._single_query()
-        ok = result is not None
-        self.assertTrue(ok)
-        q4_length = len(list(q4(return_content_type=["computational"])))
-        print(q4_length)
-        ok2 = q4_length == 885
-        self.assertTrue(ok2)
-        logger.info("Query results with only computed models: ok : (%r) : ok2 : (%s)", ok, ok2)
 
     def testIquery(self):
         """Tests the iquery function, which evaluates a query with a progress bar.
