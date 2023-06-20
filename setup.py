@@ -33,7 +33,7 @@ setup(
     long_description=longDescription,
     author="Dennis Piehl",
     author_email="dennis.piehl@rcsb.org",
-    url="https://github.com/rcsb/py-rcsb_api_search",
+    url="https://github.com/rcsb/py-rcsbsearchapi",
     #
     license="BSD 3-Clause",
     classifiers=[

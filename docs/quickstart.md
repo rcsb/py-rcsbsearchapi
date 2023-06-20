@@ -6,7 +6,7 @@ Get it from pypi:
 
     pip install rcsbsearchapi
 
-Or, download from [github](https://github.com/rcsb/py-rcsb_api_search)
+Or, download from [github](https://github.com/rcsb/py-rcsbsearchapi)
 
 ## Syntax
 
@@ -15,10 +15,10 @@ constructing queries: an "operator" API using python's comparators, and a "fluen
 syntax where terms are chained together. Which to use is a matter of preference.
 
 A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using binder:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearchapi/master?filepath=notebooks%2Fquickstart.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsbsearchapi/master?labpath=notebooks%2Fquickstart.ipynb)
 
 An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sbliven/rcsbsearchapi/master?filepath=notebooks%2Fcovid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsbsearchapi/master?labpath=notebooks%2Fcovid.ipynb)
 
 ### Operator example
 

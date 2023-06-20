@@ -18,12 +18,12 @@ Get it from pypi:
 
     pip install rcsbsearchapi
 
-Or, download from [github](https://github.com/rcsb/py-rcsb_api_search)
+Or, download from [github](https://github.com/rcsb/py-rcsbsearchapi)
 
 ## License
 
 Code is licensed under the BSD 3-clause license. See the
-[LICENSE](https://github.com/rcsb/py-rcsb_api_search/blob/master/LICENSE) for details.
+[LICENSE](https://github.com/rcsb/py-rcsbsearchapi/blob/master/LICENSE) for details.
 
 ## Citing
 
