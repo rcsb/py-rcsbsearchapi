@@ -429,7 +429,7 @@ class SearchTests(unittest.TestCase):
             ok = True
         self.assertTrue(ok)
         logger.info("Mismatch test: ok: (%r)", ok)
-    
+
     def testCSMquery(self):
         """Test firing off a single query that includes Computed Structure Models. Making sure the result is not None"""
         q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["AF_AFO87296F1"])  # entry ID for specific computed structure model of hemoglobin
