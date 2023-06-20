@@ -1,5 +1,5 @@
 """Update the distribution json files; for developer use only
-THis is currently not in use. """
+This is currently not in use. """
 import json
 from pathlib import Path
 
