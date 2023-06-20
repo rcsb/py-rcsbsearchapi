@@ -46,6 +46,7 @@ class SchemaTests(unittest.TestCase):
     def testSchema(self):
         ok = attrs.rcsb_id.attribute == "rcsb_id"
         self.assertTrue(ok)
+
         ok2 = attrs.rcsb_struct_symmetry.symbol.attribute == "rcsb_struct_symmetry.symbol"
         self.assertTrue(ok2)
         logger.info("Schema test results: ok : (%r), ok2: (%r)", ok, ok2)
