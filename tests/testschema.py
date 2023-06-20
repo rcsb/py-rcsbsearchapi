@@ -62,8 +62,6 @@ class SchemaTests(unittest.TestCase):
         logger.info("Metadata schema tests results: local version (%r) and web version (%s)", localVer, webVer)
         webSchema = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_chem_schema()
-        # logger.info("webschema: %s", webSchema)
-        # logger.info("localSchema: %s", localSchema)
         ok = webSchema == localSchema
         logger.info("ok is %r", ok)
         self.assertTrue(ok)

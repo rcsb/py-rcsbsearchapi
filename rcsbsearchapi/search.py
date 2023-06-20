@@ -154,7 +154,7 @@ class Query(ABC):
         ...
 
     def and_(
-        self, other: Union[str, "Query", "Attr"], qtype="text"
+        self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
     ) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an AND"""
         if isinstance(other, Query):
@@ -174,7 +174,7 @@ class Query(ABC):
     def or_(self, other: Union[str, "Attr"]) -> "PartialQuery":
         ...
 
-    def or_(self, other: Union[str, "Query", "Attr"], qtype="text") -> Union["Query", "PartialQuery"]:
+    def or_(self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an OR"""
         if isinstance(other, Query):
             return self & other
