@@ -24,7 +24,8 @@ import time
 import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.schema import _download_json_schema, _load_json_schema
+from rcsbsearchapi.schema import _load_json_schema, _load_chem_schema, _download_schema
+from rcsbsearchapi.const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -52,11 +53,21 @@ class SchemaTests(unittest.TestCase):
         logger.info("Schema test results: ok : (%r), ok2: (%r)", ok, ok2)
 
     def testSchemaVersion(self):
-        web_schema = _download_json_schema()
-        local_schema = _load_json_schema()
-        ok = web_schema == local_schema
+        webSchema = _download_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
+        localSchema = _load_json_schema()
+        ok = webSchema == localSchema
         self.assertTrue(ok)
-        logger.info("Schema tests results: local version (%r) and web version (%s)", local_schema.get("$comment"), web_schema.get("$comment"))
+        localVer = localSchema.get("$comment")
+        webVer = webSchema.get("$comment")
+        logger.info("Metadata schema tests results: local version (%r) and web version (%s)", localVer, webVer)
+        webSchema = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
+        localSchema = _load_chem_schema()
+        ok = webSchema == localSchema
+        logger.info("ok is %r", ok)
+        self.assertTrue(ok)
+        localVer = localSchema.get("$comment")
+        webVer = webSchema.get("$comment")
+        logger.info("Chemical schema tests results: local version (%r) and web version (%s)", localVer, webVer)
 
 
 def buildSchema():

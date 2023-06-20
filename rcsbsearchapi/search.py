@@ -28,13 +28,13 @@ from typing import (
 )
 
 import requests
+from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE
 
 if sys.version_info > (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
 # tqdm is optional
-
 # Allowed return types for searches. http://search.rcsb.org/#return-type
 ReturnType = Literal[
     "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance",
@@ -154,7 +154,7 @@ class Query(ABC):
         ...
 
     def and_(
-        self, other: Union[str, "Query", "Attr"]
+        self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
     ) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an AND"""
         if isinstance(other, Query):
@@ -162,7 +162,7 @@ class Query(ABC):
         elif isinstance(other, Attr):
             return PartialQuery(self, "and", other)
         elif isinstance(other, str):
-            return PartialQuery(self, "and", Attr(other))
+            return PartialQuery(self, "and", Attr(other, qtype))
         else:
             raise TypeError(f"Expected Query or Attr, got {type(other)}")
 
@@ -174,14 +174,14 @@ class Query(ABC):
     def or_(self, other: Union[str, "Attr"]) -> "PartialQuery":
         ...
 
-    def or_(self, other: Union[str, "Query", "Attr"]) -> Union["Query", "PartialQuery"]:
+    def or_(self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an OR"""
         if isinstance(other, Query):
             return self & other
         elif isinstance(other, Attr):
             return PartialQuery(self, "or", other)
         elif isinstance(other, str):
-            return PartialQuery(self, "or", Attr(other))
+            return PartialQuery(self, "or", Attr(other, qtype))
         else:
             raise TypeError(f"Expected Query or Attr, got {type(other)}")
 
@@ -206,9 +206,9 @@ class Terminal(Query):
     """
 
     attribute: Optional[str] = None
+    service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
     operator: Optional[str] = None
     value: Optional[TValue] = None
-    service: str = "text"
     negation: Optional[bool] = False  # investigate whether this can be changed to None
     node_id: int = 0
 
@@ -233,9 +233,9 @@ class Terminal(Query):
     def __invert__(self):
         return Terminal(
             self.attribute,
+            self.service,
             self.operator,
             self.value,
-            self.service,
             not self.negation,
             self.node_id,
         )
@@ -247,9 +247,9 @@ class Terminal(Query):
             return (
                 Terminal(
                     self.attribute,
+                    self.service,
                     self.operator,
                     self.value,
-                    self.service,
                     self.negation,
                     node_id,
                 ),
@@ -270,8 +270,8 @@ class Terminal(Query):
             return f"{negation}Terminal(value={self.value!r})"
         else:
             return (
-                f"{negation}Terminal({self.attribute!r}, {self.operator!r}, "
-                f"{self.value!r})"
+                f"{negation}Terminal({self.attribute!r}, operator={self.operator!r}, "
+                f"value={self.value!r})"
             )
 
 
@@ -285,7 +285,7 @@ class TextQuery(Terminal):
             value: free-text query
             negation: find structures without the pattern
         """
-        super().__init__(service="full_text", value=value, negation=None)
+        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, value=value, negation=None)
 
 
 @dataclass(frozen=True)
@@ -404,12 +404,13 @@ class Attr:
     """
 
     attribute: str
+    type: Optional[str] = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE  # this will be changed later, this is to allow the program to still run. Will not be optional.
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> Terminal:
         """Exact match with the value"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "exact_match", value)
+        return Terminal(self.attribute, self.type, "exact_match", value)
 
     def contains_words(
         self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]
@@ -423,43 +424,43 @@ class Attr:
             value = value.value
         if isinstance(value, list):
             value = " ".join(value)
-        return Terminal(self.attribute, "contains_words", value)
+        return Terminal(self.attribute, self.type, "contains_words", value)
 
     def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
         """Match an exact phrase"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "contains_phrase", value)
+        return Terminal(self.attribute, self.type, "contains_phrase", value)
 
     def greater(self, value: TNumberLike) -> Terminal:
         """Attribute > `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "greater", value)
+        return Terminal(self.attribute, self.type, "greater", value)
 
     def less(self, value: TNumberLike) -> Terminal:
         """Attribute < `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "less", value)
+        return Terminal(self.attribute, self.type, "less", value)
 
     def greater_or_equal(self, value: TNumberLike) -> Terminal:
         """Attribute >= `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "greater_or_equal", value)
+        return Terminal(self.attribute, self.type, "greater_or_equal", value)
 
     def less_or_equal(self, value: TNumberLike) -> Terminal:
         """Attribute <= `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "less_or_equal", value)
+        return Terminal(self.attribute, self.type, "less_or_equal", value)
 
     def equals(self, value: TNumberLike) -> Terminal:
         """Attribute == `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "equals", value)
+        return Terminal(self.attribute, self.type, "equals", value)
 
     def range(self, value: Dict[str, Any]) -> Terminal:
         """Attribute is within the specified half-open range
@@ -469,11 +470,11 @@ class Attr:
         """
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "range", value)
+        return Terminal(self.attribute, self.type, "range", value)
 
     def exists(self) -> Terminal:
         """Attribute is defined for the structure"""
-        return Terminal(self.attribute, "exists")
+        return Terminal(self.attribute, operator="exists")
 
     def in_(
         self,
@@ -499,7 +500,7 @@ class Attr:
         """Attribute is contained in the list of values"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, "in", value)
+        return Terminal(self.attribute, operator="in", value=value)
 
     # Need ignore[override] because typeshed restricts __eq__ return value
     # https://github.com/python/mypy/issues/2783
@@ -1040,7 +1041,7 @@ class Session(Iterable[str]):
         while start < total:
             assert len(identifiers) == self.rows
             req_count += 1
-            if req_count == 10:
+            if req_count == REQUESTS_PER_SECOND:
                 time.sleep(1.2)  # This prevents the user from bottlenecking the server with requests.
                 req_count = 0
             response = self._single_query(start=start)

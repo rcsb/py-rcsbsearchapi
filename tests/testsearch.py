@@ -24,7 +24,7 @@ import time
 import unittest
 from itertools import islice
 import requests
-
+from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi import Attr, Group, Session, Terminal, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery
@@ -50,8 +50,8 @@ class SearchTests(unittest.TestCase):
     def testConstruction(self):
         """Test the construction of queries, and check that the query is what
         you'd expect. """
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "5T89"])
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
+        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "5T89"])
 
         both = q1 & q2
         ok = isinstance(both, Group)
@@ -75,57 +75,17 @@ class SearchTests(unittest.TestCase):
 
     def testSingleQuery(self):
         """Test firing off a single query, making sure the result is not None."""
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
         session = Session(Group("and", [q1]))
         result = session._single_query()  # pylint takes issue with this as this is a protected method
         ok = result is not None
         self.assertTrue(ok)
         logger.info("Single query test results: ok : (%r)", ok)
 
-    def testCSMquery(self):
-        """Test firing off a single query that includes Computed Structure Models. Making sure the result is not None"""
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["AF_AFO87296F1"])  # entry ID for specific computed structure model of hemoglobin
-        session = Session(q1, return_content_type=["computational", "experimental"])
-        result = session._single_query()
-        ok = result is not None
-        self.assertTrue(ok)
-        logger.info("Single query test results with Computed Structure Models: ok : (%r)", ok)
-
-        # Checks to see if result count changes when computed structure models included or not and if result count is expected
-        q2 = Terminal("rcsb_entity_source_organism.taxonomy_lineage.name", "contains_phrase", "Arabidopsis thaliana")
-        q2_length = len(list(q2(return_content_type=["experimental"])))
-        q2_computational_length = len(list(q2(return_content_type=["computational", "experimental"])))
-        ok = q2_length > 1900
-        self.assertTrue(ok)
-        logger.info("Single query test results for Arabidopsis thaliana without Computed Structure Models has count greater than 1900: ok : (%s)", ok)
-        ok = q2_computational_length > 27000
-        self.assertTrue(ok)
-        logger.info("Single query test results for Arabidopsis thaliana with Computed Structure Models has count greater than 27000: ok : (%s)", ok)
-
-        # full text search test with computed models
-        q3 = TextQuery("hemoglobin")
-        session = Session(q3, return_content_type=["computational", "experimental"])
-        result = session._single_query()
-        ok = result is not None
-        self.assertTrue(ok)
-        logger.info("Text Query results with Computed Structure Models: ok : (%r)", ok)
-
-        # Query with only computed models
-        q4 = Terminal("rcsb_uniprot_protein.name.value", "contains_phrase", "Hemoglobin")
-        session = Session(q4, return_content_type=["computational"])
-        result = session._single_query()
-        ok = result is not None
-        self.assertTrue(ok)
-        q4_length = len(list(q4(return_content_type=["computational"])))
-        print(q4_length)
-        ok2 = q4_length == 885
-        self.assertTrue(ok2)
-        logger.info("Query results with only computed models: ok : (%r) : ok2 : (%s)", ok, ok2)
-
     def testIquery(self):
         """Tests the iquery function, which evaluates a query with a progress bar.
         The progress bar requires tqdm to run. """
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["4HHB", "2GS2"])
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
         session = Session(q1)
         result = session.iquery()
         ok = len(result) == 2
@@ -135,7 +95,7 @@ class SearchTests(unittest.TestCase):
     def testIterable(self):
         """Take a query, make it iterable and then test that its attributes remain unchanged as a result. """
         ids = ["4HHB", "2GS2"]
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids)
         result = set(q1())
         ok = len(result) == 2
         ok2 = result == set(ids)
@@ -145,7 +105,7 @@ class SearchTests(unittest.TestCase):
 
     def testInversion(self):
         """Test the overloaded inversion operator in a query. """
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "exact_match", "5T89")
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="exact_match", value="5T89")
         q3 = ~q1
         # Lots of results
         first = next(iter(q3()))
@@ -160,8 +120,8 @@ class SearchTests(unittest.TestCase):
         """Test the overloaded XOR operator in a query. """
         ids1 = ["5T89", "2GS2"]
         ids2 = ["4HHB", "2GS2"]
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids1)
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids2)
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids1)
+        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids2)
         q3 = q1 ^ q2  # overloaded xor operator used on results.
         result = set(q3())
         ok = len(result) == 2
@@ -175,7 +135,7 @@ class SearchTests(unittest.TestCase):
         the large pagination tests below, which test avoiding a 429 error,
         while this exists to make sure the feature behaves as intended. """
         ids = ["4HHB", "2GS2", "5T89", "1TIM"]
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ids)
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids)
 
         # 2+2 results
         session = Session(q1, rows=2)
@@ -194,7 +154,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
 
         # 1ABC will never be a valid ID
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", "in", ["1ABC"])
+        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["1ABC"])
         session = Session(q2)
         result = set(session)
         ok = len(result) == 0
@@ -205,7 +165,7 @@ class SearchTests(unittest.TestCase):
         """Attempt to make an invalid, malformed query. Upon finding an error,
         catch the error and pass, continuing tests. An exception is only thrown
         if the query somehow completes successfully. """
-        q1 = Terminal("invalid_identifier", "exact_match", "ERROR")
+        q1 = Terminal("invalid_identifier", operator="exact_match", value="ERROR")
         session = Session(q1)
         try:
             set(session)
@@ -236,11 +196,11 @@ class SearchTests(unittest.TestCase):
         # Fluent syntax
         query2 = (
             TextQuery('"heat-shock transcription factor"')
-            .and_("rcsb_struct_symmetry.symbol")
+            .and_("rcsb_struct_symmetry.symbol", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
             .exact_match("C2")
-            .and_("rcsb_struct_symmetry.kind")
+            .and_("rcsb_struct_symmetry.kind", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
             .exact_match("Global Symmetry")
-            .and_("rcsb_entry_info.polymer_entity_count_DNA")
+            .and_("rcsb_entry_info.polymer_entity_count_DNA", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
             .greater_or_equal(1)
         )
 
@@ -260,20 +220,20 @@ class SearchTests(unittest.TestCase):
             TextQuery('"thymidine kinase"')
             & Terminal(
                 "rcsb_entity_source_organism.taxonomy_lineage.name",
-                "exact_match",
-                "Viruses",
+                operator="exact_match",
+                value="Viruses",
             )
             & Terminal(
                 "exptl.method",
-                "exact_match",
-                "X-RAY DIFFRACTION",
+                operator="exact_match",
+                value="X-RAY DIFFRACTION",
             )
             & Terminal(
                 "rcsb_entry_info.resolution_combined",
-                "less_or_equal",
-                2.5,
+                operator="less_or_equal",
+                value=2.5,
             )
-            & Terminal("rcsb_entry_info.nonpolymer_entity_count", "greater", 0)
+            & Terminal("rcsb_entry_info.nonpolymer_entity_count", operator="greater", value=0)
         )
 
         results = set(q1("entry"))
@@ -430,6 +390,86 @@ class SearchTests(unittest.TestCase):
             ok = False
         self.assertTrue(ok)
 
+    def testChemSearch(self):
+        """Test the chemical attribute search using both the operator and
+        fluent syntaxes. """
+        q1 = attrs.drugbank_info.brand_names.contains_phrase("Tylenol")  # 111 results 19/06/23
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        ok2 = "1TYL" in result
+        logger.info("Chemical Search Operator Syntax: result length: (%d), ok: (%r), ok2: (%r)", len(result), ok, ok2)
+
+        result = TextQuery("Hemoglobin")\
+            .and_("chem_comp.name", CHEMICAL_ATTRIBUTE_SEARCH_SERVICE).contains_phrase("adenine")
+        # result = set(result("assembly"))
+        q1 = TextQuery("Hemoglobin")
+        q2 = attrs.chem_comp.name.contains_phrase("adenine")
+        result2 = q1 & q2
+        # result2 = set(result2("assembly"))
+        ok = result == result2  # check why this doesn't work tomorrow
+        logger.info("result of first query:")
+        logger.info(result)
+        logger.info("result of second query:")
+        logger.info(result2)
+        self.assertTrue(ok)
+        resultL = list(result2())
+        ok2 = "6FJH" in resultL
+        self.assertTrue(ok2)
+        logger.info("Chemical Search Fluent Syntax: result length: (%d), ok: (%r), ok2: (%r)", len(resultL), ok, ok2)
+
+    def testMismatch(self):
+        try:
+            query = TextQuery('"hemoglobin"')\
+                .and_("rcsb_chem_comp.name", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE).contains_phrase("adenine")\
+                .exec("assembly")
+            resultL = list(query)
+            ok = len(resultL) < 0  # set this to false as it should fail
+        except requests.exceptions.HTTPError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Mismatch test: ok: (%r)", ok)
+
+    def testCSMquery(self):
+        """Test firing off a single query that includes Computed Structure Models. Making sure the result is not None"""
+        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["AF_AFO87296F1"])  # entry ID for specific computed structure model of hemoglobin
+        session = Session(q1, return_content_type=["computational", "experimental"])
+        result = session._single_query()
+        ok = result is not None
+        self.assertTrue(ok)
+        logger.info("Single query test results with Computed Structure Models: ok : (%r)", ok)
+
+        # Checks to see if result count changes when computed structure models included or not and if result count is expected
+        q2 = Terminal("rcsb_entity_source_organism.taxonomy_lineage.name", operator="contains_phrase", value="Arabidopsis thaliana")
+        q2_length = len(list(q2(return_content_type=["experimental"])))
+        q2_computational_length = len(list(q2(return_content_type=["computational", "experimental"])))
+        ok = q2_length > 1900
+        self.assertTrue(ok)
+        logger.info("Single query test results for Arabidopsis thaliana without Computed Structure Models has count greater than 1900: ok : (%s)", ok)
+        ok = q2_computational_length > 27000
+        self.assertTrue(ok)
+        logger.info("Single query test results for Arabidopsis thaliana with Computed Structure Models has count greater than 27000: ok : (%s)", ok)
+
+        # full text search test with computed models
+        q3 = TextQuery("hemoglobin")
+        session = Session(q3, return_content_type=["computational", "experimental"])
+        result = session._single_query()
+        ok = result is not None
+        self.assertTrue(ok)
+        logger.info("Text Query results with Computed Structure Models: ok : (%r)", ok)
+
+        # Query with only computed models
+        q4 = Terminal("rcsb_uniprot_protein.name.value", operator="contains_phrase", value="Hemoglobin")
+        session = Session(q4, return_content_type=["computational"])
+        result = session._single_query()
+        ok = result is not None
+        self.assertTrue(ok)
+        q4_length = len(list(q4(return_content_type=["computational"])))
+        print(q4_length)
+        ok2 = q4_length == 885
+        self.assertTrue(ok2)
+        logger.info("Query results with only computed models: ok : (%r) : ok2 : (%s)", ok, ok2)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -439,8 +479,8 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testPartialQuery"))
     suiteSelect.addTest(SearchTests("testFreeText"))
     suiteSelect.addTest(SearchTests("testAttribute"))
-    suiteSelect.addTest(SearchTests("exampleQuery2"))
     suiteSelect.addTest(SearchTests("exampleQuery1"))
+    suiteSelect.addTest(SearchTests("exampleQuery2"))
     suiteSelect.addTest(SearchTests("testMalformedQuery"))
     suiteSelect.addTest(SearchTests("testPagination"))
     suiteSelect.addTest(SearchTests("testXor"))
@@ -448,6 +488,8 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testIterable"))
     suiteSelect.addTest(SearchTests("testIquery"))
     suiteSelect.addTest(SearchTests("testSingleQuery"))
+    suiteSelect.addTest(SearchTests("testChemSearch"))
+    suiteSelect.addTest(SearchTests("testMismatch"))
     suiteSelect.addTest(SearchTests("testCSMquery"))
     return suiteSelect
 
