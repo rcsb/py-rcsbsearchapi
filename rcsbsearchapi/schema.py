@@ -7,16 +7,19 @@ import json
 import logging
 import pkgutil
 import re
+import requests
 from typing import Any, Iterator, List, Union
 from .search import Attr
 from .const import METADATA_SCHEMA_URL, CHEMICAL_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE, CHEMICAL
 
-# METADATA_SCHEMA_URL = "http://search.rcsb.org/rcsbsearch/v2/metadata/schema"
-# CHEMICAL_SCHEMA_URL = "https://search.rcsb.org/rcsbsearch/v2/metadata/chemical/schema"
-# SEARCH_SCHEMA_URL = "http://search.rcsb.org/json-schema-rcsb_search_query.json"
-# STRUCTURE = "text"
-# CHEMICAL = "text_chem"
-# I would like for these to eventually go to the const file.
+
+def _download_schema(url: str):
+    "Get the current schema from the web"
+
+    logging.info("Downloading %s", url)
+    response = requests.get(url, timeout=None)
+    response.raise_for_status()
+    return response.json()
 
 
 def _load_json_schema():
