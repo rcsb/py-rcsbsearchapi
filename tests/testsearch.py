@@ -351,7 +351,7 @@ class SearchTests(unittest.TestCase):
         ok = results[0] == "5T89"  # first hit has both authors
         self.assertTrue(ok)
         ok = "3V6B" in results  # only a single author
-        logger.info("Aurhor contains words search results: (%s) ok: (%r)", "3V6B", ok)
+        logger.info("Author contains words search results: (%s) ok: (%r)", "3V6B", ok)
 
         q1 = attrs.citation.rcsb_authors.contains_phrase("kisko bliven")  # test contains_phrase
         results = list(q1())
@@ -365,19 +365,19 @@ class SearchTests(unittest.TestCase):
         results = list(q1())
         ok = "5T89" in results
         self.assertTrue(ok)
-        logger.info("Sctructure title contains phrase: (%s), (%s) in results, ok: (%r)", "VEGF-A in complex with VEGFR-1 domains D1-6", "5T89", ok)
+        logger.info("Structure title contains phrase: (%s), (%s) in results, ok: (%r)", "VEGF-A in complex with VEGFR-1 domains D1-6", "5T89", ok)
 
         q1 = attrs.rcsb_struct_symmetry.type.exact_match("Asymmetric")
         results = list(islice(q1(), 5))
         ok = len(results) == 5
         self.assertTrue(ok)
-        logger.info("Sctructure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "Asymmetric", len(results), ok)
+        logger.info("Structure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "Asymmetric", len(results), ok)
 
         q1 = attrs.rcsb_struct_symmetry.type.exact_match("symmetric")
         results = list(islice(q1(), 5))
         ok = len(results) == 0
         self.assertTrue(ok)
-        logger.info("Sctructure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "symmetric", len(results), ok)
+        logger.info("Structure type exact match: symmetry type: (%s), length: (%d), ok: (%r)", "symmetric", len(results), ok)
 
     def testLargePagination(self):
         """Test server throttling (avoidance of 429s) - using generic text query with many results to paginate over"""
@@ -419,6 +419,8 @@ class SearchTests(unittest.TestCase):
         logger.info("Chemical Search Fluent Syntax: result length: (%d), ok: (%r), ok2: (%r)", len(resultL), ok, ok2)
 
     def testMismatch(self):
+        """Negative test - test running a chemical attribute query but with structure attribute service type.
+        Expected failure."""
         try:
             query = TextQuery('"hemoglobin"')\
                 .and_("rcsb_chem_comp.name", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE).contains_phrase("adenine")\
