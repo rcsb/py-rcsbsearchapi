@@ -28,7 +28,7 @@ from typing import (
 )
 
 import requests
-from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE
+from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, MIN_NUM_OF_RESIDUES
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -41,6 +41,7 @@ ReturnType = Literal[
     "mol_definition"
 ]
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
+SequenceType = Literal["dna", "rna", "protein"]
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -208,6 +209,9 @@ class Terminal(Query):
     attribute: Optional[str] = None
     service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
     operator: Optional[str] = None
+    #evalue_cutoff: Optional[float] = None
+    #identity_cutoff: Optional[int] = None
+    #sequence_type: Optional[SequenceType] = None
     value: Optional[TValue] = None
     negation: Optional[bool] = False  # investigate whether this can be changed to None
     node_id: int = 0
@@ -238,7 +242,7 @@ class Terminal(Query):
             self.value,
             not self.negation,
             self.node_id,
-        )
+            )
 
     def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
         if self.node_id == node_id:
@@ -274,6 +278,52 @@ class Terminal(Query):
                 f"value={self.value!r})"
             )
 
+@dataclass(frozen=True)
+class GenericTerminal(Query):
+    """A terminal query node for doing searches other than attribute searches.
+    Main function to allow for sequence searches. Does not have immediate use
+    """
+    node_id: int = 0
+
+    def __init__(self, service: str, params: Dict[str, Any]):
+        self.service = service
+        self.params = params
+
+    def to_dict(self):
+        return dict(
+            type="terminal",
+            service=self.service,
+            parameters=self.params,
+            node_id=self.node_id,
+        )
+    
+    def __invert__(self):
+        return Terminal(
+            self.service,
+            self.node_id,
+        )
+
+    def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
+        if self.node_id == node_id:
+            return (self, node_id + 1)
+        else:
+            return (
+                Terminal(
+                    self.service,
+                    node_id,
+                ),
+                node_id + 1,
+            )
+
+    def __str__(self):
+        """Return a simplified string representation
+
+        Example:
+            >>> ~Terminal(value="val")
+
+        """
+        return f"Terminal(value={self.value!r})"
+
 
 class TextQuery(Terminal):
     """Special case of a Terminal for free-text queries"""
@@ -286,6 +336,24 @@ class TextQuery(Terminal):
             negation: find structures without the pattern
         """
         super().__init__(service=FULL_TEXT_SEARCH_SERVICE, value=value, negation=None)
+
+
+class SequenceQuery(GenericTerminal):
+    """Special case of a terminal for dna, rna, or protein sequence queries"""
+
+    def __init__(self, value: str, evalue_cutoff: Optional[float] = 0.1,
+                 identity_cutoff: Optional[int] = 0, sequence_type: Optional[SequenceType] = "protein"
+                 ):
+        """The string value is a target sequence that is searched
+        Args:
+            value: sequence query
+        """
+        if len(value) < MIN_NUM_OF_RESIDUES:
+            raise ValueError("The sequence must contain at least 25 residues")
+        else:
+            super().__init__(service=SEQUENCE_SEARCH_SERVICE, params={"evalue_cutoff": evalue_cutoff, "identity_cutoff": identity_cutoff,
+                                                                      "sequence_type": sequence_type, "value": value
+                                                                      })
 
 
 @dataclass(frozen=True)

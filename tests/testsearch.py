@@ -27,7 +27,7 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi import Attr, Group, Session, Terminal, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery
+from rcsbsearchapi.search import PartialQuery, GenericTerminal
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -469,6 +469,28 @@ class SearchTests(unittest.TestCase):
         ok2 = q4_length == 885
         self.assertTrue(ok2)
         logger.info("Query results with only computed models: ok : (%r) : ok2 : (%s)", ok, ok2)
+
+    #def testSequenceQuery(self):
+        #"""Test firing off a Sequence query"""
+        
+        # Sequence query with hemoglobin protein sequence (id: 4HHB). Default parameters
+        #q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAH \
+                           #VDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR"
+                           #)
+        #result = list(q1())
+        #result_len = len(result)
+        #ok = result_len > 0 and result_len == 706  # this query displays 706 ids in pdb website search function
+        #logger.info("Sequence query results correctly displays ids: (%r)", ok)
+
+        # Sequence query (id: 4HHB) with custom parameters
+        #q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAH \
+                           #VDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR",
+                           #evalue_cutoff=0.01, identity_cutoff=0.9)
+        #result = list(q1())
+        #result_len = len(result)
+        #ok = result_len > 0 and result_len == 313  # this query displays 313 ids in pdb website search function
+        #logger.info("Sequence query results correctly displays ids with custom parameters: (%r)", ok)
+
 
 
 def buildSearch():
