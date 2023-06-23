@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, List
 from .search import Terminal  # noqa: F401
 from .search import Attr, Group, Query, Session, TextQuery, Value
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 # loading rcsb_attributes can cause errors, so load it lazily
@@ -45,7 +45,6 @@ def __getattr__(name: str) -> Any:
     if name == "rcsb_attributes":
         if "rcsb_attributes" not in globals():
             from .schema import rcsb_attributes as attrs
-
             globals()["rcsb_attributes"] = attrs
         return globals()["rcsb_attributes"]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -1,8 +1,8 @@
 [![PyPi Release](https://img.shields.io/pypi/v/rcsbsearchapi.svg)](https://pypi.org/project/rcsbsearchapi/)
-[![Build Status](https://travis-ci.org/rcsb/rcsbsearchapi.svg?branch=master)](https://travis-ci.org/rcsb/rcsbsearchapi)
+[![Build Status](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_apis/build/status/rcsb.py-rcsbsearchapi?branchName=master)](https://dev.azure.com/rcsb/RCSB%20PDB%20Python%20Projects/_build/latest?definitionId=38&branchName=master)
 [![Documentation Status](https://readthedocs.org/projects/rcsbsearchapi/badge/?version=latest)](https://rcsbsearchapi.readthedocs.io/en/latest/?badge=latest)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/rcsbsearchapi/master?filepath=notebooks%2Fcovid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsbsearchapi/master)
 
 # rcsbsearchapi
 
@@ -20,10 +20,10 @@ constructing queries: an "operator" API using python's comparators, and a "fluen
 syntax where terms are chained together. Which to use is a matter of preference.
 
 A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using binder:
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/rcsbsearchapi/master?filepath=notebooks%2Fquickstart.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsbsearchapi/master?labpath=notebooks%2Fquickstart.ipynb)
 
 An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/rcsbsearchapi/master?filepath=notebooks%2Fcovid.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsbsearchapi/master?labpath=notebooks%2Fcovid.ipynb)
 
 ### Operator example
 
@@ -74,9 +74,11 @@ Here is the same example using the
 
 The following table lists the status of current and planned features.
 
-- [x] Attribute Comparison operations
-- [x] Query set operations
-- [x] Attribute `contains`, `in_` (fluent only)
+- [x] Structure and chemical attribute search
+  - [x] Attribute Comparison operations
+  - [x] Query set operations
+  - [x] Attribute `contains`, `in_` (fluent only)
+- [x] Option to include computed structure models (CSMs) in search
 - [ ] Sequence search
 - [ ] Sequence motif search
 - [ ] Structural search
@@ -92,7 +94,7 @@ Get it from pypi:
 
     pip install rcsbsearchapi
 
-Or, download from [github](https://github.com/rcsb/py-rcsb_api_search)
+Or, download from [github](https://github.com/rcsb/py-rcsbsearchapi)
 
 ## Documentation
 

@@ -1,0 +1,4917 @@
+{
+  "type": "object",
+  "properties": {
+    "chem_comp": {
+      "type": "object",
+      "properties": {
+        "formula": {
+          "type": "string",
+          "examples": [
+            "C18 H19 N7 O8 S"
+          ],
+          "description": "The formula for the chemical component. Formulae are written\n according to the following rules:\n\n (1) Only recognized element symbols may be used.\n\n (2) Each element symbol is followed by a 'count' number. A count\n    of '1' may be omitted.\n\n (3) A space or parenthesis must separate each cluster of\n    (element symbol + count), but in general parentheses are\n    not used.\n\n (4) The order of elements depends on whether carbon is\n    present or not. If carbon is present, the order should be:\n    C, then H, then the other elements in alphabetical order\n    of their symbol. If carbon is not present, the elements\n    are listed purely in alphabetic order of their symbol. This\n    is the 'Hill' system used by Chemical Abstracts.",
+          "rcsb_description": [
+            {
+              "text": "The formula for the chemical component. Formulae are written\n according to the following rules:\n\n (1) Only recognized element symbols may be used.\n\n (2) Each element symbol is followed by a 'count' number. A count\n    of '1' may be omitted.\n\n (3) A space or parenthesis must separate each cluster of\n    (element symbol + count), but in general parentheses are\n    not used.\n\n (4) The order of elements depends on whether carbon is\n    present or not. If carbon is present, the order should be:\n    C, then H, then the other elements in alphabetical order\n    of their symbol. If carbon is not present, the elements\n    are listed purely in alphabetic order of their symbol. This\n    is the 'Hill' system used by Chemical Abstracts.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Formula",
+              "context": "brief"
+            }
+          ]
+        },
+        "formula_weight": {
+          "type": "number",
+          "examples": [
+            120.12,
+            450.1
+          ],
+          "description": "Formula mass of the chemical component.",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_units": "daltons",
+          "rcsb_description": [
+            {
+              "text": "Formula mass of the chemical component.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Molecular Weight",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 45
+            }
+          ],
+          "rcsb_current_maximum_value": 5496.513,
+          "rcsb_current_minimum_value": 2.014
+        },
+        "id": {
+          "type": "string",
+          "examples": [
+            "ALA",
+            "VAL",
+            "DG",
+            "C"
+          ],
+          "description": "The value of _chem_comp.id must uniquely identify each item in\n the CHEM_COMP list.\n\n For protein polymer entities, this is the three-letter code for\n the amino acid.\n\n For nucleic acid polymer entities, this is the one-letter code\n for the base.",
+          "rcsb_description": [
+            {
+              "text": "The value of _chem_comp.id must uniquely identify each item in\n the CHEM_COMP list.\n\n For protein polymer entities, this is the three-letter code for\n the amino acid.\n\n For nucleic acid polymer entities, this is the one-letter code\n for the base.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "mon_nstd_parent_comp_id": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "The identifier for the parent component of the nonstandard\n component. May be be a comma separated list if this component\n is derived from multiple components.\n\n Items in this indirectly point to _chem_comp.id in\n the CHEM_COMP category.",
+            "rcsb_description": [
+              {
+                "text": "The identifier for the parent component of the nonstandard\n component. May be be a comma separated list if this component\n is derived from multiple components.\n\n Items in this indirectly point to _chem_comp.id in\n the CHEM_COMP category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "name": {
+          "type": "string",
+          "examples": [
+            "alanine",
+            "valine",
+            "adenine",
+            "cytosine"
+          ],
+          "description": "The full name of the component.",
+          "rcsb_search_context": [
+            "full-text",
+            "suggest"
+          ],
+          "rcsb_full_text_priority": 20,
+          "rcsb_description": [
+            {
+              "text": "The full name of the component.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Name",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 10
+            }
+          ]
+        },
+        "one_letter_code": {
+          "type": "string",
+          "examples": [
+            "A",
+            "B",
+            "R",
+            "N",
+            "D",
+            "C",
+            "Q",
+            "E",
+            "Z",
+            "G",
+            "H",
+            "I",
+            "L",
+            "K",
+            "M",
+            "F",
+            "P",
+            "S",
+            "T",
+            "W",
+            "Y",
+            "V",
+            "U",
+            "O",
+            "X"
+          ],
+          "description": "For standard polymer components, the one-letter code for\n the component.   For non-standard polymer components, the\n one-letter code for parent component if this exists;\n otherwise, the one-letter code should be given as 'X'.\n\n Components that derived from multiple parents components\n are described by a sequence of one-letter-codes.",
+          "rcsb_description": [
+            {
+              "text": "For standard polymer components, the one-letter code for\n the component.   For non-standard polymer components, the\n one-letter code for parent component if this exists;\n otherwise, the one-letter code should be given as 'X'.\n\n Components that derived from multiple parents components\n are described by a sequence of one-letter-codes.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_ambiguous_flag": {
+          "type": "string",
+          "description": "A preliminary classification used by PDB to indicate\n that the chemistry of this component while described\n as clearly as possible is still ambiguous.  Software\n tools may not be able to process this component\n definition.",
+          "rcsb_description": [
+            {
+              "text": "A preliminary classification used by PDB to indicate\n that the chemistry of this component while described\n as clearly as possible is still ambiguous.  Software\n tools may not be able to process this component\n definition.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_formal_charge": {
+          "type": "integer",
+          "description": "The net integer charge assigned to this component. This is the\n formal charge assignment normally found in chemical diagrams.",
+          "rcsb_description": [
+            {
+              "text": "The net integer charge assigned to this component. This is the\n formal charge assignment normally found in chemical diagrams.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_initial_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date component was added to database.",
+          "rcsb_description": [
+            {
+              "text": "Date component was added to database.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_modified_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date component was last modified.",
+          "rcsb_description": [
+            {
+              "text": "Date component was last modified.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_processing_site": {
+          "type": "string",
+          "enum": [
+            "EBI",
+            "PDBC",
+            "PDBE",
+            "PDBJ",
+            "RCSB"
+          ],
+          "description": "This data item identifies the deposition site that processed\n this chemical component defintion.",
+          "rcsb_description": [
+            {
+              "text": "This data item identifies the deposition site that processed\n this chemical component defintion.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_release_status": {
+          "type": "string",
+          "enum": [
+            "DEL",
+            "HOLD",
+            "HPUB",
+            "OBS",
+            "REF_ONLY",
+            "REL"
+          ],
+          "description": "This data item holds the current release status for the component.",
+          "rcsb_enum_annotated": [
+            {
+              "value": "DEL",
+              "detail": "Component definition has been deleted"
+            },
+            {
+              "value": "HOLD",
+              "detail": "On hold until yyyy-mm-dd"
+            },
+            {
+              "value": "HPUB",
+              "detail": "On hold until publication"
+            },
+            {
+              "value": "OBS",
+              "detail": "Component defintion has been obsoleted and replaced by another entry"
+            },
+            {
+              "value": "REF_ONLY",
+              "detail": "Component definition is provided for reference only and will not be used in released entries."
+            },
+            {
+              "value": "REL",
+              "detail": "Released"
+            }
+          ],
+          "rcsb_description": [
+            {
+              "text": "This data item holds the current release status for the component.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_replaced_by": {
+          "type": "string",
+          "examples": [
+            "q11",
+            "tvx"
+          ],
+          "description": "Identifies the _chem_comp.id of the component that\n has replaced this component.",
+          "rcsb_description": [
+            {
+              "text": "Identifies the _chem_comp.id of the component that\n has replaced this component.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_replaces": {
+          "type": "string",
+          "examples": [
+            "q11",
+            "tvx,atv"
+          ],
+          "description": "Identifies the _chem_comp.id's of the components\n which have been replaced by this component.\n Multiple id codes should be separated by commas.",
+          "rcsb_description": [
+            {
+              "text": "Identifies the _chem_comp.id's of the components\n which have been replaced by this component.\n Multiple id codes should be separated by commas.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "pdbx_subcomponent_list": {
+          "type": "string",
+          "examples": [
+            "TSM DPH HIS CHF EMR"
+          ],
+          "description": "The list of subcomponents contained in this component.",
+          "rcsb_description": [
+            {
+              "text": "The list of subcomponents contained in this component.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "three_letter_code": {
+          "type": "string",
+          "examples": [
+            "ALA",
+            "ARG",
+            "ASN",
+            "ASP",
+            "ASX",
+            "CYS",
+            "GLN",
+            "GLU",
+            "GLY",
+            "GLX",
+            "HIS",
+            "ILE",
+            "LEU",
+            "LYS",
+            "MET",
+            "PHE",
+            "PRO",
+            "SER",
+            "THR",
+            "TRP",
+            "TYR",
+            "VAL",
+            "1MA",
+            "5MC",
+            "OMC",
+            "1MG",
+            "2MG",
+            "M2G",
+            "7MG",
+            "0MG",
+            "H2U",
+            "5MU",
+            "PSU",
+            "ACE",
+            "FOR",
+            "HOH",
+            "UNK"
+          ],
+          "description": "For standard polymer components, the common three-letter code for\n the component.   Non-standard polymer components and non-polymer\n components are also assigned three-letter-codes.\n\n For ambiguous polymer components three-letter code should\n be given as 'UNK'.  Ambiguous ions are assigned the code 'UNX'.\n Ambiguous non-polymer components are assigned the code 'UNL'.",
+          "rcsb_description": [
+            {
+              "text": "For standard polymer components, the common three-letter code for\n the component.   Non-standard polymer components and non-polymer\n components are also assigned three-letter-codes.\n\n For ambiguous polymer components three-letter code should\n be given as 'UNK'.  Ambiguous ions are assigned the code 'UNX'.\n Ambiguous non-polymer components are assigned the code 'UNL'.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "D-beta-peptide, C-gamma linking",
+            "D-gamma-peptide, C-delta linking",
+            "D-peptide COOH carboxy terminus",
+            "D-peptide NH3 amino terminus",
+            "D-peptide linking",
+            "D-saccharide",
+            "D-saccharide, alpha linking",
+            "D-saccharide, beta linking",
+            "DNA OH 3 prime terminus",
+            "DNA OH 5 prime terminus",
+            "DNA linking",
+            "L-DNA linking",
+            "L-RNA linking",
+            "L-beta-peptide, C-gamma linking",
+            "L-gamma-peptide, C-delta linking",
+            "L-peptide COOH carboxy terminus",
+            "L-peptide NH3 amino terminus",
+            "L-peptide linking",
+            "L-saccharide",
+            "L-saccharide, alpha linking",
+            "L-saccharide, beta linking",
+            "RNA OH 3 prime terminus",
+            "RNA OH 5 prime terminus",
+            "RNA linking",
+            "non-polymer",
+            "other",
+            "peptide linking",
+            "peptide-like",
+            "saccharide"
+          ],
+          "description": "For standard polymer components, the type of the monomer.\n Note that monomers that will form polymers are of three types:\n linking monomers, monomers with some type of N-terminal (or 5')\n cap and monomers with some type of C-terminal (or 3') cap.",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_enum_annotated": [
+            {
+              "value": "D-beta-peptide, C-gamma linking",
+              "detail": "Iso-peptide linking D-beta peptide"
+            },
+            {
+              "value": "D-gamma-peptide, C-delta linking",
+              "detail": "Iso-peptide linking D-gamma peptide"
+            },
+            {
+              "value": "D-peptide COOH carboxy terminus"
+            },
+            {
+              "value": "D-peptide NH3 amino terminus"
+            },
+            {
+              "value": "D-peptide linking"
+            },
+            {
+              "value": "D-saccharide"
+            },
+            {
+              "value": "D-saccharide, alpha linking"
+            },
+            {
+              "value": "D-saccharide, beta linking"
+            },
+            {
+              "value": "DNA OH 3 prime terminus"
+            },
+            {
+              "value": "DNA OH 5 prime terminus"
+            },
+            {
+              "value": "DNA linking"
+            },
+            {
+              "value": "L-DNA linking"
+            },
+            {
+              "value": "L-RNA linking"
+            },
+            {
+              "value": "L-beta-peptide, C-gamma linking",
+              "detail": "Iso-peptide linking L-beta peptide"
+            },
+            {
+              "value": "L-gamma-peptide, C-delta linking",
+              "detail": "Iso-peptide linking L-gamma peptide"
+            },
+            {
+              "value": "L-peptide COOH carboxy terminus"
+            },
+            {
+              "value": "L-peptide NH3 amino terminus"
+            },
+            {
+              "value": "L-peptide linking"
+            },
+            {
+              "value": "L-saccharide"
+            },
+            {
+              "value": "L-saccharide, alpha linking"
+            },
+            {
+              "value": "L-saccharide, beta linking"
+            },
+            {
+              "value": "RNA OH 3 prime terminus"
+            },
+            {
+              "value": "RNA OH 5 prime terminus"
+            },
+            {
+              "value": "RNA linking"
+            },
+            {
+              "value": "non-polymer"
+            },
+            {
+              "value": "other"
+            },
+            {
+              "value": "peptide linking"
+            },
+            {
+              "value": "peptide-like"
+            },
+            {
+              "value": "saccharide"
+            }
+          ],
+          "rcsb_description": [
+            {
+              "text": "For standard polymer components, the type of the monomer.\n Note that monomers that will form polymers are of three types:\n linking monomers, monomers with some type of N-terminal (or 5')\n cap and monomers with some type of C-terminal (or 3') cap.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Type",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 25
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ]
+    },
+    "pdbx_chem_comp_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "Create component",
+              "Initial release",
+              "Modify aromatic_flag",
+              "Modify atom id",
+              "Modify charge",
+              "Modify component atom id",
+              "Modify component comp_id",
+              "Modify coordinates",
+              "Modify descriptor",
+              "Modify formal charge",
+              "Modify formula",
+              "Modify identifier",
+              "Modify internal type",
+              "Modify leaving atom flag",
+              "Modify linking type",
+              "Modify model coordinates code",
+              "Modify name",
+              "Modify one letter code",
+              "Modify parent residue",
+              "Modify processing site",
+              "Modify subcomponent list",
+              "Modify synonyms",
+              "Modify value order",
+              "Obsolete component",
+              "Other modification"
+            ],
+            "description": "The action associated with this audit record.",
+            "rcsb_description": [
+              {
+                "text": "The action associated with this audit record.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "comp_id": {
+            "type": "string",
+            "description": "This data item is a pointer to _chem_comp.id in the CHEM_COMP\n category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is a pointer to _chem_comp.id in the CHEM_COMP\n category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The date associated with this audit record.",
+            "rcsb_description": [
+              {
+                "text": "The date associated with this audit record.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "details": {
+            "type": "string",
+            "examples": [
+              "Added C14 as a leaving atom."
+            ],
+            "description": "Additional details decribing this change.",
+            "rcsb_description": [
+              {
+                "text": "Additional details decribing this change.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "This data item is an ordinal index for the\n PDBX_CHEM_COMP_AUDIT category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is an ordinal index for the\n PDBX_CHEM_COMP_AUDIT category.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_chem_comp_descriptor": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comp_id": {
+            "type": "string",
+            "description": "This data item is a pointer to _chem_comp.id in the CHEM_COMP\n category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is a pointer to _chem_comp.id in the CHEM_COMP\n category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "descriptor": {
+            "type": "string",
+            "description": "This data item contains the descriptor value for this\n component.",
+            "rcsb_description": [
+              {
+                "text": "This data item contains the descriptor value for this\n component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "program": {
+            "type": "string",
+            "examples": [
+              "OPENEYE",
+              "CACTVS",
+              "DAYLIGHT",
+              "OTHER"
+            ],
+            "description": "This data item contains the name of the program\n or library used to compute the descriptor.",
+            "rcsb_description": [
+              {
+                "text": "This data item contains the name of the program\n or library used to compute the descriptor.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "program_version": {
+            "type": "string",
+            "description": "This data item contains the version of the program\n or library used to compute the descriptor.",
+            "rcsb_description": [
+              {
+                "text": "This data item contains the version of the program\n or library used to compute the descriptor.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "InChI",
+              "InChIKey",
+              "InChI_CHARGE",
+              "InChI_FIXEDH",
+              "InChI_ISOTOPE",
+              "InChI_MAIN",
+              "InChI_MAIN_CONNECT",
+              "InChI_MAIN_FORMULA",
+              "InChI_MAIN_HATOM",
+              "InChI_RECONNECT",
+              "InChI_STEREO",
+              "SMILES",
+              "SMILES_CANNONICAL",
+              "SMILES_CANONICAL"
+            ],
+            "description": "This data item contains the descriptor type.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "InChI",
+                "detail": "InChI descriptor"
+              },
+              {
+                "value": "InChIKey",
+                "detail": "InChI descriptor- hash key form"
+              },
+              {
+                "value": "InChI_CHARGE",
+                "detail": "InChI descriptor- charge layer"
+              },
+              {
+                "value": "InChI_FIXEDH",
+                "detail": "InChI descriptor- fixed hydrogren layer"
+              },
+              {
+                "value": "InChI_ISOTOPE",
+                "detail": "InChI descriptor- isotopic layer"
+              },
+              {
+                "value": "InChI_MAIN",
+                "detail": "InChI descriptor- main layer"
+              },
+              {
+                "value": "InChI_MAIN_CONNECT",
+                "detail": "InChI descriptor- main layer - atom connection sub-layer"
+              },
+              {
+                "value": "InChI_MAIN_FORMULA",
+                "detail": "InChI descriptor- main layer - chemical formula sub-layer"
+              },
+              {
+                "value": "InChI_MAIN_HATOM",
+                "detail": "InChI descriptor- main layer - hydrogen atom sub-layer"
+              },
+              {
+                "value": "InChI_RECONNECT",
+                "detail": "InChI descriptor- reconnected layer"
+              },
+              {
+                "value": "InChI_STEREO",
+                "detail": "InChI descriptor- stereochemical layer"
+              },
+              {
+                "value": "SMILES",
+                "detail": "SMILES descriptor"
+              },
+              {
+                "value": "SMILES_CANNONICAL",
+                "detail": "deprecated"
+              },
+              {
+                "value": "SMILES_CANONICAL",
+                "detail": "Canonical SMILES descriptor"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "This data item contains the descriptor type.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comp_id",
+          "program",
+          "program_version",
+          "type"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_chem_comp_feature": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comp_id": {
+            "type": "string",
+            "examples": [
+              "ABC",
+              "ATP"
+            ],
+            "description": "The component identifier for this feature.",
+            "rcsb_description": [
+              {
+                "text": "The component identifier for this feature.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "examples": [
+              "PDB",
+              "CHEBI",
+              "DRUGBANK",
+              "PUBCHEM"
+            ],
+            "description": "The information source for the component feature.",
+            "rcsb_description": [
+              {
+                "text": "The information source for the component feature.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CARBOHYDRATE ANOMER",
+              "CARBOHYDRATE ISOMER",
+              "CARBOHYDRATE PRIMARY CARBONYL GROUP",
+              "CARBOHYDRATE RING"
+            ],
+            "examples": [
+              "CARBOHYDRATE ANOMER",
+              "CARBOHYDRATE ISOMER",
+              "CARBOHYDRATE RING"
+            ],
+            "description": "The component feature type.",
+            "rcsb_description": [
+              {
+                "text": "The component feature type.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The component feature value.",
+            "rcsb_description": [
+              {
+                "text": "The component feature value.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comp_id",
+          "source",
+          "type",
+          "value"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_chem_comp_identifier": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comp_id": {
+            "type": "string",
+            "description": "This data item is a pointer to _chem_comp.id in the CHEM_COMP\n category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is a pointer to _chem_comp.id in the CHEM_COMP\n category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "identifier": {
+            "type": "string",
+            "description": "This data item contains the identifier value for this\n component.",
+            "rcsb_description": [
+              {
+                "text": "This data item contains the identifier value for this\n component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "program": {
+            "type": "string",
+            "examples": [
+              "OPENEYE",
+              "DAYLIGHT",
+              "ACD",
+              "AUTONOM",
+              "PUBCHEM_CID",
+              "PUBCHEM_SID",
+              "OTHER",
+              "NONE"
+            ],
+            "description": "This data item contains the name of the program\n or library used to compute the identifier.",
+            "rcsb_description": [
+              {
+                "text": "This data item contains the name of the program\n or library used to compute the identifier.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "program_version": {
+            "type": "string",
+            "description": "This data item contains the version of the program\n or library used to compute the identifier.",
+            "rcsb_description": [
+              {
+                "text": "This data item contains the version of the program\n or library used to compute the identifier.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "CAS REGISTRY NUMBER",
+              "COMMON NAME",
+              "CONDENSED IUPAC CARB SYMBOL",
+              "CONDENSED IUPAC CARBOHYDRATE SYMBOL",
+              "IUPAC CARB SYMBOL",
+              "IUPAC CARBOHYDRATE SYMBOL",
+              "MDL Identifier",
+              "PUBCHEM Identifier",
+              "SNFG CARB SYMBOL",
+              "SNFG CARBOHYDRATE SYMBOL",
+              "SYNONYM",
+              "SYSTEMATIC NAME"
+            ],
+            "description": "This data item contains the identifier type.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "CAS REGISTRY NUMBER",
+                "detail": "Chemical Abstracts Registry Number"
+              },
+              {
+                "value": "COMMON NAME",
+                "detail": "Common chemical name"
+              },
+              {
+                "value": "CONDENSED IUPAC CARB SYMBOL",
+                "detail": "Condensed IUPAC carbohydrate symbol"
+              },
+              {
+                "value": "CONDENSED IUPAC CARBOHYDRATE SYMBOL",
+                "detail": "Condensed IUPAC carbohydrate symbol"
+              },
+              {
+                "value": "IUPAC CARB SYMBOL",
+                "detail": "IUPAC carbohydrate symbol"
+              },
+              {
+                "value": "IUPAC CARBOHYDRATE SYMBOL",
+                "detail": "IUPAC carbohydrate symbol"
+              },
+              {
+                "value": "MDL Identifier",
+                "detail": "Molecular Design Limited Identifier"
+              },
+              {
+                "value": "PUBCHEM Identifier",
+                "detail": "PubChem accession number"
+              },
+              {
+                "value": "SNFG CARB SYMBOL",
+                "detail": "3D-SNFG carbohydrate symbol"
+              },
+              {
+                "value": "SNFG CARBOHYDRATE SYMBOL",
+                "detail": "3D-SNFG carbohydrate symbol"
+              },
+              {
+                "value": "SYNONYM",
+                "detail": "Synonym chemical name"
+              },
+              {
+                "value": "SYSTEMATIC NAME",
+                "detail": "Systematic chemical name"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "This data item contains the identifier type.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comp_id",
+          "program",
+          "program_version",
+          "type"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_family_prd_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "Add PRD",
+              "Create family",
+              "Initial release",
+              "Modify annotation",
+              "Modify citation",
+              "Modify family classification",
+              "Modify family name",
+              "Modify feature",
+              "Modify molecule details",
+              "Modify related structures",
+              "Modify sequence",
+              "Modify synonyms",
+              "Obsolete family",
+              "Obsolete familyt",
+              "Other modification",
+              "Remove PRD"
+            ],
+            "description": "The action associated with this audit record.",
+            "rcsb_description": [
+              {
+                "text": "The action associated with this audit record.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "annotator": {
+            "type": "string",
+            "examples": [
+              "JO",
+              "SJ",
+              "KB"
+            ],
+            "description": "The initials of the annotator creating of modifying the family.",
+            "rcsb_description": [
+              {
+                "text": "The initials of the annotator creating of modifying the family.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The date associated with this audit record.",
+            "rcsb_description": [
+              {
+                "text": "The date associated with this audit record.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "details": {
+            "type": "string",
+            "examples": [
+              "Revise molecule sequence."
+            ],
+            "description": "Additional details decribing this change.",
+            "rcsb_description": [
+              {
+                "text": "Additional details decribing this change.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "family_prd_id": {
+            "type": "string",
+            "description": "This data item is a pointer to _pdbx_reference_molecule_family.family_prd_id in the\n\t       pdbx_reference_molecule category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is a pointer to _pdbx_reference_molecule_family.family_prd_id in the\n\t       pdbx_reference_molecule category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "processing_site": {
+            "type": "string",
+            "examples": [
+              "RCSB",
+              "PDBE",
+              "PDBJ",
+              "BMRB",
+              "PDBC"
+            ],
+            "description": "An identifier for the wwPDB site creating or modifying the family.",
+            "rcsb_description": [
+              {
+                "text": "An identifier for the wwPDB site creating or modifying the family.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "action_type",
+          "date",
+          "family_prd_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_prd_audit": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "Create molecule",
+              "Initial release",
+              "Modify audit",
+              "Modify class",
+              "Modify linkage",
+              "Modify molecule name",
+              "Modify representation",
+              "Modify sequence",
+              "Modify taxonomy organism",
+              "Modify type",
+              "Obsolete molecule",
+              "Other modification"
+            ],
+            "description": "The action associated with this audit record.",
+            "rcsb_description": [
+              {
+                "text": "The action associated with this audit record.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "annotator": {
+            "type": "string",
+            "examples": [
+              "JO",
+              "SJ",
+              "KB"
+            ],
+            "description": "The initials of the annotator creating of modifying the molecule.",
+            "rcsb_description": [
+              {
+                "text": "The initials of the annotator creating of modifying the molecule.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The date associated with this audit record.",
+            "rcsb_description": [
+              {
+                "text": "The date associated with this audit record.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "details": {
+            "type": "string",
+            "examples": [
+              "Revise molecule sequence."
+            ],
+            "description": "Additional details decribing this change.",
+            "rcsb_description": [
+              {
+                "text": "Additional details decribing this change.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "This data item is a pointer to _pdbx_reference_molecule.prd_id in the\n\t       pdbx_reference_molecule category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is a pointer to _pdbx_reference_molecule.prd_id in the\n\t       pdbx_reference_molecule category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "processing_site": {
+            "type": "string",
+            "enum": [
+              "BMRB",
+              "PDBC",
+              "PDBE",
+              "PDBJ",
+              "RCSB"
+            ],
+            "examples": [
+              "RCSB",
+              "PDBE",
+              "PDBJ",
+              "BMRB",
+              "PDBC"
+            ],
+            "description": "An identifier for the wwPDB site creating or modifying the molecule.",
+            "rcsb_description": [
+              {
+                "text": "An identifier for the wwPDB site creating or modifying the molecule.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "action_type",
+          "date",
+          "prd_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_entity_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "component_id": {
+            "type": "integer",
+            "description": "The component number of this entity within the molecule.",
+            "rcsb_description": [
+              {
+                "text": "The component number of this entity within the molecule.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "details": {
+            "type": "string",
+            "description": "Additional details about this entity.",
+            "rcsb_description": [
+              {
+                "text": "Additional details about this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_list.prd_id is a reference\n _pdbx_reference_molecule.prd_id in the PDBX_REFERENCE_MOLECULE category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_list.prd_id is a reference\n _pdbx_reference_molecule.prd_id in the PDBX_REFERENCE_MOLECULE category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ref_entity_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_list.ref_entity_id is a unique identifier\n the a constituent entity within this reference molecule.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_list.ref_entity_id is a unique identifier\n the a constituent entity within this reference molecule.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "branched",
+              "non-polymer",
+              "polymer",
+              "polymer-like"
+            ],
+            "examples": [
+              "polymer",
+              "non-polymer",
+              "branched"
+            ],
+            "description": "Defines the polymer characteristic of the entity.",
+            "rcsb_description": [
+              {
+                "text": "Defines the polymer characteristic of the entity.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "component_id",
+          "prd_id",
+          "ref_entity_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_entity_poly": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "db_code": {
+            "type": "string",
+            "description": "The database code for this source information",
+            "rcsb_description": [
+              {
+                "text": "The database code for this source information",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "db_name": {
+            "type": "string",
+            "description": "The database name for this source information",
+            "rcsb_description": [
+              {
+                "text": "The database name for this source information",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_poly.prd_id is a reference\n\t       _pdbx_reference_entity_list.prd_id in the  PDBX_REFERENCE_ENTITY_LIST category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly.prd_id is a reference\n\t       _pdbx_reference_entity_list.prd_id in the  PDBX_REFERENCE_ENTITY_LIST category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ref_entity_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_poly.ref_entity_id is a reference\n to _pdbx_reference_entity_list.ref_entity_id in PDBX_REFERENCE_ENTITY_LIST category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly.ref_entity_id is a reference\n to _pdbx_reference_entity_list.ref_entity_id in PDBX_REFERENCE_ENTITY_LIST category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "nucleic-acid-like",
+              "oligosaccharide",
+              "peptide-like",
+              "polysaccharide-like"
+            ],
+            "examples": [
+              "peptide-like"
+            ],
+            "description": "The type of the polymer.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "nucleic-acid-like",
+                "detail": "Where the majority of residue linkages are nucleotide sugar phosphate bonds"
+              },
+              {
+                "value": "oligosaccharide",
+                "detail": "Where the majority of residue linkages are sugar to sugar bonds"
+              },
+              {
+                "value": "peptide-like",
+                "detail": "Where the majority of residue linkages are peptide bonds"
+              },
+              {
+                "value": "polysaccharide-like",
+                "detail": "Where the majority of residue linkages are sugar to sugar bonds"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "The type of the polymer.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "prd_id",
+          "ref_entity_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_entity_poly_link": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "atom_id_1": {
+            "type": "string",
+            "description": "The atom identifier/name in the first of the two components making\n the linkage.",
+            "rcsb_description": [
+              {
+                "text": "The atom identifier/name in the first of the two components making\n the linkage.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "atom_id_2": {
+            "type": "string",
+            "description": "The atom identifier/name in the second of the two components making\n the linkage.",
+            "rcsb_description": [
+              {
+                "text": "The atom identifier/name in the second of the two components making\n the linkage.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "comp_id_1": {
+            "type": "string",
+            "description": "The component identifier in the first of the two components making the\n linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.mon_id\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+            "rcsb_description": [
+              {
+                "text": "The component identifier in the first of the two components making the\n linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.mon_id\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "comp_id_2": {
+            "type": "string",
+            "description": "The component identifier in the second of the two components making the\n linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.mon_id\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+            "rcsb_description": [
+              {
+                "text": "The component identifier in the second of the two components making the\n linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.mon_id\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "component_id": {
+            "type": "integer",
+            "description": "The entity component identifier entity containing the linkage.",
+            "rcsb_description": [
+              {
+                "text": "The entity component identifier entity containing the linkage.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "entity_seq_num_1": {
+            "type": "integer",
+            "description": "For a polymer entity, the sequence number in the first of\n the two components making the linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.num\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+            "rcsb_description": [
+              {
+                "text": "For a polymer entity, the sequence number in the first of\n the two components making the linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.num\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "entity_seq_num_2": {
+            "type": "integer",
+            "description": "For a polymer entity, the sequence number in the second of\n the two components making the linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.num\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+            "rcsb_description": [
+              {
+                "text": "For a polymer entity, the sequence number in the second of\n the two components making the linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly_seq.num\n in the PDBX_REFERENCE_ENTITY_POLY_SEQ category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "link_id": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_entity_poly_link.link_id uniquely identifies\n a linkage within a polymer entity.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly_link.link_id uniquely identifies\n a linkage within a polymer entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_poly_link.prd_id is a reference\n _pdbx_reference_entity_list.prd_id in the PDBX_REFERENCE_ENTITY_POLY category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly_link.prd_id is a reference\n _pdbx_reference_entity_list.prd_id in the PDBX_REFERENCE_ENTITY_POLY category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ref_entity_id": {
+            "type": "string",
+            "description": "The reference entity id of the polymer entity containing the linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly.ref_entity_id\n in the PDBX_REFERENCE_ENTITY_POLY category.",
+            "rcsb_description": [
+              {
+                "text": "The reference entity id of the polymer entity containing the linkage.\n\n This data item is a pointer to _pdbx_reference_entity_poly.ref_entity_id\n in the PDBX_REFERENCE_ENTITY_POLY category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "value_order": {
+            "type": "string",
+            "enum": [
+              "arom",
+              "delo",
+              "doub",
+              "pi",
+              "poly",
+              "quad",
+              "sing",
+              "trip"
+            ],
+            "description": "The bond order target for the non-standard linkage.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "arom",
+                "detail": "aromatic bond"
+              },
+              {
+                "value": "delo",
+                "detail": "delocalised double bond"
+              },
+              {
+                "value": "doub",
+                "detail": "double bond"
+              },
+              {
+                "value": "pi",
+                "detail": "pi bond"
+              },
+              {
+                "value": "poly",
+                "detail": "polymeric bond"
+              },
+              {
+                "value": "quad",
+                "detail": "quadruple bond"
+              },
+              {
+                "value": "sing",
+                "detail": "single bond"
+              },
+              {
+                "value": "trip",
+                "detail": "triple bond"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "The bond order target for the non-standard linkage.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "component_id",
+          "link_id",
+          "prd_id",
+          "ref_entity_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_entity_poly_seq": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hetero": {
+            "type": "string",
+            "enum": [
+              "N",
+              "Y"
+            ],
+            "examples": [
+              "N"
+            ],
+            "description": "A flag to indicate that sequence heterogeneity at this monomer position.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "N",
+                "detail": "sequence is not heterogeneous at this monomer"
+              },
+              {
+                "value": "Y",
+                "detail": "sequence is heterogeneous at this monomer"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "A flag to indicate that sequence heterogeneity at this monomer position.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "mon_id": {
+            "type": "string",
+            "description": "This data item is the chemical component identifier of monomer.",
+            "rcsb_description": [
+              {
+                "text": "This data item is the chemical component identifier of monomer.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "num": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_entity_poly_seq.num must uniquely and sequentially\n identify a record in the PDBX_REFERENCE_ENTITY_POLY_SEQ list.\n\n This value is conforms to author numbering conventions and does not map directly\n to the numbering conventions used for _entity_poly_seq.num.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly_seq.num must uniquely and sequentially\n identify a record in the PDBX_REFERENCE_ENTITY_POLY_SEQ list.\n\n This value is conforms to author numbering conventions and does not map directly\n to the numbering conventions used for _entity_poly_seq.num.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "observed": {
+            "type": "string",
+            "enum": [
+              "N",
+              "Y"
+            ],
+            "examples": [
+              "Y"
+            ],
+            "description": "A flag to indicate that this monomer is observed in the instance example.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "N",
+                "detail": "not observed"
+              },
+              {
+                "value": "Y",
+                "detail": "observed"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "A flag to indicate that this monomer is observed in the instance example.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "parent_mon_id": {
+            "type": "string",
+            "description": "This data item is the chemical component identifier for the parent component corresponding to this monomer.",
+            "rcsb_description": [
+              {
+                "text": "This data item is the chemical component identifier for the parent component corresponding to this monomer.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_poly_seq.prd_id is a reference\n\t       _pdbx_reference_entity_poly.prd_id in the  PDBX_REFERENCE_ENTITY_POLY category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly_seq.prd_id is a reference\n\t       _pdbx_reference_entity_poly.prd_id in the  PDBX_REFERENCE_ENTITY_POLY category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ref_entity_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_poly_seq.ref_entity_id is a reference\n to _pdbx_reference_entity_poly.ref_entity_id in PDBX_REFERENCE_ENTITY_POLY category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_poly_seq.ref_entity_id is a reference\n to _pdbx_reference_entity_poly.ref_entity_id in PDBX_REFERENCE_ENTITY_POLY category.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "hetero",
+          "mon_id",
+          "num",
+          "prd_id",
+          "ref_entity_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_entity_sequence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "NRP_flag": {
+            "type": "string",
+            "enum": [
+              "N",
+              "Y"
+            ],
+            "examples": [
+              "Y"
+            ],
+            "description": "A flag to indicate a non-ribosomal entity.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "N",
+                "detail": "ribosomal"
+              },
+              {
+                "value": "Y",
+                "detail": "non-ribosomal"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "A flag to indicate a non-ribosomal entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "one_letter_codes": {
+            "type": "string",
+            "description": "The one-letter-code sequence for this entity.  Non-standard monomers are represented as 'X'.",
+            "rcsb_description": [
+              {
+                "text": "The one-letter-code sequence for this entity.  Non-standard monomers are represented as 'X'.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_sequence.prd_id is a reference\n\t       _pdbx_reference_entity_list.prd_id in the  PDBX_REFERENCE_ENTITY_LIST category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_sequence.prd_id is a reference\n\t       _pdbx_reference_entity_list.prd_id in the  PDBX_REFERENCE_ENTITY_LIST category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ref_entity_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_sequence.ref_entity_id is a reference\n to _pdbx_reference_entity_list.ref_entity_id in PDBX_REFERENCE_ENTITY_LIST category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_sequence.ref_entity_id is a reference\n to _pdbx_reference_entity_list.ref_entity_id in PDBX_REFERENCE_ENTITY_LIST category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "peptide-like",
+              "saccharide"
+            ],
+            "examples": [
+              "peptide-like",
+              "saccharide"
+            ],
+            "description": "The monomer type for the sequence.",
+            "rcsb_description": [
+              {
+                "text": "The monomer type for the sequence.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "prd_id",
+          "ref_entity_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_entity_src_nat": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "atcc": {
+            "type": "string",
+            "description": "The Americal Tissue Culture Collection code for organism from which the entity was isolated.",
+            "rcsb_description": [
+              {
+                "text": "The Americal Tissue Culture Collection code for organism from which the entity was isolated.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "db_code": {
+            "type": "string",
+            "description": "The database code for this source information",
+            "rcsb_description": [
+              {
+                "text": "The database code for this source information",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "db_name": {
+            "type": "string",
+            "description": "The database name for this source information",
+            "rcsb_description": [
+              {
+                "text": "The database name for this source information",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_entity_src_nat.ordinal distinguishes\n\t       source details for this entity.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_src_nat.ordinal distinguishes\n\t       source details for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "organism_scientific": {
+            "type": "string",
+            "examples": [
+              "Mus musculus"
+            ],
+            "description": "The scientific name of the organism from which the entity was isolated.",
+            "rcsb_description": [
+              {
+                "text": "The scientific name of the organism from which the entity was isolated.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_src_nat.prd_id is a reference\n\t       _pdbx_reference_entity_list.prd_id in the  PDBX_REFERENCE_ENTITY_LIST category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_src_nat.prd_id is a reference\n\t       _pdbx_reference_entity_list.prd_id in the  PDBX_REFERENCE_ENTITY_LIST category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ref_entity_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_entity_src_nat.ref_entity_id is a reference\n to _pdbx_reference_entity_list.ref_entity_id in PDBX_REFERENCE_ENTITY_LIST category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_entity_src_nat.ref_entity_id is a reference\n to _pdbx_reference_entity_list.ref_entity_id in PDBX_REFERENCE_ENTITY_LIST category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "The data source for this information.",
+            "rcsb_description": [
+              {
+                "text": "The data source for this information.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "description": "A identifier within the data source for this information.",
+            "rcsb_description": [
+              {
+                "text": "A identifier within the data source for this information.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "taxid": {
+            "type": "string",
+            "description": "The NCBI TaxId of the organism from which the entity was isolated.",
+            "rcsb_description": [
+              {
+                "text": "The NCBI TaxId of the organism from which the entity was isolated.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ordinal",
+          "prd_id",
+          "ref_entity_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_molecule": {
+      "type": "object",
+      "properties": {
+        "chem_comp_id": {
+          "type": "string",
+          "examples": [
+            "0Z3",
+            "CD9"
+          ],
+          "description": "For entities represented as single molecules, the identifier\n corresponding to the chemical definition for the molecule.",
+          "rcsb_description": [
+            {
+              "text": "For entities represented as single molecules, the identifier\n corresponding to the chemical definition for the molecule.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "class": {
+          "type": "string",
+          "enum": [
+            "Antagonist",
+            "Anthelmintic",
+            "Antibiotic",
+            "Antibiotic, Anthelmintic",
+            "Antibiotic, Antimicrobial",
+            "Antibiotic, Antineoplastic",
+            "Anticancer",
+            "Anticoagulant",
+            "Anticoagulant, Antithrombotic",
+            "Antifungal",
+            "Antigen",
+            "Antiinflammatory",
+            "Antimicrobial",
+            "Antimicrobial, Antiparasitic, Antibiotic",
+            "Antimicrobial, Antiretroviral",
+            "Antimicrobial, Antitumor",
+            "Antineoplastic",
+            "Antiparasitic",
+            "Antiretroviral",
+            "Antithrombotic",
+            "Antitumor",
+            "Antiviral",
+            "CASPASE inhibitor",
+            "Chaperone binding",
+            "Drug delivery",
+            "Enzyme inhibitor",
+            "Glycan component",
+            "Growth factor",
+            "Immunosuppressant",
+            "Inducer",
+            "Inhibitor",
+            "Lantibiotic",
+            "Metabolism",
+            "Metal transport",
+            "Nutrient",
+            "Oxidation-reduction",
+            "Protein binding",
+            "Receptor",
+            "Substrate analog",
+            "Synthetic opioid",
+            "Thrombin inhibitor",
+            "Thrombin inhibitor, Trypsin inhibitor",
+            "Toxin",
+            "Transition state mimetic",
+            "Transport activator",
+            "Trypsin inhibitor",
+            "Unknown",
+            "Water retention"
+          ],
+          "description": "Broadly defines the function of the entity.",
+          "rcsb_search_context": [
+            "exact-match",
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "Broadly defines the function of the entity.",
+              "context": "dictionary"
+            },
+            {
+              "text": "BIRD Class",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Biologically Interesting Molecules (BIRD)",
+              "priority_order": 20
+            }
+          ]
+        },
+        "class_evidence_code": {
+          "type": "string",
+          "description": "Evidence for the assignment of _pdbx_reference_molecule.class",
+          "rcsb_description": [
+            {
+              "text": "Evidence for the assignment of _pdbx_reference_molecule.class",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "compound_details": {
+          "type": "string",
+          "description": "Special details about this molecule.",
+          "rcsb_description": [
+            {
+              "text": "Special details about this molecule.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this molecule.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "Description of this molecule.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Description (Reference Molecule)",
+              "context": "brief"
+            }
+          ]
+        },
+        "formula": {
+          "type": "string",
+          "examples": [
+            "C18 H19 N7 O8 S"
+          ],
+          "description": "The formula for the reference entity. Formulae are written\n according to the rules:\n\n 1. Only recognised element symbols may be used.\n\n 2. Each element symbol is followed by a 'count' number. A count\n    of '1' may be omitted.\n\n 3. A space or parenthesis must separate each element symbol and\n    its count, but in general parentheses are not used.\n\n 4. The order of elements depends on whether or not carbon is\n    present. If carbon is present, the order should be: C, then\n    H, then the other elements in alphabetical order of their\n    symbol. If carbon is not present, the elements are listed\n    purely in alphabetic order of their symbol. This is the\n    'Hill' system used by Chemical Abstracts.",
+          "rcsb_description": [
+            {
+              "text": "The formula for the reference entity. Formulae are written\n according to the rules:\n\n 1. Only recognised element symbols may be used.\n\n 2. Each element symbol is followed by a 'count' number. A count\n    of '1' may be omitted.\n\n 3. A space or parenthesis must separate each element symbol and\n    its count, but in general parentheses are not used.\n\n 4. The order of elements depends on whether or not carbon is\n    present. If carbon is present, the order should be: C, then\n    H, then the other elements in alphabetical order of their\n    symbol. If carbon is not present, the elements are listed\n    purely in alphabetic order of their symbol. This is the\n    'Hill' system used by Chemical Abstracts.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "formula_weight": {
+          "type": "number",
+          "description": "Formula mass in daltons of the entity.",
+          "rcsb_description": [
+            {
+              "text": "Formula mass in daltons of the entity.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "name": {
+          "type": "string",
+          "examples": [
+            "thiostrepton"
+          ],
+          "description": "A name of the entity.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "A name of the entity.",
+              "context": "dictionary"
+            },
+            {
+              "text": "BIRD Name",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Biologically Interesting Molecules (BIRD)",
+              "priority_order": 10
+            }
+          ]
+        },
+        "prd_id": {
+          "type": "string",
+          "examples": [
+            "PRD_000001",
+            "PRD_0000010"
+          ],
+          "description": "The value of _pdbx_reference_molecule.prd_id is the unique identifier\n for the reference molecule in this family.\n\n By convention this ID uniquely identifies the reference molecule in\n in the PDB reference dictionary.\n\n The ID has the template form PRD_dddddd (e.g. PRD_000001)",
+          "rcsb_search_context": [
+            "exact-match",
+            "suggest"
+          ],
+          "rcsb_full_text_priority": 20,
+          "rcsb_description": [
+            {
+              "text": "The value of _pdbx_reference_molecule.prd_id is the unique identifier\n for the reference molecule in this family.\n\n By convention this ID uniquely identifies the reference molecule in\n in the PDB reference dictionary.\n\n The ID has the template form PRD_dddddd (e.g. PRD_000001)",
+              "context": "dictionary"
+            },
+            {
+              "text": "BIRD ID(s)",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Biologically Interesting Molecules (BIRD)",
+              "priority_order": 5
+            }
+          ]
+        },
+        "release_status": {
+          "type": "string",
+          "enum": [
+            "HOLD",
+            "OBS",
+            "REL",
+            "WAIT"
+          ],
+          "description": "Defines the current PDB release status for this molecule definition.",
+          "rcsb_description": [
+            {
+              "text": "Defines the current PDB release status for this molecule definition.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "replaced_by": {
+          "type": "string",
+          "description": "Assigns the identifier of the reference molecule that has replaced this molecule.",
+          "rcsb_description": [
+            {
+              "text": "Assigns the identifier of the reference molecule that has replaced this molecule.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "replaces": {
+          "type": "string",
+          "description": "Assigns the identifier for the reference molecule which have been replaced\n by this reference molecule.\n Multiple molecule identifier codes should be separated by commas.",
+          "rcsb_description": [
+            {
+              "text": "Assigns the identifier for the reference molecule which have been replaced\n by this reference molecule.\n Multiple molecule identifier codes should be separated by commas.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "represent_as": {
+          "type": "string",
+          "enum": [
+            "branched",
+            "polymer",
+            "single molecule"
+          ],
+          "description": "Defines how this entity is represented in PDB data files.",
+          "rcsb_description": [
+            {
+              "text": "Defines how this entity is represented in PDB data files.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "representative_PDB_id_code": {
+          "type": "string",
+          "description": "The PDB accession code for the entry containing a representative example of this molecule.",
+          "rcsb_description": [
+            {
+              "text": "The PDB accession code for the entry containing a representative example of this molecule.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Amino acid",
+            "Aminoglycoside",
+            "Ansamycin",
+            "Anthracycline",
+            "Anthraquinone",
+            "Chalkophore",
+            "Chalkophore, Polypeptide",
+            "Chromophore",
+            "Cyclic depsipeptide",
+            "Cyclic lipopeptide",
+            "Cyclic peptide",
+            "Glycopeptide",
+            "Heterocyclic",
+            "Imino sugar",
+            "Keto acid",
+            "Lipoglycopeptide",
+            "Lipopeptide",
+            "Macrolide",
+            "Non-polymer",
+            "Nucleoside",
+            "Oligopeptide",
+            "Oligosaccharide",
+            "Peptaibol",
+            "Peptide-like",
+            "Polycyclic",
+            "Polypeptide",
+            "Polysaccharide",
+            "Quinolone",
+            "Siderophore",
+            "Thiolactone",
+            "Thiopeptide",
+            "Unknown"
+          ],
+          "examples": [
+            "Peptide-like",
+            "Macrolide"
+          ],
+          "description": "Defines the structural classification of the entity.",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "Defines the structural classification of the entity.",
+              "context": "dictionary"
+            },
+            {
+              "text": "BIRD Type",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Biologically Interesting Molecules (BIRD)",
+              "priority_order": 15
+            }
+          ]
+        },
+        "type_evidence_code": {
+          "type": "string",
+          "description": "Evidence for the assignment of _pdbx_reference_molecule.type",
+          "rcsb_description": [
+            {
+              "text": "Evidence for the assignment of _pdbx_reference_molecule.type",
+              "context": "dictionary"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "prd_id"
+      ]
+    },
+    "pdbx_reference_molecule_annotation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family_prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_annotation.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_annotation.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "This data item distinguishes anotations for this entity.",
+            "rcsb_description": [
+              {
+                "text": "This data item distinguishes anotations for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "This data item is a pointer to _pdbx_reference_molecule.prd_id in the\n PDB_REFERENCE_MOLECULE category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is a pointer to _pdbx_reference_molecule.prd_id in the\n PDB_REFERENCE_MOLECULE category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "examples": [
+              "depositor provided",
+              "from UniProt Entry P200311"
+            ],
+            "description": "The source of the annoation for this entity.",
+            "rcsb_description": [
+              {
+                "text": "The source of the annoation for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "examples": [
+              "antigen binding",
+              "glucose transporter activity"
+            ],
+            "description": "Text describing the annotation for this entity.",
+            "rcsb_description": [
+              {
+                "text": "Text describing the annotation for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "examples": [
+              "Function",
+              "Use",
+              "Pharmacology",
+              "Mechanism_of_Action",
+              "Biological_Activity",
+              "Inhibitor_Class",
+              "Therapeutic_Category",
+              "Research_Use",
+              "Other_annotation"
+            ],
+            "description": "Type of annotation for this entity.",
+            "rcsb_description": [
+              {
+                "text": "Type of annotation for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "family_prd_id",
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_molecule_details": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family_prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_details.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id' in category PDBX_REFERENCE_MOLECULE_FAMILY.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_details.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id' in category PDBX_REFERENCE_MOLECULE_FAMILY.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_molecule_details.ordinal is an ordinal that\n distinguishes each descriptive text for this entity.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_details.ordinal is an ordinal that\n distinguishes each descriptive text for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "description": "A data source of this information (e.g. PubMed, Merck Index)",
+            "rcsb_description": [
+              {
+                "text": "A data source of this information (e.g. PubMed, Merck Index)",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source_id": {
+            "type": "string",
+            "description": "A identifier within the data source for this information.",
+            "rcsb_description": [
+              {
+                "text": "A identifier within the data source for this information.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "text": {
+            "type": "string",
+            "description": "The text of the description of special aspects of the entity.",
+            "rcsb_description": [
+              {
+                "text": "The text of the description of special aspects of the entity.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "family_prd_id",
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_molecule_family": {
+      "type": "object",
+      "properties": {
+        "family_prd_id": {
+          "type": "string",
+          "description": "The value of _pdbx_reference_entity.family_prd_id must uniquely identify a record in the\n PDBX_REFERENCE_MOLECULE_FAMILY list.\n\n By convention this ID uniquely identifies the reference family in\n in the PDB reference dictionary.\n\n The ID has the template form FAM_dddddd (e.g. FAM_000001)",
+          "rcsb_description": [
+            {
+              "text": "The value of _pdbx_reference_entity.family_prd_id must uniquely identify a record in the\n PDBX_REFERENCE_MOLECULE_FAMILY list.\n\n By convention this ID uniquely identifies the reference family in\n in the PDB reference dictionary.\n\n The ID has the template form FAM_dddddd (e.g. FAM_000001)",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "name": {
+          "type": "string",
+          "examples": [
+            "actinomycin",
+            "adriamycin"
+          ],
+          "description": "The entity family name.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "The entity family name.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Name (Reference Molecule Family)",
+              "context": "brief"
+            }
+          ]
+        },
+        "release_status": {
+          "type": "string",
+          "enum": [
+            "HOLD",
+            "OBS",
+            "REL",
+            "WAIT"
+          ],
+          "description": "Assigns the current PDB release status for this family.",
+          "rcsb_description": [
+            {
+              "text": "Assigns the current PDB release status for this family.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "replaced_by": {
+          "type": "string",
+          "description": "Assigns the identifier of the family that has replaced this component.",
+          "rcsb_description": [
+            {
+              "text": "Assigns the identifier of the family that has replaced this component.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "replaces": {
+          "type": "string",
+          "description": "Assigns the identifier for the family which have been replaced by this family.\n Multiple family identifier codes should be separated by commas.",
+          "rcsb_description": [
+            {
+              "text": "Assigns the identifier for the family which have been replaced by this family.\n Multiple family identifier codes should be separated by commas.",
+              "context": "dictionary"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "family_prd_id"
+      ]
+    },
+    "pdbx_reference_molecule_features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family_prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_features.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_features.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_molecule_features.ordinal distinguishes\n\t       each feature for this entity.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_features.ordinal distinguishes\n\t       each feature for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_features.prd_id is a reference\n\t       _pdbx_reference_molecule.prd_id in the  PDBX_REFERENCE_MOLECULE category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_features.prd_id is a reference\n\t       _pdbx_reference_molecule.prd_id in the  PDBX_REFERENCE_MOLECULE category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "examples": [
+              "PDB",
+              "CHEBI",
+              "DRUGBANK",
+              "PUBCHEM"
+            ],
+            "description": "The information source for the component feature.",
+            "rcsb_description": [
+              {
+                "text": "The information source for the component feature.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source_ordinal": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_molecule_features.source_ordinal provides\n\t       the priority order of features from a particular source or database.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_features.source_ordinal provides\n\t       the priority order of features from a particular source or database.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "examples": [
+              "FUNCTION",
+              "ENZYME INHIBITED",
+              "STRUCTURE IMAGE URL"
+            ],
+            "description": "The entity feature type.",
+            "rcsb_description": [
+              {
+                "text": "The entity feature type.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "value": {
+            "type": "string",
+            "description": "The entity feature value.",
+            "rcsb_description": [
+              {
+                "text": "The entity feature value.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "family_prd_id",
+          "ordinal",
+          "prd_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_molecule_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family_prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_list.family_prd_id is a reference to\n _pdbx_reference_molecule_family.family_prd_id' in category PDBX_REFERENCE_MOLECULE_FAMILY.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_list.family_prd_id is a reference to\n _pdbx_reference_molecule_family.family_prd_id' in category PDBX_REFERENCE_MOLECULE_FAMILY.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_list.prd_id is the unique identifier\n for the reference molecule in this family.\n\n By convention this ID uniquely identifies the reference molecule in\n in the PDB reference dictionary.\n\n The ID has the template form PRD_dddddd (e.g. PRD_000001)",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_list.prd_id is the unique identifier\n for the reference molecule in this family.\n\n By convention this ID uniquely identifies the reference molecule in\n in the PDB reference dictionary.\n\n The ID has the template form PRD_dddddd (e.g. PRD_000001)",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "family_prd_id",
+          "prd_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_molecule_related_structures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "citation_id": {
+            "type": "string",
+            "description": "A link to related reference information in the citation category.",
+            "rcsb_description": [
+              {
+                "text": "A link to related reference information in the citation category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "db_accession": {
+            "type": "string",
+            "examples": [
+              "143108"
+            ],
+            "description": "The database accession code for the related structure reference.",
+            "rcsb_description": [
+              {
+                "text": "The database accession code for the related structure reference.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "db_code": {
+            "type": "string",
+            "examples": [
+              "QEFHUE"
+            ],
+            "description": "The database identifier code for the related structure reference.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The database identifier code for the related structure reference.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Db Code (Reference Molecule Related Structures)",
+                "context": "brief"
+              }
+            ]
+          },
+          "db_name": {
+            "type": "string",
+            "examples": [
+              "CCDC"
+            ],
+            "description": "The database name for the related structure reference.",
+            "rcsb_description": [
+              {
+                "text": "The database name for the related structure reference.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "family_prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_related_structures.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_related_structures.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "formula": {
+            "type": "string",
+            "examples": [
+              "C18 H19 N7 O8 S"
+            ],
+            "description": "The formula for the reference entity. Formulae are written\n according to the rules:\n\n 1. Only recognised element symbols may be used.\n\n 2. Each element symbol is followed by a 'count' number. A count\n    of '1' may be omitted.\n\n 3. A space or parenthesis must separate each element symbol and\n    its count, but in general parentheses are not used.\n\n 4. The order of elements depends on whether or not carbon is\n    present. If carbon is present, the order should be: C, then\n    H, then the other elements in alphabetical order of their\n    symbol. If carbon is not present, the elements are listed\n    purely in alphabetic order of their symbol. This is the\n    'Hill' system used by Chemical Abstracts.",
+            "rcsb_description": [
+              {
+                "text": "The formula for the reference entity. Formulae are written\n according to the rules:\n\n 1. Only recognised element symbols may be used.\n\n 2. Each element symbol is followed by a 'count' number. A count\n    of '1' may be omitted.\n\n 3. A space or parenthesis must separate each element symbol and\n    its count, but in general parentheses are not used.\n\n 4. The order of elements depends on whether or not carbon is\n    present. If carbon is present, the order should be: C, then\n    H, then the other elements in alphabetical order of their\n    symbol. If carbon is not present, the elements are listed\n    purely in alphabetic order of their symbol. This is the\n    'Hill' system used by Chemical Abstracts.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "examples": [
+              "actinomycn"
+            ],
+            "description": "The chemical name for the structure entry in the related database",
+            "rcsb_description": [
+              {
+                "text": "The chemical name for the structure entry in the related database",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_molecule_related_structures.ordinal distinguishes\n related structural data for each entity.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_related_structures.ordinal distinguishes\n related structural data for each entity.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "family_prd_id",
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "pdbx_reference_molecule_synonyms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "family_prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_synonyms.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_synonyms.family_prd_id is a reference to\n _pdbx_reference_molecule_list.family_prd_id in category PDBX_REFERENCE_MOLECULE_FAMILY_LIST.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "examples": [
+              "thiostrepton"
+            ],
+            "description": "A synonym name for the entity.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "A synonym name for the entity.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Name (Reference Molecule Synonyms)",
+                "context": "brief"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _pdbx_reference_molecule_synonyms.ordinal is an ordinal\n\t       to distinguish synonyms for this entity.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_synonyms.ordinal is an ordinal\n\t       to distinguish synonyms for this entity.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "prd_id": {
+            "type": "string",
+            "description": "The value of _pdbx_reference_molecule_synonyms.prd_id is a reference\n\t       _pdbx_reference_molecule.prd_id in the  PDBX_REFERENCE_MOLECULE category.",
+            "rcsb_description": [
+              {
+                "text": "The value of _pdbx_reference_molecule_synonyms.prd_id is a reference\n\t       _pdbx_reference_molecule.prd_id in the  PDBX_REFERENCE_MOLECULE category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "source": {
+            "type": "string",
+            "examples": [
+              "CAS"
+            ],
+            "description": "The source of this synonym name for the entity.",
+            "rcsb_description": [
+              {
+                "text": "The source of this synonym name for the entity.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "family_prd_id",
+          "ordinal",
+          "prd_id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "rcsb_bird_citation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "examples": [
+              "1",
+              "2"
+            ],
+            "description": "The value of _rcsb_bird_citation.id must uniquely identify a record in the\n rcsb_bird_citation list.",
+            "rcsb_description": [
+              {
+                "text": "The value of _rcsb_bird_citation.id must uniquely identify a record in the\n rcsb_bird_citation list.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "journal_abbrev": {
+            "type": "string",
+            "examples": [
+              "J.Mol.Biol.",
+              "J. Mol. Biol."
+            ],
+            "description": "Abbreviated name of the cited journal as given in the\n Chemical Abstracts Service Source Index.",
+            "rcsb_description": [
+              {
+                "text": "Abbreviated name of the cited journal as given in the\n Chemical Abstracts Service Source Index.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The PDB (i.e., the Chemical Abstracts) abbreviation for a journal. If you do not know the abbreviation, then give the complete  name of the journal and we will try and find it for you. If it is a book or other monographic work, state the full title.",
+                "context": "deposition"
+              }
+            ]
+          },
+          "journal_volume": {
+            "type": "string",
+            "examples": [
+              "174"
+            ],
+            "description": "Volume number of the journal cited; relevant for journal\n articles.",
+            "rcsb_description": [
+              {
+                "text": "Volume number of the journal cited; relevant for journal\n articles.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The volume number of the journal in which the article appeared. Example: 317",
+                "context": "deposition"
+              }
+            ]
+          },
+          "page_first": {
+            "type": "string",
+            "description": "The first page of the rcsb_bird_citation; relevant for journal\n articles, books and book chapters.",
+            "rcsb_description": [
+              {
+                "text": "The first page of the rcsb_bird_citation; relevant for journal\n articles, books and book chapters.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The starting page number of this article.",
+                "context": "deposition"
+              }
+            ]
+          },
+          "page_last": {
+            "type": "string",
+            "description": "The last page of the rcsb_bird_citation; relevant for journal\n articles, books and book chapters.",
+            "rcsb_description": [
+              {
+                "text": "The last page of the rcsb_bird_citation; relevant for journal\n articles, books and book chapters.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The last page number of this article.",
+                "context": "deposition"
+              }
+            ]
+          },
+          "pdbx_database_id_DOI": {
+            "type": "string",
+            "examples": [
+              "10.2345/S1384107697000225"
+            ],
+            "description": "Document Object Identifier used by doi.org to uniquely\n specify bibliographic entry.",
+            "rcsb_description": [
+              {
+                "text": "Document Object Identifier used by doi.org to uniquely\n specify bibliographic entry.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The document Object Identifier used by doi.org to uniquely specify bibliographic entry",
+                "context": "deposition"
+              }
+            ]
+          },
+          "pdbx_database_id_PubMed": {
+            "type": "integer",
+            "description": "Ascession number used by PubMed to categorize a specific\n bibliographic entry.",
+            "rcsb_description": [
+              {
+                "text": "Ascession number used by PubMed to categorize a specific\n bibliographic entry.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The accession number used by PubMed to categorize a specific bibliographic entry",
+                "context": "deposition"
+              }
+            ]
+          },
+          "rcsb_authors": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "examples": [
+                "Bleary, Percival R."
+              ],
+              "description": "Names of the authors of the citation; relevant for journal\n articles, books and book chapters.  Names are separated by vertical bars.\n\n The family name(s), followed by a comma and including any\n dynastic components, precedes the first name(s) or initial(s).",
+              "rcsb_description": [
+                {
+                  "text": "Names of the authors of the citation; relevant for journal\n articles, books and book chapters.  Names are separated by vertical bars.\n\n The family name(s), followed by a comma and including any\n dynastic components, precedes the first name(s) or initial(s).",
+                  "context": "dictionary"
+                }
+              ]
+            },
+            "uniqueItems": false
+          },
+          "title": {
+            "type": "string",
+            "examples": [
+              "Structure of diferric duck ovotransferrin\n                                  at 2.35 Angstroms resolution."
+            ],
+            "description": "The title of the rcsb_bird_citation; relevant for journal articles, books\n and book chapters.",
+            "rcsb_description": [
+              {
+                "text": "The title of the rcsb_bird_citation; relevant for journal articles, books\n and book chapters.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Title of the article or chapter or part of a book. This should be marked NULL if the author(s) listed wrote the entire book (or other work) and no sub-section of the book is being cited. Example: The Structure of Crystalline Profilin-Beta-Actin",
+                "context": "deposition"
+              }
+            ]
+          },
+          "year": {
+            "type": "integer",
+            "description": "The year of the rcsb_bird_citation; relevant for journal articles, books\n and book chapters.",
+            "rcsb_description": [
+              {
+                "text": "The year of the rcsb_bird_citation; relevant for journal articles, books\n and book chapters.",
+                "context": "dictionary"
+              },
+              {
+                "text": "The year of publication of the article. Example: 2002",
+                "context": "deposition"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "rcsb_chem_comp_annotation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "annotation_id": {
+            "type": "string",
+            "description": "An identifier for the annotation.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_description": [
+              {
+                "text": "An identifier for the annotation.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Identifier",
+                "context": "brief"
+              }
+            ]
+          },
+          "assignment_version": {
+            "type": "string",
+            "examples": [
+              "V4_0_2"
+            ],
+            "description": "Identifies the version of the annotation assignment.",
+            "rcsb_description": [
+              {
+                "text": "Identifies the version of the annotation assignment.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Annotation Version",
+                "context": "brief"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "A description for the annotation.",
+            "rcsb_search_context": [
+              "exact-match",
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_description": [
+              {
+                "text": "A description for the annotation.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Annotation Description",
+                "context": "brief"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "A name for the annotation.",
+            "rcsb_search_context": [
+              "exact-match",
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_description": [
+              {
+                "text": "A name for the annotation.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Name",
+                "context": "brief"
+              }
+            ],
+            "rcsb_search_group": [
+              {
+                "group_name": "Chemical Components",
+                "priority_order": 75
+              }
+            ]
+          },
+          "provenance_source": {
+            "type": "string",
+            "examples": [
+              "RESID",
+              "UniProt",
+              "PDB"
+            ],
+            "description": "Code identifying the individual, organization or program that\n assigned the annotation.",
+            "rcsb_description": [
+              {
+                "text": "Code identifying the individual, organization or program that\n assigned the annotation.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Annotation Source",
+                "context": "brief"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ATC",
+              "Carbohydrate Anomer",
+              "Carbohydrate Isomer",
+              "Carbohydrate Primary Carbonyl Group",
+              "Carbohydrate Ring",
+              "Generating Enzyme",
+              "Modification Type",
+              "PSI-MOD"
+            ],
+            "examples": [
+              "PSI-MOD"
+            ],
+            "description": "A type or category of the annotation.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_enum_annotated": [
+              {
+                "value": "ATC",
+                "detail": "Anatomical Therapeutic Chemical Classification System (ATC) from the World Health Organization (WHO)",
+                "name": "ATC (WHO)"
+              },
+              {
+                "value": "Carbohydrate Anomer",
+                "detail": "Carbohydrate Anomeric Form",
+                "name": "Carbohydrate Anomer"
+              },
+              {
+                "value": "Carbohydrate Isomer",
+                "detail": "Carbohydrate Isomeric Form",
+                "name": "Carbohydrate Isomer"
+              },
+              {
+                "value": "Carbohydrate Primary Carbonyl Group",
+                "detail": "Carbohydrate Primary Carbonyl Group",
+                "name": "Carbohydrate Primary Carbonyl Group"
+              },
+              {
+                "value": "Carbohydrate Ring",
+                "detail": "Carbohydrate Ring Type",
+                "name": "Carbohydrate Ring"
+              },
+              {
+                "value": "Generating Enzyme",
+                "detail": "Enzyme generating residue modification (RESID)",
+                "name": "RESID Generating Enzyme"
+              },
+              {
+                "value": "Modification Type",
+                "detail": "Modified residue classification (RESID)",
+                "name": "RESID Modification"
+              },
+              {
+                "value": "PSI-MOD",
+                "detail": "Protein Modification Ontology",
+                "name": "PSI-MOD"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "A type or category of the annotation.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Annotation Type",
+                "context": "brief"
+              }
+            ]
+          },
+          "annotation_lineage": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "depth": {
+                  "type": "integer",
+                  "description": "Members of the annotation lineage as parent lineage depth (1-N)",
+                  "rcsb_search_context": [
+                    "default-match"
+                  ],
+                  "rcsb_description": [
+                    {
+                      "text": "Members of the annotation lineage as parent lineage depth (1-N)",
+                      "context": "dictionary"
+                    },
+                    {
+                      "text": "Lineage Depth",
+                      "context": "brief"
+                    }
+                  ],
+                  "rcsb_current_maximum_value": 18,
+                  "rcsb_current_minimum_value": 1
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Members of the annotation lineage as parent class identifiers.",
+                  "rcsb_search_context": [
+                    "exact-match"
+                  ],
+                  "rcsb_full_text_priority": 10,
+                  "rcsb_description": [
+                    {
+                      "text": "Members of the annotation lineage as parent class identifiers.",
+                      "context": "dictionary"
+                    },
+                    {
+                      "text": "Lineage Identifier",
+                      "context": "brief"
+                    }
+                  ],
+                  "rcsb_search_group": [
+                    {
+                      "group_name": "Chemical Components",
+                      "priority_order": 85
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Members of the annotation lineage as parent class names.",
+                  "rcsb_search_context": [
+                    "exact-match",
+                    "full-text"
+                  ],
+                  "rcsb_full_text_priority": 10,
+                  "rcsb_description": [
+                    {
+                      "text": "Members of the annotation lineage as parent class names.",
+                      "context": "dictionary"
+                    },
+                    {
+                      "text": "Lineage Name",
+                      "context": "brief"
+                    }
+                  ],
+                  "rcsb_search_group": [
+                    {
+                      "group_name": "Chemical Components",
+                      "priority_order": 80
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            "uniqueItems": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "rcsb_nested_indexing": true,
+      "rcsb_nested_indexing_context": [
+        {
+          "category_name": "annotation_type",
+          "category_path": "rcsb_chem_comp_annotation.type",
+          "context_attributes": [
+            {
+              "context_value": "ATC",
+              "attributes": [
+                {
+                  "examples": [
+                    "G02CB02",
+                    "C03CC01"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.annotation_lineage.id"
+                },
+                {
+                  "examples": [
+                    "lisuride",
+                    "etacrynic acid"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.annotation_lineage.name"
+                }
+              ]
+            },
+            {
+              "context_value": "PSI-MOD",
+              "attributes": [
+                {
+                  "examples": [
+                    "MOD:00599",
+                    "MOD:01680"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.annotation_lineage.id"
+                },
+                {
+                  "examples": [
+                    "monomethylated residue",
+                    "alpha-amino monomethylated residue"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.annotation_lineage.name"
+                }
+              ]
+            },
+            {
+              "context_value": "Generating Enzyme",
+              "attributes": [
+                {
+                  "examples": [
+                    "protein N-terminal methyltransferase (EC 2.1.1.-)",
+                    "autocatalytic"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.name"
+                }
+              ]
+            },
+            {
+              "context_value": "Modification Type",
+              "attributes": [
+                {
+                  "examples": [
+                    "Thyroxine",
+                    "N4-methylasparagine"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.name"
+                }
+              ]
+            },
+            {
+              "context_value": "Carbohydrate Anomer",
+              "attributes": [
+                {
+                  "examples": [
+                    "alpha",
+                    "beta"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.name"
+                }
+              ]
+            },
+            {
+              "context_value": "Carbohydrate Isomer",
+              "attributes": [
+                {
+                  "examples": [
+                    "D",
+                    "L"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.name"
+                }
+              ]
+            },
+            {
+              "context_value": "Carbohydrate Ring",
+              "attributes": [
+                {
+                  "examples": [
+                    "pyranose",
+                    "furanose"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.name"
+                }
+              ]
+            },
+            {
+              "context_value": "Carbohydrate Primary Carbonyl Group",
+              "attributes": [
+                {
+                  "examples": [
+                    "aldose",
+                    "ketose"
+                  ],
+                  "path": "rcsb_chem_comp_annotation.name"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rcsb_chem_comp_container_identifiers": {
+      "type": "object",
+      "properties": {
+        "atc_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "G03FA02",
+              "S02AA11",
+              "S03AA03",
+              "J01XB02",
+              "A07AA05",
+              "S01AA18"
+            ],
+            "description": "The Anatomical Therapeutic Chemical (ATC) Classification System identifiers corresponding\n to the chemical component.",
+            "rcsb_description": [
+              {
+                "text": "The Anatomical Therapeutic Chemical (ATC) Classification System identifiers corresponding\n to the chemical component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "comp_id": {
+          "type": "string",
+          "examples": [
+            "ATP",
+            "STI"
+          ],
+          "description": "The chemical component identifier.",
+          "rcsb_search_context": [
+            "exact-match",
+            "suggest"
+          ],
+          "rcsb_full_text_priority": 20,
+          "rcsb_description": [
+            {
+              "text": "The chemical component identifier.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical ID(s)",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 5
+            }
+          ]
+        },
+        "drugbank_id": {
+          "type": "string",
+          "examples": [
+            "DB00781",
+            "DB15263"
+          ],
+          "description": "The DrugBank identifier corresponding to the chemical component.",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank identifier corresponding to the chemical component.",
+              "context": "dictionary"
+            },
+            {
+              "text": "DrugBank ID(s)",
+              "context": "brief"
+            }
+          ]
+        },
+        "prd_id": {
+          "type": "string",
+          "examples": [
+            "PRD_000010"
+          ],
+          "description": "The BIRD definition identifier.",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "The BIRD definition identifier.",
+              "context": "dictionary"
+            },
+            {
+              "text": "BIRD ID(s)",
+              "context": "brief"
+            }
+          ]
+        },
+        "rcsb_id": {
+          "type": "string",
+          "examples": [
+            "ATP",
+            "PRD_000010"
+          ],
+          "description": "A unique identifier for the chemical definition in this container.",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "A unique identifier for the chemical definition in this container.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Id (Chem Comp Container Identifiers)",
+              "context": "brief"
+            }
+          ]
+        },
+        "subcomponent_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "The list of subcomponents contained in this component.",
+            "rcsb_description": [
+              {
+                "text": "The list of subcomponents contained in this component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "uniqueItems": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "comp_id"
+      ]
+    },
+    "rcsb_chem_comp_descriptor": {
+      "type": "object",
+      "properties": {
+        "InChI": {
+          "type": "string",
+          "examples": [
+            "InChI=1S/C3H6FO6P/c4-1-2(3(5)6)10-11(7,8)9/h2H,1H2,(H,5,6)(H2,7,8,9)/t2-/m0/s1"
+          ],
+          "description": "Standard IUPAC International Chemical Identifier (InChI) descriptor for the chemical component.\n\n   InChI, the IUPAC International Chemical Identifier,\n   by Stephen R Heller, Alan McNaught, Igor Pletnev, Stephen Stein and Dmitrii Tchekhovskoi,\n   Journal of Cheminformatics, 2015, 7:23;",
+          "rcsb_description": [
+            {
+              "text": "Standard IUPAC International Chemical Identifier (InChI) descriptor for the chemical component.\n\n   InChI, the IUPAC International Chemical Identifier,\n   by Stephen R Heller, Alan McNaught, Igor Pletnev, Stephen Stein and Dmitrii Tchekhovskoi,\n   Journal of Cheminformatics, 2015, 7:23;",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "InChIKey": {
+          "type": "string",
+          "examples": [
+            "BNOCDEBUFVJMQI-REOHCLBHSA-N"
+          ],
+          "description": "Standard IUPAC International Chemical Identifier (InChI) descriptor key\n for the chemical component\n\n InChI, the IUPAC International Chemical Identifier,\n by Stephen R Heller, Alan McNaught, Igor Pletnev, Stephen Stein and Dmitrii Tchekhovskoi,\n Journal of Cheminformatics, 2015, 7:23",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "Standard IUPAC International Chemical Identifier (InChI) descriptor key\n for the chemical component\n\n InChI, the IUPAC International Chemical Identifier,\n by Stephen R Heller, Alan McNaught, Igor Pletnev, Stephen Stein and Dmitrii Tchekhovskoi,\n Journal of Cheminformatics, 2015, 7:23",
+              "context": "dictionary"
+            },
+            {
+              "text": "InChiKey",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 40
+            }
+          ]
+        },
+        "SMILES": {
+          "type": "string",
+          "examples": [
+            "OC(=O)[CH](CF)O[P](O)(O)=O"
+          ],
+          "description": "Simplified molecular-input line-entry system (SMILES) descriptor for the chemical component.\n\n   Weininger D (February 1988). \"SMILES, a chemical language and information system. 1.\n   Introduction to methodology and encoding rules\". Journal of Chemical Information and Modeling. 28 (1): 31-6.\n\n   Weininger D, Weininger A, Weininger JL (May 1989).\n   \"SMILES. 2. Algorithm for generation of unique SMILES notation\",\n   Journal of Chemical Information and Modeling. 29 (2): 97-101.",
+          "rcsb_description": [
+            {
+              "text": "Simplified molecular-input line-entry system (SMILES) descriptor for the chemical component.\n\n   Weininger D (February 1988). \"SMILES, a chemical language and information system. 1.\n   Introduction to methodology and encoding rules\". Journal of Chemical Information and Modeling. 28 (1): 31-6.\n\n   Weininger D, Weininger A, Weininger JL (May 1989).\n   \"SMILES. 2. Algorithm for generation of unique SMILES notation\",\n   Journal of Chemical Information and Modeling. 29 (2): 97-101.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "SMILES_stereo": {
+          "type": "string",
+          "examples": [
+            "OC(=O)[C@H](CF)O[P](O)(O)=O"
+          ],
+          "description": "Simplified molecular-input line-entry system (SMILES) descriptor for the chemical\n component including stereochemical features.\n\n Weininger D (February 1988). \"SMILES, a chemical language and information system. 1.\n Introduction to methodology and encoding rules\".\n Journal of Chemical Information and Modeling. 28 (1): 31-6.\n\n Weininger D, Weininger A, Weininger JL (May 1989).\n \"SMILES. 2. Algorithm for generation of unique SMILES notation\".\n Journal of Chemical Information and Modeling. 29 (2): 97-101.",
+          "rcsb_description": [
+            {
+              "text": "Simplified molecular-input line-entry system (SMILES) descriptor for the chemical\n component including stereochemical features.\n\n Weininger D (February 1988). \"SMILES, a chemical language and information system. 1.\n Introduction to methodology and encoding rules\".\n Journal of Chemical Information and Modeling. 28 (1): 31-6.\n\n Weininger D, Weininger A, Weininger JL (May 1989).\n \"SMILES. 2. Algorithm for generation of unique SMILES notation\".\n Journal of Chemical Information and Modeling. 29 (2): 97-101.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "comp_id": {
+          "type": "string",
+          "description": "The chemical component identifier.",
+          "rcsb_description": [
+            {
+              "text": "The chemical component identifier.",
+              "context": "dictionary"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "comp_id"
+      ]
+    },
+    "rcsb_chem_comp_info": {
+      "type": "object",
+      "properties": {
+        "atom_count": {
+          "type": "integer",
+          "description": "Chemical component total atom count",
+          "rcsb_description": [
+            {
+              "text": "Chemical component total atom count",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "atom_count_chiral": {
+          "type": "integer",
+          "description": "Chemical component chiral atom count",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_description": [
+            {
+              "text": "Chemical component chiral atom count",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Chiral Atom Count",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 55
+            }
+          ],
+          "rcsb_current_maximum_value": 48,
+          "rcsb_current_minimum_value": 0
+        },
+        "atom_count_heavy": {
+          "type": "integer",
+          "description": "Chemical component heavy atom count",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_description": [
+            {
+              "text": "Chemical component heavy atom count",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Nonhydrogen Atom Count",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 50
+            }
+          ],
+          "rcsb_current_maximum_value": 352,
+          "rcsb_current_minimum_value": 0
+        },
+        "bond_count": {
+          "type": "integer",
+          "description": "Chemical component total bond count",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_description": [
+            {
+              "text": "Chemical component total bond count",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Bond Count",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 60
+            }
+          ],
+          "rcsb_current_maximum_value": 727,
+          "rcsb_current_minimum_value": 0
+        },
+        "bond_count_aromatic": {
+          "type": "integer",
+          "description": "Chemical component aromatic bond count",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_description": [
+            {
+              "text": "Chemical component aromatic bond count",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Aromatic Bond Count",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 65
+            }
+          ],
+          "rcsb_current_maximum_value": 116,
+          "rcsb_current_minimum_value": 0
+        },
+        "comp_id": {
+          "type": "string",
+          "description": "The chemical component identifier.",
+          "rcsb_description": [
+            {
+              "text": "The chemical component identifier.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "initial_deposition_date": {
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2016-09-11"
+          ],
+          "description": "The date the chemical definition was first deposited in the PDB repository.",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_description": [
+            {
+              "text": "The date the chemical definition was first deposited in the PDB repository.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Deposition Date",
+              "context": "brief"
+            }
+          ],
+          "rcsb_current_maximum_value": 1686096000000,
+          "rcsb_current_minimum_value": 711158400000
+        },
+        "initial_release_date": {
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2016-09-11"
+          ],
+          "description": "The initial date the chemical definition was released in the PDB repository.",
+          "rcsb_search_context": [
+            "default-match"
+          ],
+          "rcsb_description": [
+            {
+              "text": "The initial date the chemical definition was released in the PDB repository.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Chemical Component Release Date",
+              "context": "brief"
+            }
+          ],
+          "rcsb_search_group": [
+            {
+              "group_name": "Chemical Components",
+              "priority_order": 20
+            }
+          ],
+          "rcsb_current_maximum_value": 1686700800000,
+          "rcsb_current_minimum_value": 105235200000
+        },
+        "release_status": {
+          "type": "string",
+          "enum": [
+            "DEL",
+            "HOLD",
+            "HPUB",
+            "OBS",
+            "REF_ONLY",
+            "REL"
+          ],
+          "examples": [
+            "REL"
+          ],
+          "description": "The release status of the chemical definition.",
+          "rcsb_enum_annotated": [
+            {
+              "value": "DEL",
+              "detail": "Component definition has been deleted"
+            },
+            {
+              "value": "HOLD",
+              "detail": "On hold until yyyy-mm-dd"
+            },
+            {
+              "value": "HPUB",
+              "detail": "On hold until publication"
+            },
+            {
+              "value": "OBS",
+              "detail": "Component defintion has been obsoleted and replaced by another definition"
+            },
+            {
+              "value": "REF_ONLY",
+              "detail": "Component definition is provided for reference only and will not be used in released entries."
+            },
+            {
+              "value": "REL",
+              "detail": "Released"
+            }
+          ],
+          "rcsb_description": [
+            {
+              "text": "The release status of the chemical definition.",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "revision_date": {
+          "type": "string",
+          "format": "date",
+          "examples": [
+            "2016-10-12"
+          ],
+          "description": "The date of last revision of the chemical definition.",
+          "rcsb_description": [
+            {
+              "text": "The date of last revision of the chemical definition.",
+              "context": "dictionary"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "comp_id"
+      ]
+    },
+    "rcsb_chem_comp_related": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comp_id": {
+            "type": "string",
+            "description": "The value of _rcsb_chem_comp_related.comp_id is a reference to\n a chemical component definition.",
+            "rcsb_description": [
+              {
+                "text": "The value of _rcsb_chem_comp_related.comp_id is a reference to\n a chemical component definition.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _rcsb_chem_comp_related.ordinal distinguishes\n related examples for each chemical component.",
+            "rcsb_description": [
+              {
+                "text": "The value of _rcsb_chem_comp_related.ordinal distinguishes\n related examples for each chemical component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "related_mapping_method": {
+            "type": "string",
+            "enum": [
+              "assigned by DrugBank resource",
+              "assigned by PDB",
+              "assigned by PubChem resource",
+              "matching ChEMBL ID in Pharos",
+              "matching InChIKey in DrugBank",
+              "matching InChIKey in PubChem",
+              "matching InChIKey-prefix in DrugBank",
+              "matching by RESID resource"
+            ],
+            "examples": [
+              "assigned by DrugBank resource"
+            ],
+            "description": "The method used to establish the resource correspondence.",
+            "rcsb_enum_annotated": [
+              {
+                "value": "assigned by DrugBank resource",
+                "detail": "Correspondence assigned by the DrugBank resource"
+              },
+              {
+                "value": "assigned by PDB",
+                "detail": "Correspondence assigned by PDB"
+              },
+              {
+                "value": "assigned by PubChem resource",
+                "detail": "Correspondence assigned by the PubChem resource"
+              },
+              {
+                "value": "matching ChEMBL ID in Pharos",
+                "detail": "Correspondence established by matching ChEMBL ID in Pharos"
+              },
+              {
+                "value": "matching InChIKey in DrugBank",
+                "detail": "Correspondence established by matching InChIKey in DrugBank"
+              },
+              {
+                "value": "matching InChIKey in PubChem",
+                "detail": "Correspondence established by matching InChIKey in PubChem"
+              },
+              {
+                "value": "matching InChIKey-prefix in DrugBank",
+                "detail": "Correspondence established by matching InChIKey prefix in DrugBank"
+              },
+              {
+                "value": "matching by RESID resource",
+                "detail": "Correspondence assigned by the RESID resource"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "The method used to establish the resource correspondence.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "resource_accession_code": {
+            "type": "string",
+            "examples": [
+              "124832"
+            ],
+            "description": "The resource identifier code for the related chemical reference.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_description": [
+              {
+                "text": "The resource identifier code for the related chemical reference.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Identifier Codes",
+                "context": "brief"
+              }
+            ],
+            "rcsb_search_group": [
+              {
+                "group_name": "Chemical Components",
+                "priority_order": 70
+              }
+            ]
+          },
+          "resource_name": {
+            "type": "string",
+            "enum": [
+              "CAS",
+              "CCDC/CSD",
+              "ChEBI",
+              "ChEMBL",
+              "DrugBank",
+              "Pharos",
+              "PubChem",
+              "RESID"
+            ],
+            "examples": [
+              "CCDC/CSD"
+            ],
+            "description": "The resource name for the related chemical reference.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_enum_annotated": [
+              {
+                "value": "CAS",
+                "detail": "Chemical Abstracts Service (CAS) Registry Number",
+                "name": "CAS Registry Number"
+              },
+              {
+                "value": "CCDC/CSD",
+                "detail": "Cambridge Crystallographic Data Center",
+                "name": "CCDC/CSD"
+              },
+              {
+                "value": "ChEBI",
+                "detail": "Chemical Entities of Biological Interest (ChEBI)",
+                "name": "ChEBI"
+              },
+              {
+                "value": "ChEMBL",
+                "detail": "ChEMBL, manually curated database of bioactive molecules with drug-like properties",
+                "name": "ChEMBL"
+              },
+              {
+                "value": "DrugBank",
+                "detail": "DrugBank, database containing information on drugs and drug targets",
+                "name": "DrugBank"
+              },
+              {
+                "value": "Pharos",
+                "detail": "User interface to the Knowledge Management Center (KMC) for the Illuminating the Druggable Genome (IDG)",
+                "name": "Pharos"
+              },
+              {
+                "value": "PubChem",
+                "detail": "NCBI PubChem Resource",
+                "name": "PubChem"
+              },
+              {
+                "value": "RESID",
+                "detail": "RESID Database of Protein Modifications",
+                "name": "RESID"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "The resource name for the related chemical reference.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Resource Name",
+                "context": "brief"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comp_id",
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true,
+      "rcsb_nested_indexing": true,
+      "rcsb_nested_indexing_context": [
+        {
+          "category_name": "related_resource",
+          "category_path": "rcsb_chem_comp_related.resource_name",
+          "context_attributes": [
+            {
+              "context_value": "DrugBank",
+              "attributes": [
+                {
+                  "examples": [
+                    "DB06830",
+                    "DB07255"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "CCDC/CSD",
+              "attributes": [
+                {
+                  "examples": [
+                    "QAXDEZ",
+                    "XEGJEA"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "RESID",
+              "attributes": [
+                {
+                  "examples": [
+                    "AA0078",
+                    "AA0034"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "PubChem",
+              "attributes": [
+                {
+                  "examples": [
+                    3082729,
+                    5289380
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "ChEBI",
+              "attributes": [
+                {
+                  "examples": [
+                    "CHEBI:151557",
+                    "CHEBI:6198"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "ChEMBL",
+              "attributes": [
+                {
+                  "examples": [
+                    "CHEMBL1165239",
+                    "CHEMBL3330255"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "CAS",
+              "attributes": [
+                {
+                  "examples": [
+                    "2133-34-8",
+                    "30565-25-4"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            },
+            {
+              "context_value": "Pharos",
+              "attributes": [
+                {
+                  "examples": [
+                    "CHEMBL1165239",
+                    "CHEMBL3330255"
+                  ],
+                  "path": "rcsb_chem_comp_related.resource_accession_code"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "rcsb_chem_comp_synonyms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comp_id": {
+            "type": "string",
+            "description": "The chemical component to which this synonym applies.",
+            "rcsb_description": [
+              {
+                "text": "The chemical component to which this synonym applies.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "examples": [
+              "Ursonic acid",
+              "Talotrexin",
+              "4-oxodecanedioic acid"
+            ],
+            "description": "The synonym of this particular chemical component.",
+            "rcsb_search_context": [
+              "full-text",
+              "suggest"
+            ],
+            "rcsb_full_text_priority": 20,
+            "rcsb_description": [
+              {
+                "text": "The synonym of this particular chemical component.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Chemical Synonyms",
+                "context": "brief"
+              }
+            ],
+            "rcsb_search_group": [
+              {
+                "group_name": "Chemical Components",
+                "priority_order": 15
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "This data item is an ordinal index for the\n RCSB_CHEM_COMP_SYNONYMS category.",
+            "rcsb_description": [
+              {
+                "text": "This data item is an ordinal index for the\n RCSB_CHEM_COMP_SYNONYMS category.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "provenance_source": {
+            "type": "string",
+            "enum": [
+              "ACDLabs",
+              "Author",
+              "ChEBI",
+              "ChEMBL",
+              "DrugBank",
+              "GMML",
+              "Lexichem",
+              "OpenEye OEToolkits",
+              "OpenEye/Lexichem",
+              "PDB Reference Data",
+              "PDB Reference Data (Preferred)",
+              "PDB-CARE",
+              "PubChem",
+              "RESID"
+            ],
+            "description": "The provenance of this synonym.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_description": [
+              {
+                "text": "The provenance of this synonym.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Chemical Synonym Provenance Source",
+                "context": "brief"
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "Brand Name",
+              "Common Name",
+              "Condensed IUPAC Carbohydrate Symbol",
+              "IUPAC Carbohydrate Symbol",
+              "Preferred Common Name",
+              "Preferred Name",
+              "Preferred Synonym",
+              "SNFG Carbohydrate Symbol",
+              "Synonym",
+              "Systematic Name"
+            ],
+            "description": "This data item contains the synonym type.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_enum_annotated": [
+              {
+                "value": "Brand Name",
+                "detail": "Product chemical name"
+              },
+              {
+                "value": "Common Name",
+                "detail": "Common chemical name"
+              },
+              {
+                "value": "Condensed IUPAC Carbohydrate Symbol",
+                "detail": "Condensed IUPAC carbohydrate symbol"
+              },
+              {
+                "value": "IUPAC Carbohydrate Symbol",
+                "detail": "IUPAC carbohydrate symbol"
+              },
+              {
+                "value": "Preferred Common Name",
+                "detail": "Preferred common chemical name"
+              },
+              {
+                "value": "Preferred Name",
+                "detail": "Preferred chemical name"
+              },
+              {
+                "value": "Preferred Synonym",
+                "detail": "Preferred synonym chemical name"
+              },
+              {
+                "value": "SNFG Carbohydrate Symbol",
+                "detail": "3D-SNFG carbohydrate symbol"
+              },
+              {
+                "value": "Synonym",
+                "detail": "Synonym chemical name"
+              },
+              {
+                "value": "Systematic Name",
+                "detail": "Systematic chemical name"
+              }
+            ],
+            "rcsb_description": [
+              {
+                "text": "This data item contains the synonym type.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Chemical Synonym Type",
+                "context": "brief"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comp_id",
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "rcsb_chem_comp_target": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "comp_id": {
+            "type": "string",
+            "description": "The value of _rcsb_chem_comp_target.comp_id is a reference to\n a chemical component definition.",
+            "rcsb_description": [
+              {
+                "text": "The value of _rcsb_chem_comp_target.comp_id is a reference to\n a chemical component definition.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "interaction_type": {
+            "type": "string",
+            "description": "The type of target interaction.",
+            "rcsb_description": [
+              {
+                "text": "The type of target interaction.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The chemical component target name.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The chemical component target name.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Drug Target Name",
+                "context": "brief"
+              }
+            ],
+            "rcsb_search_group": [
+              {
+                "group_name": "Chemical Components",
+                "priority_order": 30
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _rcsb_chem_comp_target.ordinal distinguishes\n related examples for each chemical component.",
+            "rcsb_description": [
+              {
+                "text": "The value of _rcsb_chem_comp_target.ordinal distinguishes\n related examples for each chemical component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "provenance_source": {
+            "type": "string",
+            "enum": [
+              "DrugBank",
+              "PDB Primary Data"
+            ],
+            "description": "A code indicating the provenance of the target interaction assignment",
+            "rcsb_description": [
+              {
+                "text": "A code indicating the provenance of the target interaction assignment",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "reference_database_accession_code": {
+            "type": "string",
+            "examples": [
+              "Q9HD40"
+            ],
+            "description": "The reference identifier code for the target interaction reference.",
+            "rcsb_description": [
+              {
+                "text": "The reference identifier code for the target interaction reference.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "reference_database_name": {
+            "type": "string",
+            "enum": [
+              "UniProt"
+            ],
+            "examples": [
+              "UniProt"
+            ],
+            "description": "The reference database name for the target interaction.",
+            "rcsb_description": [
+              {
+                "text": "The reference database name for the target interaction.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "target_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The mechanism of action of the chemical component - target interaction.",
+              "rcsb_description": [
+                {
+                  "text": "The mechanism of action of the chemical component - target interaction.",
+                  "context": "dictionary"
+                }
+              ]
+            },
+            "uniqueItems": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "comp_id",
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "rcsb_schema_container_identifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "collection_name": {
+            "type": "string",
+            "description": "Collection name associated with the data in the container.",
+            "rcsb_description": [
+              {
+                "text": "Collection name associated with the data in the container.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "collection_schema_version": {
+            "type": "string",
+            "description": "Version string for the schema and collection.",
+            "rcsb_description": [
+              {
+                "text": "Version string for the schema and collection.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "schema_name": {
+            "type": "string",
+            "description": "Schema name associated with the data in the container.",
+            "rcsb_description": [
+              {
+                "text": "Schema name associated with the data in the container.",
+                "context": "dictionary"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "collection_name",
+          "schema_name"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "rcsb_id": {
+      "type": "string",
+      "examples": [
+        "ATP",
+        "PRD_000010"
+      ],
+      "description": "A unique identifier for the chemical definition in this container.",
+      "rcsb_search_context": [
+        "exact-match"
+      ],
+      "rcsb_full_text_priority": 10,
+      "rcsb_description": [
+        {
+          "text": "A unique identifier for the chemical definition in this container.",
+          "context": "dictionary"
+        },
+        {
+          "text": "Id",
+          "context": "brief"
+        }
+      ]
+    },
+    "drugbank_container_identifiers": {
+      "type": "object",
+      "properties": {
+        "drugbank_id": {
+          "type": "string",
+          "description": "The DrugBank accession code",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank accession code",
+              "context": "dictionary"
+            },
+            {
+              "text": "Drugbank Id (Drugbank Container Identifiers)",
+              "context": "brief"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "drugbank_id"
+      ]
+    },
+    "drugbank_info": {
+      "type": "object",
+      "properties": {
+        "affected_organisms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "Humans and other mammals"
+            ],
+            "description": "The DrugBank drug affected organisms.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The DrugBank drug affected organisms.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Affected Organisms (Drugbank Info)",
+                "context": "brief"
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "atc_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "A11HA04"
+            ],
+            "description": "The Anatomical Therapeutic Chemical Classification System (ATC) codes.",
+            "rcsb_search_context": [
+              "exact-match"
+            ],
+            "rcsb_full_text_priority": 10,
+            "rcsb_description": [
+              {
+                "text": "The Anatomical Therapeutic Chemical Classification System (ATC) codes.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Atc Codes (Drugbank Info)",
+                "context": "brief"
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "brand_names": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "Atriphos; Striadyne"
+            ],
+            "description": "DrugBank drug brand names.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "DrugBank drug brand names.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Drug Brand Name",
+                "context": "brief"
+              }
+            ],
+            "rcsb_search_group": [
+              {
+                "group_name": "Chemical Components",
+                "priority_order": 35
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "cas_number": {
+          "type": "string",
+          "examples": [
+            "56-65-5"
+          ],
+          "description": "The DrugBank assigned Chemical Abstracts Service identifier.",
+          "rcsb_search_context": [
+            "exact-match"
+          ],
+          "rcsb_full_text_priority": 10,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank assigned Chemical Abstracts Service identifier.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Cas Number (Drugbank Info)",
+              "context": "brief"
+            }
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "The DrugBank drug description.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank drug description.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Description (Drugbank Info)",
+              "context": "brief"
+            }
+          ]
+        },
+        "drug_categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "Adenine Nucleotides;Carbohydrates;Dietary Supplements"
+            ],
+            "description": "The DrugBank drug categories.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The DrugBank drug categories.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Drug Categories (Drugbank Info)",
+                "context": "brief"
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "drug_groups": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "approved;nutraceutical"
+            ],
+            "description": "The DrugBank drug drug groups.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The DrugBank drug drug groups.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Drug Groups (Drugbank Info)",
+                "context": "brief"
+              }
+            ]
+          },
+          "uniqueItems": false
+        },
+        "drugbank_id": {
+          "type": "string",
+          "description": "The DrugBank accession code",
+          "rcsb_description": [
+            {
+              "text": "The DrugBank accession code",
+              "context": "dictionary"
+            }
+          ]
+        },
+        "indication": {
+          "type": "string",
+          "examples": [
+            "For nutritional supplementation, also for treating dietary shortage or imbalance"
+          ],
+          "description": "The DrugBank drug indication.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank drug indication.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Indication (Drugbank Info)",
+              "context": "brief"
+            }
+          ]
+        },
+        "mechanism_of_action": {
+          "type": "string",
+          "examples": [
+            "ATP is able to store and transport chemical energy within cells."
+          ],
+          "description": "The DrugBank drug mechanism of actions.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank drug mechanism of actions.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Mechanism Of Action (Drugbank Info)",
+              "context": "brief"
+            }
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "The DrugBank drug name.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank drug name.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Name (Drugbank Info)",
+              "context": "brief"
+            }
+          ]
+        },
+        "pharmacology": {
+          "type": "string",
+          "examples": [
+            "Adenosine triphosphate (ATP) is the nucleotide known in biochemistry as the \"molecular currency\" of intracellular energy transfer; that is, ATP is able to store and transport chemical energy within cells. ATP also plays an important role in the synthesis of nucleic acids. The total quantity of ATP in the human body is about 0.1 mole. The energy used by human cells requires the hydrolysis of 200 to 300 moles of ATP daily. This means that each ATP molecule is recycled 2000 to 3000 times during a single day. ATP cannot be stored, hence its consumption must closely follow its synthesis."
+          ],
+          "description": "The DrugBank drug pharmacology.",
+          "rcsb_search_context": [
+            "full-text"
+          ],
+          "rcsb_full_text_priority": 1,
+          "rcsb_description": [
+            {
+              "text": "The DrugBank drug pharmacology.",
+              "context": "dictionary"
+            },
+            {
+              "text": "Pharmacology (Drugbank Info)",
+              "context": "brief"
+            }
+          ]
+        },
+        "synonyms": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "examples": [
+              "Adenosine-5'-triphosphate; ATP"
+            ],
+            "description": "DrugBank drug name synonyms.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "DrugBank drug name synonyms.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Synonyms (Drugbank Info)",
+                "context": "brief"
+              }
+            ]
+          },
+          "uniqueItems": false
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "drugbank_id"
+      ]
+    },
+    "drugbank_target": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "interaction_type": {
+            "type": "string",
+            "description": "The type of target interaction.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The type of target interaction.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Interaction Type (Drugbank Target)",
+                "context": "brief"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The target name.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The target name.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Name (Drugbank Target)",
+                "context": "brief"
+              }
+            ]
+          },
+          "ordinal": {
+            "type": "integer",
+            "description": "The value of _drugbank_target.ordinal distinguishes\n related examples for each chemical component.",
+            "rcsb_description": [
+              {
+                "text": "The value of _drugbank_target.ordinal distinguishes\n related examples for each chemical component.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "organism_common_name": {
+            "type": "string",
+            "description": "The organism common name.",
+            "rcsb_search_context": [
+              "full-text"
+            ],
+            "rcsb_full_text_priority": 1,
+            "rcsb_description": [
+              {
+                "text": "The organism common name.",
+                "context": "dictionary"
+              },
+              {
+                "text": "Organism Common Name (Drugbank Target)",
+                "context": "brief"
+              }
+            ]
+          },
+          "reference_database_accession_code": {
+            "type": "string",
+            "examples": [
+              "Q9HD40"
+            ],
+            "description": "The reference identifier code for the target interaction reference.",
+            "rcsb_description": [
+              {
+                "text": "The reference identifier code for the target interaction reference.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "reference_database_name": {
+            "type": "string",
+            "enum": [
+              "UniProt"
+            ],
+            "examples": [
+              "UniProt"
+            ],
+            "description": "The reference database name for the target interaction.",
+            "rcsb_description": [
+              {
+                "text": "The reference database name for the target interaction.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "seq_one_letter_code": {
+            "type": "string",
+            "examples": [
+              "MAKQRSG..."
+            ],
+            "description": "Target sequence expressed as string of one-letter amino acid codes.",
+            "rcsb_description": [
+              {
+                "text": "Target sequence expressed as string of one-letter amino acid codes.",
+                "context": "dictionary"
+              }
+            ]
+          },
+          "target_actions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The actions of the target interaction.",
+              "rcsb_search_context": [
+                "full-text"
+              ],
+              "rcsb_full_text_priority": 1,
+              "rcsb_description": [
+                {
+                  "text": "The actions of the target interaction.",
+                  "context": "dictionary"
+                },
+                {
+                  "text": "Target Actions (Drugbank Target)",
+                  "context": "brief"
+                }
+              ]
+            },
+            "uniqueItems": false
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "ordinal"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "rcsb_id"
+  ],
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Chemical Text Service Metadata",
+  "description": "",
+  "$comment": "Schema version: 1.42.0"
+}
