@@ -1,7 +1,7 @@
 """RCSB PDB Search API"""
 from typing import TYPE_CHECKING, Any, List
 
-from .search import Terminal  # noqa: F401
+from .search import GenericTerminal  # noqa: F401
 from .search import Attr, Group, Query, Session, TextQuery, Value
 
 __version__ = "1.1.0"
@@ -57,7 +57,7 @@ def __dir__() -> List[str]:
 __all__ = [
     "Query",
     "Group",
-    "Terminal",
+    "GenericTerminal",
     "TextQuery",
     "Session",
     "Attr",

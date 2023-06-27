@@ -41,7 +41,7 @@ ReturnType = Literal[
     "mol_definition"
 ]
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
-SequenceType = Literal["dna", "rna", "protein"]
+SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -187,107 +187,103 @@ class Query(ABC):
             raise TypeError(f"Expected Query or Attr, got {type(other)}")
 
 
-@dataclass(frozen=True)
-class Terminal(Query):
-    """A terminal query node.
+#@dataclass(frozen=True)
+#class Terminal(Query):
+    #"""A terminal query node.
 
-    Terminals are simple predicates comparing some *attribute* of a structure to a
-    value.
+    #Terminals are simple predicates comparing some *attribute* of a structure to a
+    #value.
 
-    Examples:
-        >>> Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION")
-        >>> Terminal("rcsb_id", "in", ["5T89", "1TIM"])
-        >>> Terminal(value="tubulin")
+    #Examples:
+        #>>> Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        #>>> Terminal("rcsb_id", "in", ["5T89", "1TIM"])
+        #>>> Terminal(value="tubulin")
 
-    A full list of attributes is available in the
-    `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
-    Operators are documented `here <http://search.rcsb.org/#field-queries>`_.
+    #A full list of attributes is available in the
+    #schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
+    #Operators are documented `here <http://search.rcsb.org/#field-queries>`_.
 
-    The :py:class:`Attr` class provides a more pythonic way of constructing Terminals.
+    #The :py:class:`Attr` class provides a more pythonic way of constructing Terminals.
     """
 
-    attribute: Optional[str] = None
-    service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
-    operator: Optional[str] = None
-    #evalue_cutoff: Optional[float] = None
-    #identity_cutoff: Optional[int] = None
-    #sequence_type: Optional[SequenceType] = None
-    value: Optional[TValue] = None
-    negation: Optional[bool] = False  # investigate whether this can be changed to None
-    node_id: int = 0
+    #attribute: Optional[str] = None
+    #service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    #operator: Optional[str] = None
+    #value: Optional[TValue] = None
+    #negation: Optional[bool] = False  # investigate whether this can be changed to None
+    #node_id: int = 0
 
-    def to_dict(self):
-        params = dict()
-        if self.attribute is not None:
-            params["attribute"] = self.attribute
-        if self.operator is not None:
+    #def to_dict(self):
+        #params = dict()
+        #if self.attribute is not None:
+            #params["attribute"] = self.attribute
+        #if self.operator is not None:
             params["operator"] = self.operator
-        if self.value is not None:
-            params["value"] = self.value
-        if self.negation is not None:
-            params["negation"] = self.negation
+        #if self.value is not None:
+            #params["value"] = self.value
+        #if self.negation is not None:
+            #params["negation"] = self.negation
 
-        return dict(
-            type="terminal",
-            service=self.service,
-            parameters=params,
-            node_id=self.node_id,
-        )
+        #return dict(
+            #type="terminal",
+            #service=self.service,
+            #parameters=params,
+            #node_id=self.node_id,
+        #)
 
-    def __invert__(self):
-        return Terminal(
-            self.attribute,
-            self.service,
-            self.operator,
-            self.value,
-            not self.negation,
-            self.node_id,
-            )
+    #def __invert__(self):
+        #return Terminal(
+            #self.attribute,
+            #self.service,
+            #self.operator,
+            #self.value,
+            #not self.negation,
+            #self.node_id,
+            #)
 
-    def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
-        if self.node_id == node_id:
-            return (self, node_id + 1)
-        else:
-            return (
-                Terminal(
-                    self.attribute,
-                    self.service,
-                    self.operator,
-                    self.value,
-                    self.negation,
-                    node_id,
-                ),
-                node_id + 1,
-            )
+    #def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
+        #if self.node_id == node_id:
+            #return (self, node_id + 1)
+        #else:
+            #return (
+                #Terminal(
+                    #self.attribute,
+                    #self.service,
+                    #self.operator,
+                    #self.value,
+                    #self.negation,
+                    #node_id,
+                #),
+                #node_id + 1,
+            #)
 
-    def __str__(self):
-        """Return a simplified string representation
+    #def __str__(self):
+        """#Return a simplified string representation
 
-        Examples:
-            >>> Terminal("attr", "op", "val")
-            >>> ~Terminal(value="val")
+        #Examples:
+            #>>> Terminal("attr", "op", "val")
+            #>>> ~Terminal(value="val")
 
-        """
-        negation = "~" if self.negation else ""
-        if self.attribute is None and self.operator is None:
-            # value-only
-            return f"{negation}Terminal(value={self.value!r})"
-        else:
-            return (
-                f"{negation}Terminal({self.attribute!r}, operator={self.operator!r}, "
-                f"value={self.value!r})"
-            )
+        #"""
+        #negation = "~" if self.negation else ""
+        #if self.attribute is None and self.operator is None:
+            ## value-only
+            #return f"{negation}Terminal(value={self.value!r})"
+        #else:
+            #return (
+                #f"{negation}Terminal({self.attribute!r}, operator={self.operator!r}, "
+                #f"value={self.value!r})"
+            #)
+
 
 @dataclass(frozen=True)
 class GenericTerminal(Query):
     """A terminal query node for doing searches other than attribute searches.
     Main function to allow for sequence searches. Does not have immediate use
     """
+    service: str
+    params: Dict[str, Any]
     node_id: int = 0
-
-    def __init__(self, service: str, params: Dict[str, Any]):
-        self.service = service
-        self.params = params
 
     def to_dict(self):
         return dict(
@@ -296,22 +292,22 @@ class GenericTerminal(Query):
             parameters=self.params,
             node_id=self.node_id,
         )
-    
+
     def __invert__(self):
-        return Terminal(
-            self.service,
-            self.node_id,
-        )
+        if isinstance(self, AttributeQuery):
+            return GenericTerminal(self.service, {"attribute": self.params.get("attribute"),
+                                                  "operator": self.params.get("operator"),
+                                                  "negation": not self.params.get("negation"),
+                                                  "value": self.params.get("value")})
+        else:
+            return GenericTerminal(self.service, self.params)
 
     def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
         if self.node_id == node_id:
             return (self, node_id + 1)
         else:
             return (
-                Terminal(
-                    self.service,
-                    node_id,
-                ),
+                GenericTerminal(self.service, self.params, node_id),
                 node_id + 1,
             )
 
@@ -319,13 +315,38 @@ class GenericTerminal(Query):
         """Return a simplified string representation
 
         Example:
-            >>> ~Terminal(value="val")
+            >>> Terminal(service="serv", params="par")
 
         """
-        return f"Terminal(value={self.value!r})"
+        return f"GenericTerminal(service={self.service!r}, params={self.params!r})"
 
 
-class TextQuery(Terminal):
+class AttributeQuery(GenericTerminal):
+    """Special case of a Terminal for Structure and Chemical Attribute Searches"""
+
+    def __init__(self, attribute: Optional[str] = None,
+                 operator: Optional[str] = None,
+                 value: Optional[TValue] = None,
+                 service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE,
+                 negation: Optional[bool] = False
+                 ):
+        """Search for the string value given possible attribute or operator
+        Also can specify service and negation
+
+        Args:
+            attribute: specify attribute for search (i.e struct.title, exptl.method, rcsb_id)
+            operator: specify operation to be done for search (i.e "contains_phrase", "exact_match")
+            value: text query
+            service: specify what search service (i.e "text", "text_chem")
+            negation: logical not
+        """
+        super().__init__(params={"attribute": attribute,
+                                 "operator": operator,
+                                 "negation": negation,
+                                 "value": value}, service=service)
+
+
+class TextQuery(GenericTerminal):
     """Special case of a Terminal for free-text queries"""
 
     def __init__(self, value: str):
@@ -333,16 +354,17 @@ class TextQuery(Terminal):
 
         Args:
             value: free-text query
-            negation: find structures without the pattern
         """
-        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, value=value, negation=None)
+        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, params={"value": value})
 
 
 class SequenceQuery(GenericTerminal):
     """Special case of a terminal for dna, rna, or protein sequence queries"""
 
-    def __init__(self, value: str, evalue_cutoff: Optional[float] = 0.1,
-                 identity_cutoff: Optional[int] = 0, sequence_type: Optional[SequenceType] = "protein"
+    def __init__(self, value: str,
+                 evalue_cutoff: Optional[float] = 0.1,
+                 identity_cutoff: Optional[int] = 0,
+                 sequence_type: Optional[SequenceType] = "protein"
                  ):
         """The string value is a target sequence that is searched
         Args:
@@ -351,8 +373,10 @@ class SequenceQuery(GenericTerminal):
         if len(value) < MIN_NUM_OF_RESIDUES:
             raise ValueError("The sequence must contain at least 25 residues")
         else:
-            super().__init__(service=SEQUENCE_SEARCH_SERVICE, params={"evalue_cutoff": evalue_cutoff, "identity_cutoff": identity_cutoff,
-                                                                      "sequence_type": sequence_type, "value": value
+            super().__init__(service=SEQUENCE_SEARCH_SERVICE, params={"evalue_cutoff": evalue_cutoff,
+                                                                      "identity_cutoff": identity_cutoff,
+                                                                      "sequence_type": sequence_type,
+                                                                      "value": value
                                                                       })
 
 
@@ -393,7 +417,7 @@ class Group(Query):
             if isinstance(other, Group):
                 if other.operator == "or":
                     return Group("or", (*self.nodes, *other.nodes))
-            elif isinstance(other, Terminal):
+            elif isinstance(other, GenericTerminal):
                 return Group("or", (*self.nodes, other))
             else:
                 return NotImplemented
@@ -474,15 +498,15 @@ class Attr:
     attribute: str
     type: Optional[str] = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE  # this will be changed later, this is to allow the program to still run. Will not be optional.
 
-    def exact_match(self, value: Union[str, "Value[str]"]) -> Terminal:
+    def exact_match(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
         """Exact match with the value"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "exact_match", value)
+        return AttributeQuery(self.attribute, "exact_match", value, self.type)
 
     def contains_words(
         self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]
-    ) -> Terminal:
+    ) -> AttributeQuery:
         """Match any word within the string.
 
         Words are split at whitespace. All results which match any word are returned,
@@ -492,45 +516,45 @@ class Attr:
             value = value.value
         if isinstance(value, list):
             value = " ".join(value)
-        return Terminal(self.attribute, self.type, "contains_words", value)
+        return AttributeQuery(self.attribute, "contains_words", value, self.type)
 
-    def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
+    def contains_phrase(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
         """Match an exact phrase"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "contains_phrase", value)
+        return AttributeQuery(self.attribute, "contains_phrase", value, self.type)
 
-    def greater(self, value: TNumberLike) -> Terminal:
+    def greater(self, value: TNumberLike) -> AttributeQuery:
         """Attribute > `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "greater", value)
+        return AttributeQuery(self.attribute, "greater", value, self.type)
 
-    def less(self, value: TNumberLike) -> Terminal:
+    def less(self, value: TNumberLike) -> AttributeQuery:
         """Attribute < `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "less", value)
+        return AttributeQuery(self.attribute, "less", value, self.type)
 
-    def greater_or_equal(self, value: TNumberLike) -> Terminal:
+    def greater_or_equal(self, value: TNumberLike) -> AttributeQuery:
         """Attribute >= `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "greater_or_equal", value)
+        return AttributeQuery(self.attribute, "greater_or_equal", value, self.type)
 
-    def less_or_equal(self, value: TNumberLike) -> Terminal:
+    def less_or_equal(self, value: TNumberLike) -> AttributeQuery:
         """Attribute <= `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "less_or_equal", value)
+        return AttributeQuery(self.attribute, "less_or_equal", value, self.type)
 
-    def equals(self, value: TNumberLike) -> Terminal:
+    def equals(self, value: TNumberLike) -> AttributeQuery:
         """Attribute == `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "equals", value)
+        return AttributeQuery(self.attribute, "equals", value, self.type)
 
-    def range(self, value: Dict[str, Any]) -> Terminal:
+    def range(self, value: Dict[str, Any]) -> AttributeQuery:
         """Attribute is within the specified half-open range
 
         Args:
@@ -538,11 +562,11 @@ class Attr:
         """
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "range", value)
+        return AttributeQuery(self.attribute, "range", value, self.type)
 
-    def exists(self) -> Terminal:
+    def exists(self) -> AttributeQuery:
         """Attribute is defined for the structure"""
-        return Terminal(self.attribute, operator="exists")
+        return AttributeQuery(self.attribute, operator="exists")
 
     def in_(
         self,
@@ -564,11 +588,11 @@ class Attr:
             "Value[Tuple[float, ...]]",
             "Value[Tuple[date, ...]]",
         ],
-    ) -> Terminal:
+    ) -> AttributeQuery:
         """Attribute is contained in the list of values"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, operator="in", value=value)
+        return AttributeQuery(self.attribute, operator="in", value=value)
 
     # Need ignore[override] because typeshed restricts __eq__ return value
     # https://github.com/python/mypy/issues/2783
@@ -589,7 +613,7 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Terminal:
+    ) -> GenericTerminal:
         ...
 
     def __eq__(
@@ -605,7 +629,7 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Union[Terminal, bool]:  # type: ignore[override]
+    ) -> Union[GenericTerminal, bool]:  # type: ignore[override]
         if isinstance(value, Attr):
             return self.attribute == value.attribute
         if isinstance(value, Value):
@@ -638,7 +662,7 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Terminal:
+    ) -> GenericTerminal:
         ...
 
     def __ne__(
@@ -654,39 +678,39 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Union[Terminal, bool]:  # type: ignore[override]
+    ) -> Union[GenericTerminal, bool]:  # type: ignore[override]
         if isinstance(value, Attr):
             return self.attribute != value.attribute
         if isinstance(value, Value):
             value = value.value
         return ~(self == value)
 
-    def __lt__(self, value: TNumberLike) -> Terminal:
+    def __lt__(self, value: TNumberLike) -> GenericTerminal:
         if isinstance(value, Value):
             value = value.value
         return self.less(value)
 
-    def __le__(self, value: TNumberLike) -> Terminal:
+    def __le__(self, value: TNumberLike) -> GenericTerminal:
         if isinstance(value, Value):
             value = value.value
         return self.less_or_equal(value)
 
-    def __gt__(self, value: TNumberLike) -> Terminal:
+    def __gt__(self, value: TNumberLike) -> GenericTerminal:
         if isinstance(value, Value):
             value = value.value
         return self.greater(value)
 
-    def __ge__(self, value: TNumberLike) -> Terminal:
+    def __ge__(self, value: TNumberLike) -> GenericTerminal:
         if isinstance(value, Value):
             value = value.value
         return self.greater_or_equal(value)
 
-    def __bool__(self) -> Terminal:  # pylint: disable=invalid-bool-returned
+    def __bool__(self) -> GenericTerminal:  # pylint: disable=invalid-bool-returned
         return self.exists()
 
     def __contains__(
         self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]
-    ) -> Terminal:
+    ) -> GenericTerminal:
         """Maps to contains_words or contains_phrase depending on the value passed.
 
         * `"value" in attr` maps to `attr.contains_phrase("value")` for simple values.
@@ -705,7 +729,7 @@ class Attr:
 
 
 # Type for functions returning Terminal
-FTerminal = TypeVar("FTerminal", bound=Callable[..., Terminal])
+FTerminal = TypeVar("FTerminal", bound=Callable[..., GenericTerminal])
 # Type for functions returning Query
 FQuery = TypeVar("FQuery", bound=Callable[..., Query])
 
@@ -725,7 +749,7 @@ def _attr_delegate(attr_func: FTerminal) -> Callable[[FQuery], FQuery]:
     def decorator(partialquery_func: FQuery):
         @functools.wraps(partialquery_func)
         def wrap(self: "PartialQuery", *args, **kwargs) -> Query:
-            term: Terminal = attr_func(self.attr, *args, **kwargs)
+            term: GenericTerminal = attr_func(self.attr, *args, **kwargs)
             if self.operator == "and":
                 return self.query & term
             elif self.operator == "or":
@@ -948,10 +972,10 @@ class Value(Generic[T]):
         ...
 
     @overload  # type: ignore[override]
-    def __eq__(self, attr: Attr) -> Terminal:
+    def __eq__(self, attr: Attr) -> GenericTerminal:
         ...
 
-    def __eq__(self, attr: Union["Value", Attr]) -> Union[bool, Terminal]:
+    def __eq__(self, attr: Union["Value", Attr]) -> Union[bool, GenericTerminal]:
         # type: ignore[override]
         if isinstance(attr, Value):
             return self.value == attr.value
@@ -964,10 +988,10 @@ class Value(Generic[T]):
         ...
 
     @overload  # type: ignore[override]
-    def __ne__(self, attr: Attr) -> Terminal:
+    def __ne__(self, attr: Attr) -> GenericTerminal:
         ...
 
-    def __ne__(self, attr: Union["Value", Attr]) -> Union[bool, Terminal]:
+    def __ne__(self, attr: Union["Value", Attr]) -> Union[bool, GenericTerminal]:
         # type: ignore[override]
         if isinstance(attr, Value):
             return self.value != attr.value
@@ -975,7 +999,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr != self.value
 
-    def __lt__(self, attr: Attr) -> Terminal:
+    def __lt__(self, attr: Attr) -> GenericTerminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -986,7 +1010,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr.greater(self.value)
 
-    def __le__(self, attr: Attr) -> Terminal:
+    def __le__(self, attr: Attr) -> GenericTerminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -997,7 +1021,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr.greater_or_equal(self.value)
 
-    def __gt__(self, attr: Attr) -> Terminal:
+    def __gt__(self, attr: Attr) -> GenericTerminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -1008,7 +1032,7 @@ class Value(Generic[T]):
             return NotImplemented
         return attr.less(self.value)
 
-    def __ge__(self, attr: Attr) -> Terminal:
+    def __ge__(self, attr: Attr) -> GenericTerminal:
         if not isinstance(attr, Attr):
             return NotImplemented
         if not (
@@ -1032,7 +1056,6 @@ class Session(Iterable[str]):
     return_type: ReturnType
     start: int
     rows: int
-    computational: bool
 
     def __init__(
         # parameter added below for computed model inclusion

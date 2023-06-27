@@ -25,9 +25,9 @@ import unittest
 from itertools import islice
 import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
-from rcsbsearchapi import Attr, Group, Session, Terminal, TextQuery, Value
+from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, GenericTerminal
+from rcsbsearchapi.search import PartialQuery, GenericTerminal, AttributeQuery, SequenceQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -50,8 +50,8 @@ class SearchTests(unittest.TestCase):
     def testConstruction(self):
         """Test the construction of queries, and check that the query is what
         you'd expect. """
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "5T89"])
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
+        q2 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "5T89"])
 
         both = q1 & q2
         ok = isinstance(both, Group)
@@ -75,9 +75,10 @@ class SearchTests(unittest.TestCase):
 
     def testSingleQuery(self):
         """Test firing off a single query, making sure the result is not None."""
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
         session = Session(Group("and", [q1]))
         result = session._single_query()  # pylint takes issue with this as this is a protected method
+        print(result)
         ok = result is not None
         self.assertTrue(ok)
         logger.info("Single query test results: ok : (%r)", ok)
@@ -85,7 +86,7 @@ class SearchTests(unittest.TestCase):
     def testIquery(self):
         """Tests the iquery function, which evaluates a query with a progress bar.
         The progress bar requires tqdm to run. """
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
         session = Session(q1)
         result = session.iquery()
         ok = len(result) == 2
@@ -95,7 +96,7 @@ class SearchTests(unittest.TestCase):
     def testIterable(self):
         """Take a query, make it iterable and then test that its attributes remain unchanged as a result. """
         ids = ["4HHB", "2GS2"]
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids)
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids)
         result = set(q1())
         ok = len(result) == 2
         ok2 = result == set(ids)
@@ -105,7 +106,7 @@ class SearchTests(unittest.TestCase):
 
     def testInversion(self):
         """Test the overloaded inversion operator in a query. """
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="exact_match", value="5T89")
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="exact_match", value="5T89")
         q3 = ~q1
         # Lots of results
         first = next(iter(q3()))
@@ -120,9 +121,9 @@ class SearchTests(unittest.TestCase):
         """Test the overloaded XOR operator in a query. """
         ids1 = ["5T89", "2GS2"]
         ids2 = ["4HHB", "2GS2"]
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids1)
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids2)
-        q3 = q1 ^ q2  # overloaded xor operator used on results.
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids1)
+        q2 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids2)
+        q3 = q1 ^ q2  # overloaded xor operator used on results
         result = set(q3())
         ok = len(result) == 2
         self.assertTrue(ok)
@@ -135,7 +136,7 @@ class SearchTests(unittest.TestCase):
         the large pagination tests below, which test avoiding a 429 error,
         while this exists to make sure the feature behaves as intended. """
         ids = ["4HHB", "2GS2", "5T89", "1TIM"]
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids)
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=ids)
 
         # 2+2 results
         session = Session(q1, rows=2)
@@ -154,7 +155,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
 
         # 1ABC will never be a valid ID
-        q2 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["1ABC"])
+        q2 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["1ABC"])
         session = Session(q2)
         result = set(session)
         ok = len(result) == 0
@@ -165,7 +166,7 @@ class SearchTests(unittest.TestCase):
         """Attempt to make an invalid, malformed query. Upon finding an error,
         catch the error and pass, continuing tests. An exception is only thrown
         if the query somehow completes successfully. """
-        q1 = Terminal("invalid_identifier", operator="exact_match", value="ERROR")
+        q1 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR")
         session = Session(q1)
         try:
             set(session)
@@ -218,22 +219,22 @@ class SearchTests(unittest.TestCase):
         """Make another example query, and make sure that it performs successfully. """
         q1 = (
             TextQuery('"thymidine kinase"')
-            & Terminal(
+            & AttributeQuery(
                 "rcsb_entity_source_organism.taxonomy_lineage.name",
                 operator="exact_match",
                 value="Viruses",
             )
-            & Terminal(
+            & AttributeQuery(
                 "exptl.method",
                 operator="exact_match",
                 value="X-RAY DIFFRACTION",
             )
-            & Terminal(
+            & AttributeQuery(
                 "rcsb_entry_info.resolution_combined",
                 operator="less_or_equal",
                 value=2.5,
             )
-            & Terminal("rcsb_entry_info.nonpolymer_entity_count", operator="greater", value=0)
+            & AttributeQuery("rcsb_entry_info.nonpolymer_entity_count", operator="greater", value=0)
         )
 
         results = set(q1("entry"))
@@ -248,28 +249,28 @@ class SearchTests(unittest.TestCase):
         attr = Attr("attr")
 
         term = attr == "value"
-        ok = isinstance(term, Terminal)
+        ok = isinstance(term, GenericTerminal)
         self.assertTrue(ok)
-        ok = term.operator == "exact_match"
+        ok = term.params.get("operator") == "exact_match"
         self.assertTrue(ok)
 
         term = "value" == attr
-        ok = isinstance(term, Terminal)
+        ok = isinstance(term, GenericTerminal)
         self.assertTrue(ok)
-        ok = term.operator == "exact_match"
+        ok = term.params.get("operator") == "exact_match"
         self.assertTrue(ok)
 
         term = Value("value") == attr
-        ok = isinstance(term, Terminal)
+        ok = isinstance(term, GenericTerminal)
         self.assertTrue(ok)
-        ok = term.operator == "exact_match"
+        ok = term.params.get("operator") == "exact_match"
         self.assertTrue(ok)
         logger.info("Attribute tests results: ok: (%d)", ok)
 
     def testFreeText(self):
         """Test the free text search function"""
         query = TextQuery("tubulin")  # make a TextQuery
-        results = set(query())  # make it an iterable set
+        results = list(query())  # make it an iterable set
         ok = len(results) > 0  # assert the result isn't blank
         self.assertTrue(ok)
         logger.info("FreeText test results: length (%d) ok (%r)", len(results), ok)
@@ -289,26 +290,26 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = len(query.nodes) == 2
         self.assertTrue(ok)
-        ok = query.nodes[0].attribute == "a"
+        ok = query.nodes[0].params.get("attribute") == "a"
         self.assertTrue(ok)
-        ok = query.nodes[0].operator == "equals"
+        ok = query.nodes[0].params.get("operator") == "equals"
         self.assertTrue(ok)
-        ok = query.nodes[0].value == "aval"
+        ok = query.nodes[0].params.get("value") == "aval"
         self.assertTrue(ok)
-        ok = query.nodes[1].attribute == "b"
+        ok = query.nodes[1].params.get("attribute") == "b"
         self.assertTrue(ok)
-        ok = query.nodes[1].operator == "exact_match"
+        ok = query.nodes[1].params.get("operator") == "exact_match"
         self.assertTrue(ok)
-        ok = query.nodes[1].value == "bval"
+        ok = query.nodes[1].params.get("value") == "bval"
 
         query = query.and_(Attr("c") < 5)
         ok = len(query.nodes) == 3
         self.assertTrue(ok)
-        ok = query.nodes[2].attribute == "c"
+        ok = query.nodes[2].params.get("attribute") == "c"
         self.assertTrue(ok)
-        ok = query.nodes[2].operator == "less"
+        ok = query.nodes[2].params.get("operator") == "less"
         self.assertTrue(ok)
-        ok = query.nodes[2].value == 5
+        ok = query.nodes[2].params.get("value") == 5
         self.assertTrue(ok)
 
         query = query.or_("d")
@@ -330,11 +331,11 @@ class SearchTests(unittest.TestCase):
 
         ok = isinstance(query.nodes[0], Group)
         self.assertTrue(ok)
-        ok = query.nodes[1].attribute == "d"
+        ok = query.nodes[1].params.get("attribute") == "d"
         self.assertTrue(ok)
-        ok = query.nodes[1].operator == "exact_match"
+        ok = query.nodes[1].params.get("operator") == "exact_match"
         self.assertTrue(ok)
-        ok = query.nodes[1].value == "dval"
+        ok = query.nodes[1].params.get("value") == "dval"
         self.assertTrue(ok)
         logger.info("Partial Query results: ok: (%r)", ok)
 
@@ -434,7 +435,7 @@ class SearchTests(unittest.TestCase):
 
     def testCSMquery(self):
         """Test firing off a single query that includes Computed Structure Models. Making sure the result is not None"""
-        q1 = Terminal("rcsb_entry_container_identifiers.entry_id", operator="in", value=["AF_AFO87296F1"])  # entry ID for specific computed structure model of hemoglobin
+        q1 = AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["AF_AFO87296F1"])  # entry ID for specific computed structure model of hemoglobin
         session = Session(q1, return_content_type=["computational", "experimental"])
         result = session._single_query()
         ok = result is not None
@@ -442,7 +443,7 @@ class SearchTests(unittest.TestCase):
         logger.info("Single query test results with Computed Structure Models: ok : (%r)", ok)
 
         # Checks to see if result count changes when computed structure models included or not and if result count is expected
-        q2 = Terminal("rcsb_entity_source_organism.taxonomy_lineage.name", operator="contains_phrase", value="Arabidopsis thaliana")
+        q2 = AttributeQuery("rcsb_entity_source_organism.taxonomy_lineage.name", operator="contains_phrase", value="Arabidopsis thaliana")
         q2_length = len(list(q2(return_content_type=["experimental"])))
         q2_computational_length = len(list(q2(return_content_type=["computational", "experimental"])))
         ok = q2_length > 1900
@@ -461,38 +462,32 @@ class SearchTests(unittest.TestCase):
         logger.info("Text Query results with Computed Structure Models: ok : (%r)", ok)
 
         # Query with only computed models
-        q4 = Terminal("rcsb_uniprot_protein.name.value", operator="contains_phrase", value="Hemoglobin")
+        q4 = AttributeQuery("rcsb_uniprot_protein.name.value", operator="contains_phrase", value="Hemoglobin")
         session = Session(q4, return_content_type=["computational"])
         result = session._single_query()
         ok = result is not None
         self.assertTrue(ok)
         q4_length = len(list(q4(return_content_type=["computational"])))
-        print(q4_length)
         ok2 = q4_length == 885
         self.assertTrue(ok2)
         logger.info("Query results with only computed models: ok : (%r) : ok2 : (%s)", ok, ok2)
 
-    #def testSequenceQuery(self):
-        #"""Test firing off a Sequence query"""
-        
+    def testSequenceQuery(self):
+        """Test firing off a Sequence query"""
         # Sequence query with hemoglobin protein sequence (id: 4HHB). Default parameters
-        #q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAH \
-                           #VDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR"
-                           #)
-        #result = list(q1())
-        #result_len = len(result)
-        #ok = result_len > 0 and result_len == 706  # this query displays 706 ids in pdb website search function
-        #logger.info("Sequence query results correctly displays ids: (%r)", ok)
+        q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR")
+        result = list(q1())
+        result_len = len(result)
+        ok = result_len > 0 and result_len == 706  # this query displays 706 ids in pdb website search function
+        logger.info("Sequence query results correctly displays ids: (%r)", ok)
 
         # Sequence query (id: 4HHB) with custom parameters
-        #q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAH \
-                           #VDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR",
-                           #evalue_cutoff=0.01, identity_cutoff=0.9)
-        #result = list(q1())
-        #result_len = len(result)
-        #ok = result_len > 0 and result_len == 313  # this query displays 313 ids in pdb website search function
-        #logger.info("Sequence query results correctly displays ids with custom parameters: (%r)", ok)
-
+        q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR",
+                           evalue_cutoff=0.01, identity_cutoff=0.9)
+        result = list(q1())
+        result_len = len(result)
+        ok = result_len > 0 and result_len == 313  # this query displays 313 ids in pdb website search function
+        logger.info("Sequence query results correctly displays ids with custom parameters: (%r)", ok)
 
 
 def buildSearch():
@@ -515,6 +510,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testChemSearch"))
     suiteSelect.addTest(SearchTests("testMismatch"))
     suiteSelect.addTest(SearchTests("testCSMquery"))
+    suiteSelect.addTest(SearchTests("testSequenceQuery"))
     return suiteSelect
 
 
