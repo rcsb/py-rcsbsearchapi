@@ -27,7 +27,7 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, GenericTerminal, AttributeQuery, SequenceQuery
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -180,36 +180,31 @@ class SearchTests(unittest.TestCase):
         """Make an example query, and make sure it performs correctly.
         This example is pulled directly from the 'Biological Assembly Search'
         example found at http://search.rcsb.org/#examples"""
-        q1 = TextQuery('"heat-shock transcription factor"')
+        q1 = TextQuery("heat-shock transcription factor")
         q2 = attrs.rcsb_struct_symmetry.symbol == "C2"
         q3 = attrs.rcsb_struct_symmetry.kind == "Global Symmetry"
         q4 = attrs.rcsb_entry_info.polymer_entity_count_DNA >= 1
 
         # combined using bitwise operators (&, |, ~, etc)
-        query = q1 & q2 & q3 & q4  # AND of all queries
+        query = q1 & (q2 & q3 & q4)  # AND of all queries
 
         results = set(query("assembly"))
-        ok = len(results) > 0  # 14 results 2020-06
+        ok = len(results) > 0  # 1657 results 2023-06
         self.assertTrue(ok)
         ok = "1FYL-1" in results
         self.assertTrue(ok)
 
         # Fluent syntax
-        query2 = (
-            TextQuery('"heat-shock transcription factor"')
-            .and_("rcsb_struct_symmetry.symbol", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
-            .exact_match("C2")
-            .and_("rcsb_struct_symmetry.kind", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
-            .exact_match("Global Symmetry")
-            .and_("rcsb_entry_info.polymer_entity_count_DNA", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
-            .greater_or_equal(1)
-        )
-
+        query2 = TextQuery("heat-shock transcription factor").and_(AttributeQuery("rcsb_struct_symmetry.symbol", "exact_match", "C2")
+                                                                   .and_("rcsb_struct_symmetry.kind", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
+                                                                   .exact_match("Global Symmetry")
+                                                                   .and_("rcsb_entry_info.polymer_entity_count_DNA", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
+                                                                   .greater_or_equal(1))
         ok = query2 == query
         self.assertTrue(ok)
 
         results = set(query2.exec("assembly"))
-        ok = len(results) > 0  # 14 results 2020-06
+        ok = len(results) > 0  # 1657 results 2023-06
         self.assertTrue(ok)
         ok = "1FYL-1" in results
         self.assertTrue(ok)
@@ -218,7 +213,7 @@ class SearchTests(unittest.TestCase):
     def exampleQuery2(self):
         """Make another example query, and make sure that it performs successfully. """
         q1 = (
-            TextQuery('"thymidine kinase"')
+            TextQuery("thymidine kinase")
             & AttributeQuery(
                 "rcsb_entity_source_organism.taxonomy_lineage.name",
                 operator="exact_match",
@@ -236,9 +231,8 @@ class SearchTests(unittest.TestCase):
             )
             & AttributeQuery("rcsb_entry_info.nonpolymer_entity_count", operator="greater", value=0)
         )
-
         results = set(q1("entry"))
-        ok = len(results) > 0  # 224 results 2020-06
+        ok = len(results) > 0  # 1484 results 2023-06
         self.assertTrue(ok)
         ok = "1KI6" in results  # make sure that the right information is pulled
         self.assertTrue(ok)
@@ -249,19 +243,19 @@ class SearchTests(unittest.TestCase):
         attr = Attr("attr")
 
         term = attr == "value"
-        ok = isinstance(term, GenericTerminal)
+        ok = isinstance(term, Terminal)
         self.assertTrue(ok)
         ok = term.params.get("operator") == "exact_match"
         self.assertTrue(ok)
 
         term = "value" == attr
-        ok = isinstance(term, GenericTerminal)
+        ok = isinstance(term, Terminal)
         self.assertTrue(ok)
         ok = term.params.get("operator") == "exact_match"
         self.assertTrue(ok)
 
         term = Value("value") == attr
-        ok = isinstance(term, GenericTerminal)
+        ok = isinstance(term, Terminal)
         self.assertTrue(ok)
         ok = term.params.get("operator") == "exact_match"
         self.assertTrue(ok)
