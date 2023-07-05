@@ -2867,7 +2867,7 @@
               "text" : "Collection Date (Diffrn Detector)",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 1.6833312E12,
+            "rcsb_current_maximum_value" : 1.6868736E12,
             "rcsb_current_minimum_value" : -2.7080352E13
           },
           "pdbx_frequency" : {
@@ -9499,7 +9499,7 @@
             "group_name" : "Structure Details",
             "priority_order" : 20
           } ],
-          "rcsb_current_maximum_value" : 1.686096E12,
+          "rcsb_current_maximum_value" : 1.687824E12,
           "rcsb_current_minimum_value" : 8.23392E10
         },
         "has_released_experimental_data" : {
@@ -9538,7 +9538,7 @@
             "group_name" : "Structure Details",
             "priority_order" : 25
           } ],
-          "rcsb_current_maximum_value" : 1.6867008E12,
+          "rcsb_current_maximum_value" : 1.6885152E12,
           "rcsb_current_minimum_value" : 2.01312E11
         },
         "major_revision" : {
@@ -9574,7 +9574,7 @@
             "group_name" : "Structure Details",
             "priority_order" : 30
           } ],
-          "rcsb_current_maximum_value" : 1.6867008E12,
+          "rcsb_current_maximum_value" : 1.6885152E12,
           "rcsb_current_minimum_value" : 9.736416E11
         },
         "status_code" : {
@@ -13482,7 +13482,7 @@
           },
           "type" : {
             "type" : "string",
-            "enum" : [ "OLDERADO", "BMRB", "NDB", "SB GRID", "PROTEIN DIFFRACTION", "EM DATA RESOURCE" ],
+            "enum" : [ "OLDERADO", "BMRB", "NDB", "NAKB", "SB GRID", "PROTEIN DIFFRACTION", "EM DATA RESOURCE" ],
             "rcsb_enum_annotated" : [ {
               "value" : "OLDERADO",
               "name" : "OLDERADO",
@@ -13498,6 +13498,10 @@
             }, {
               "value" : "NDB",
               "name" : "NDB",
+              "detail" : "Three-dimensional structural information about nucleic acids"
+            }, {
+              "value" : "NAKB",
+              "name" : "NAKB",
               "detail" : "Three-dimensional structural information about nucleic acids"
             }, {
               "value" : "PROTEIN DIFFRACTION",
@@ -15807,7 +15811,7 @@
             "group_name" : "ID(s) and Keywords",
             "priority_order" : 18
           } ],
-          "rcsb_current_maximum_value" : 3.7285134E7,
+          "rcsb_current_maximum_value" : 3.7380027E7,
           "rcsb_current_minimum_value" : 5.0
         }
       },
@@ -15920,7 +15924,7 @@
               "text" : "Cluster Identifier",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 1066499.0,
+            "rcsb_current_maximum_value" : 1066978.0,
             "rcsb_current_minimum_value" : 1.0
           },
           "identity" : {
@@ -22585,6 +22589,19 @@
                 "value" : {
                   "type" : "number",
                   "description" : "The value for the feature over this monomer segment."
+                },
+                "values" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "number",
+                    "examples" : [ 5, 0.25 ],
+                    "description" : "The value(s) for the feature over this monomer segment.",
+                    "rcsb_description" : [ {
+                      "text" : "The value(s) for the feature over this monomer segment.",
+                      "context" : "dictionary"
+                    } ]
+                  },
+                  "uniqueItems" : false
                 }
               },
               "additionalProperties" : false,
@@ -22646,7 +22663,7 @@
             "rcsb_search_context" : [ "exact-match", "full-text" ],
             "rcsb_full_text_priority" : 10,
             "rcsb_description" : [ {
-              "text" : "UniProt Annotation Name",
+              "text" : "Annotation Name",
               "context" : "brief"
             } ]
           },
@@ -22654,7 +22671,7 @@
             "type" : "string",
             "description" : "Code identifying the individual, organization or program that\n assigned the annotation.",
             "rcsb_description" : [ {
-              "text" : "UniProt Annotation Source",
+              "text" : "Annotation Source",
               "context" : "brief"
             } ]
           },
@@ -22664,8 +22681,20 @@
             "description" : "A type or category of the annotation.",
             "rcsb_search_context" : [ "exact-match" ],
             "rcsb_full_text_priority" : 10,
+            "rcsb_enum_annotated" : [ {
+              "value" : "disease",
+              "detail" : "Disease data from OMIM and Disease Ontology represented in Pharos",
+              "name" : "Disease"
+            }, {
+              "value" : "phenotype",
+              "detail" : "Phenotypic data including mouse phenotypes, mouse/human orthologs and GWAS results represented in Pharos",
+              "name" : "Phenotype"
+            } ],
             "rcsb_description" : [ {
-              "text" : "UniProt Annotation Type",
+              "text" : "A type or category of the annotation.",
+              "context" : "dictionary"
+            }, {
+              "text" : "Annotation Type",
               "context" : "brief"
             } ]
           },
@@ -22838,5 +22867,5 @@
   "$schema" : "http://json-schema.org/draft-07/schema#",
   "title" : "Text Service Metadata",
   "description" : "",
-  "$comment" : "Schema version: 1.42.0"
+  "$comment" : "Schema version: 1.42.2"
 }
