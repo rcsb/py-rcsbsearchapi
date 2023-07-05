@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.2.0 (2023-07-06)
+
+- Added support for sequence search
+- Updated Terminal class to allow for various types of searches
+- Documentation and code update
+
 ## v1.1.0 (2023-06-20)
 
 - Added support for including computed structure models (CSMs) in search (via `results_content_type`)
