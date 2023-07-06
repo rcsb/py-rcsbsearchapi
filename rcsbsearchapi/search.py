@@ -28,14 +28,15 @@ from typing import (
 )
 
 import requests
-from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, MIN_NUM_OF_RESIDUES, IDENTITY_CUTOFF_MAX_NUMBER
+from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
+from .const import RCSB_SEARCH_API_QUERY_URL
 
 if sys.version_info > (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
 # tqdm is optional
-# Allowed return types for searches. http://search.rcsb.org/#return-type
+# Allowed return types for searches. https://search.rcsb.org/#return-type
 ReturnType = Literal[
     "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance",
     "mol_definition"
@@ -189,8 +190,18 @@ class Query(ABC):
 
 @dataclass(frozen=True)
 class Terminal(Query):
-    """A terminal query node for doing searches other than attribute searches.
-    Main function to allow for sequence searches. Does not have immediate use
+    """A terminal query node.
+
+    Used for doing various types of searches. Accepts a service type and a dictionary of parameters.
+    The set of parameters differs for different search services.
+
+    Terminal can be built by passing in a service and parameter dictionary, but it's tedious work.
+    Typically, it's built by child classes that each represent a unique type of search.
+    This allows for more concise searching.
+
+    Examples:
+        >>> Terminal("full_text", {"value": "protease"})
+        >>> Terminal("text", {"attribute": "rcsb_id", "operator": "in", "negation": False, "value": ["5T89, "1TIM"]})
     """
     service: str
     params: Dict[str, Any]
@@ -222,18 +233,32 @@ class Terminal(Query):
                 node_id + 1,
             )
 
-    def __str__(self):
-        """Return a simplified string representation
+    # def __str__(self): (leaving it commented out to find out what it actually does once something breaks)
+    #     """Return a simplified string representation
 
-        Example:
-            >>> Terminal(service="serv", params="par")
+    #     Example:
+    #         >>> Terminal(service="serv", params="par")
 
-        """
-        return f"Terminal(service={self.service!r}, params={self.params!r})"
+    #     """
+    #     return f"Terminal(service={self.service!r}, params={self.params!r})"
 
 
 class AttributeQuery(Terminal):
-    """Special case of a Terminal for Structure and Chemical Attribute Searches"""
+    """Special case of a Terminal for Structure and Chemical Attribute Searches
+
+    AttributeQueries compares some *attribute* of a structure to a value.
+
+    Examples:
+        >>> AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        >>> AttributeQuery(value="tubulin")
+        >>> AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
+
+    A full list of attributes is available in the
+    `schema <https://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
+    Operators are documented `here <https://search.rcsb.org/#field-queries>`_.
+
+    The :py:class:`Attr` class provides a more pythonic way of constructing AttributeQueries.
+    """
 
     def __init__(self, attribute: Optional[str] = None,
                  operator: Optional[str] = None,
@@ -270,7 +295,7 @@ class TextQuery(Terminal):
 
 
 class SequenceQuery(Terminal):
-    """Special case of a terminal for dna, rna, or protein sequence queries"""
+    """Special case of a terminal for protein, DNA, or RNA sequence queries"""
 
     def __init__(self, value: str,
                  evalue_cutoff: Optional[float] = 0.1,
@@ -281,10 +306,10 @@ class SequenceQuery(Terminal):
         Args:
             value: sequence query
         """
-        if len(value) < MIN_NUM_OF_RESIDUES:
+        if len(value) < SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES:  # (placeholder for now) look into deriving constraints from API Schema programatically
             raise ValueError("The sequence must contain at least 25 residues")
-        if identity_cutoff > IDENTITY_CUTOFF_MAX_NUMBER:
-            raise ValueError("Identity cutoff should be less than or equal to 1")
+        if identity_cutoff < 0.0 or identity_cutoff > 1.0:
+            raise ValueError("Identity cutoff should be between 0 and 1 (inclusive)")
         else:
             super().__init__(service=SEQUENCE_SEARCH_SERVICE, params={"evalue_cutoff": evalue_cutoff,
                                                                       "identity_cutoff": identity_cutoff,
@@ -399,7 +424,7 @@ class Attr:
     Pre-instantiated attributes are available from the
     :py:data:`rcsbsearchapi.rcsb_attributes` object. These are generally easier to use
     than constructing Attr objects by hand. A complete list of valid attributes is
-    available in the `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
+    available in the `schema <https://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
 
     * The `range` dictionary requires the following keys:
      * "from" -> int
@@ -963,12 +988,13 @@ class Session(Iterable[str]):
     Handles paging the query and parsing results
     """
 
-    url = "http://search.rcsb.org/rcsbsearch/v2/query"
+    url = RCSB_SEARCH_API_QUERY_URL
     query_id: str
     query: Query
     return_type: ReturnType
     start: int
     rows: int
+    return_content_type: List[ReturnContentType]
 
     def __init__(
         # parameter added below for computed model inclusion
@@ -1082,7 +1108,7 @@ class Session(Iterable[str]):
         """URL to edit this query in the RCSB PDB query editor"""
         data = json.dumps(self._make_params(), separators=(",", ":"))
         return (
-            f"http://search.rcsb.org/query-editor.html?json={urllib.parse.quote(data)}"
+            f"https://search.rcsb.org/query-editor.html?json={urllib.parse.quote(data)}"
         )
 
     def rcsb_query_builder_url(self) -> str:
@@ -1090,4 +1116,4 @@ class Session(Iterable[str]):
         params = self._make_params()
         params["request_options"]["paginate"]["rows"] = 25
         data = json.dumps(params, separators=(",", ":"))
-        return f"http://www.rcsb.org/search?request={urllib.parse.quote(data)}"
+        return f"https://www.rcsb.org/search?request={urllib.parse.quote(data)}"
