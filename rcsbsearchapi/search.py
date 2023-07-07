@@ -217,12 +217,14 @@ class Terminal(Query):
 
     def __invert__(self):
         if isinstance(self, AttributeQuery):
-            return Terminal(self.service, {"attribute": self.params.get("attribute"),
-                                           "operator": self.params.get("operator"),
-                                           "negation": not self.params.get("negation"),
-                                           "value": self.params.get("value")})
+            return AttributeQuery(
+                attribute=self.params.get("attribute"),
+                operator=self.params.get("operator"),
+                negation=not self.params.get("negation"),
+                value=self.params.get("value")
+            )
         else:
-            return Terminal(self.service, self.params)
+            raise TypeError("Negation is not supported by type " + str(type(self)))  # Attribute Queries are the only query type to support inversion.
 
     def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
         if self.node_id == node_id:
