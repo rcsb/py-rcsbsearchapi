@@ -116,6 +116,15 @@ class SearchTests(unittest.TestCase):
         ok = first != "5T89"
         self.assertTrue(ok)
         logger.info("Inversion test results: ok : (%r)", ok)
+        # Test that seqqueries fail as intended:
+        q4 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR")
+        ok = False
+        try:
+            _ = ~q4
+        except TypeError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Inversion failed on SequenceQuery: ok : (%r)", ok)
 
     def testXor(self):
         """Test the overloaded XOR operator in a query. """
@@ -130,6 +139,16 @@ class SearchTests(unittest.TestCase):
         ok = result == {ids1[0], ids2[0]}
         self.assertTrue(ok)
         logger.info("Xor test results: ok : (%r)", ok)
+        # Test that xor fails when used for seqqueries
+        q4 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR")
+        q5 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR")
+        ok = False
+        try:
+            _ = q4 ^ q5  # this should fail as xor is not supported behavior for seq queries
+        except TypeError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("xor failed for seq queries: ok : (%r)", ok)
 
     def testPagination(self):
         """Test the pagination of the query. Note that this test differs from
