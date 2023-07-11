@@ -8,3 +8,6 @@ SEARCH_OPENAPI_SCHEMA_URL = "https://search.rcsb.org/openapi.json"
 STRUCTURE_ATTRIBUTE_SEARCH_SERVICE = "text"
 CHEMICAL_ATTRIBUTE_SEARCH_SERVICE = "text_chem"
 FULL_TEXT_SEARCH_SERVICE = "full_text"
+SEQUENCE_SEARCH_SERVICE = "sequence"
+SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES = 25
+RCSB_SEARCH_API_QUERY_URL = "https://search.rcsb.org/rcsbsearch/v2/query"

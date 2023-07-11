@@ -28,19 +28,21 @@ from typing import (
 )
 
 import requests
-from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE
+from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
+from .const import RCSB_SEARCH_API_QUERY_URL
 
 if sys.version_info > (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
 # tqdm is optional
-# Allowed return types for searches. http://search.rcsb.org/#return-type
+# Allowed return types for searches. https://search.rcsb.org/#return-type
 ReturnType = Literal[
     "entry", "assembly", "polymer_entity", "non_polymer_entity", "polymer_instance",
     "mol_definition"
 ]
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
+SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -190,89 +192,96 @@ class Query(ABC):
 class Terminal(Query):
     """A terminal query node.
 
-    Terminals are simple predicates comparing some *attribute* of a structure to a
-    value.
+    Used for doing various types of searches. Accepts a service type and a dictionary of parameters.
+    The set of parameters differs for different search services.
+
+    Terminal can be built by passing in a service and parameter dictionary, but it's tedious work.
+    Typically, it's built by child classes that each represent a unique type of search.
+    This allows for more concise searching.
 
     Examples:
-        >>> Terminal("exptl.method", "exact_match", "X-RAY DIFFRACTION")
-        >>> Terminal("rcsb_id", "in", ["5T89", "1TIM"])
-        >>> Terminal(value="tubulin")
-
-    A full list of attributes is available in the
-    `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
-    Operators are documented `here <http://search.rcsb.org/#field-queries>`_.
-
-    The :py:class:`Attr` class provides a more pythonic way of constructing Terminals.
+        >>> Terminal("full_text", {"value": "protease"})
+        >>> Terminal("text", {"attribute": "rcsb_id", "operator": "in", "negation": False, "value": ["5T89, "1TIM"]})
     """
-
-    attribute: Optional[str] = None
-    service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
-    operator: Optional[str] = None
-    value: Optional[TValue] = None
-    negation: Optional[bool] = False  # investigate whether this can be changed to None
+    service: str
+    params: Dict[str, Any]
     node_id: int = 0
 
     def to_dict(self):
-        params = dict()
-        if self.attribute is not None:
-            params["attribute"] = self.attribute
-        if self.operator is not None:
-            params["operator"] = self.operator
-        if self.value is not None:
-            params["value"] = self.value
-        if self.negation is not None:
-            params["negation"] = self.negation
-
         return dict(
             type="terminal",
             service=self.service,
-            parameters=params,
+            parameters=self.params,
             node_id=self.node_id,
         )
 
     def __invert__(self):
-        return Terminal(
-            self.attribute,
-            self.service,
-            self.operator,
-            self.value,
-            not self.negation,
-            self.node_id,
-        )
+        if isinstance(self, AttributeQuery):
+            return AttributeQuery(
+                attribute=self.params.get("attribute"),
+                operator=self.params.get("operator"),
+                negation=not self.params.get("negation"),
+                value=self.params.get("value")
+            )
+        else:
+            raise TypeError("Negation is not supported by type " + str(type(self)))  # Attribute Queries are the only query type to support inversion.
 
     def _assign_ids(self, node_id=0) -> Tuple[Query, int]:
         if self.node_id == node_id:
             return (self, node_id + 1)
         else:
             return (
-                Terminal(
-                    self.attribute,
-                    self.service,
-                    self.operator,
-                    self.value,
-                    self.negation,
-                    node_id,
-                ),
+                Terminal(self.service, self.params, node_id),
                 node_id + 1,
             )
 
-    def __str__(self):
-        """Return a simplified string representation
+    # def __str__(self): (leaving it commented out to find out what it actually does once something breaks)
+    #     """Return a simplified string representation
 
-        Examples:
-            >>> Terminal("attr", "op", "val")
-            >>> ~Terminal(value="val")
+    #     Example:
+    #         >>> Terminal(service="serv", params="par")
 
+    #     """
+    #     return f"Terminal(service={self.service!r}, params={self.params!r})"
+
+
+class AttributeQuery(Terminal):
+    """Special case of a Terminal for Structure and Chemical Attribute Searches
+
+    AttributeQueries compares some *attribute* of a structure to a value.
+
+    Examples:
+        >>> AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        >>> AttributeQuery(value="tubulin")
+        >>> AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
+
+    A full list of attributes is available in the
+    `schema <https://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
+    Operators are documented `here <https://search.rcsb.org/#field-queries>`_.
+
+    The :py:class:`Attr` class provides a more pythonic way of constructing AttributeQueries.
+    """
+
+    def __init__(self, attribute: Optional[str] = None,
+                 operator: Optional[str] = None,
+                 value: Optional[TValue] = None,
+                 service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE,
+                 negation: Optional[bool] = False
+                 ):
+        """Search for the string value given possible attribute or operator
+        Also can specify service and negation
+
+        Args:
+            attribute: specify attribute for search (i.e struct.title, exptl.method, rcsb_id)
+            operator: specify operation to be done for search (i.e "contains_phrase", "exact_match")
+            value: text query
+            service: specify what search service (i.e "text", "text_chem")
+            negation: logical not
         """
-        negation = "~" if self.negation else ""
-        if self.attribute is None and self.operator is None:
-            # value-only
-            return f"{negation}Terminal(value={self.value!r})"
-        else:
-            return (
-                f"{negation}Terminal({self.attribute!r}, operator={self.operator!r}, "
-                f"value={self.value!r})"
-            )
+        super().__init__(params={"attribute": attribute,
+                                 "operator": operator,
+                                 "negation": negation,
+                                 "value": value}, service=service)
 
 
 class TextQuery(Terminal):
@@ -283,9 +292,32 @@ class TextQuery(Terminal):
 
         Args:
             value: free-text query
-            negation: find structures without the pattern
         """
-        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, value=value, negation=None)
+        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, params={"value": value})
+
+
+class SequenceQuery(Terminal):
+    """Special case of a terminal for protein, DNA, or RNA sequence queries"""
+
+    def __init__(self, value: str,
+                 evalue_cutoff: Optional[float] = 0.1,
+                 identity_cutoff: Optional[float] = 0,
+                 sequence_type: Optional[SequenceType] = "protein"
+                 ):
+        """The string value is a target sequence that is searched
+        Args:
+            value: sequence query
+        """
+        if len(value) < SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES:  # (placeholder for now) look into deriving constraints from API Schema programatically
+            raise ValueError("The sequence must contain at least 25 residues")
+        if identity_cutoff < 0.0 or identity_cutoff > 1.0:
+            raise ValueError("Identity cutoff should be between 0 and 1 (inclusive)")
+        else:
+            super().__init__(service=SEQUENCE_SEARCH_SERVICE, params={"evalue_cutoff": evalue_cutoff,
+                                                                      "identity_cutoff": identity_cutoff,
+                                                                      "sequence_type": sequence_type,
+                                                                      "value": value
+                                                                      })
 
 
 @dataclass(frozen=True)
@@ -325,7 +357,7 @@ class Group(Query):
             if isinstance(other, Group):
                 if other.operator == "or":
                     return Group("or", (*self.nodes, *other.nodes))
-            elif isinstance(other, Terminal):
+            elif isinstance(other, Query):
                 return Group("or", (*self.nodes, other))
             else:
                 return NotImplemented
@@ -394,7 +426,7 @@ class Attr:
     Pre-instantiated attributes are available from the
     :py:data:`rcsbsearchapi.rcsb_attributes` object. These are generally easier to use
     than constructing Attr objects by hand. A complete list of valid attributes is
-    available in the `schema <http://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
+    available in the `schema <https://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
 
     * The `range` dictionary requires the following keys:
      * "from" -> int
@@ -406,15 +438,15 @@ class Attr:
     attribute: str
     type: Optional[str] = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE  # this will be changed later, this is to allow the program to still run. Will not be optional.
 
-    def exact_match(self, value: Union[str, "Value[str]"]) -> Terminal:
+    def exact_match(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
         """Exact match with the value"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "exact_match", value)
+        return AttributeQuery(self.attribute, "exact_match", value, self.type)
 
     def contains_words(
         self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]
-    ) -> Terminal:
+    ) -> AttributeQuery:
         """Match any word within the string.
 
         Words are split at whitespace. All results which match any word are returned,
@@ -424,45 +456,45 @@ class Attr:
             value = value.value
         if isinstance(value, list):
             value = " ".join(value)
-        return Terminal(self.attribute, self.type, "contains_words", value)
+        return AttributeQuery(self.attribute, "contains_words", value, self.type)
 
-    def contains_phrase(self, value: Union[str, "Value[str]"]) -> Terminal:
+    def contains_phrase(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
         """Match an exact phrase"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "contains_phrase", value)
+        return AttributeQuery(self.attribute, "contains_phrase", value, self.type)
 
-    def greater(self, value: TNumberLike) -> Terminal:
+    def greater(self, value: TNumberLike) -> AttributeQuery:
         """Attribute > `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "greater", value)
+        return AttributeQuery(self.attribute, "greater", value, self.type)
 
-    def less(self, value: TNumberLike) -> Terminal:
+    def less(self, value: TNumberLike) -> AttributeQuery:
         """Attribute < `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "less", value)
+        return AttributeQuery(self.attribute, "less", value, self.type)
 
-    def greater_or_equal(self, value: TNumberLike) -> Terminal:
+    def greater_or_equal(self, value: TNumberLike) -> AttributeQuery:
         """Attribute >= `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "greater_or_equal", value)
+        return AttributeQuery(self.attribute, "greater_or_equal", value, self.type)
 
-    def less_or_equal(self, value: TNumberLike) -> Terminal:
+    def less_or_equal(self, value: TNumberLike) -> AttributeQuery:
         """Attribute <= `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "less_or_equal", value)
+        return AttributeQuery(self.attribute, "less_or_equal", value, self.type)
 
-    def equals(self, value: TNumberLike) -> Terminal:
+    def equals(self, value: TNumberLike) -> AttributeQuery:
         """Attribute == `value`"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "equals", value)
+        return AttributeQuery(self.attribute, "equals", value, self.type)
 
-    def range(self, value: Dict[str, Any]) -> Terminal:
+    def range(self, value: Dict[str, Any]) -> AttributeQuery:
         """Attribute is within the specified half-open range
 
         Args:
@@ -470,11 +502,11 @@ class Attr:
         """
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, self.type, "range", value)
+        return AttributeQuery(self.attribute, "range", value, self.type)
 
-    def exists(self) -> Terminal:
+    def exists(self) -> AttributeQuery:
         """Attribute is defined for the structure"""
-        return Terminal(self.attribute, operator="exists")
+        return AttributeQuery(self.attribute, operator="exists")
 
     def in_(
         self,
@@ -496,11 +528,11 @@ class Attr:
             "Value[Tuple[float, ...]]",
             "Value[Tuple[date, ...]]",
         ],
-    ) -> Terminal:
+    ) -> AttributeQuery:
         """Attribute is contained in the list of values"""
         if isinstance(value, Value):
             value = value.value
-        return Terminal(self.attribute, operator="in", value=value)
+        return AttributeQuery(self.attribute, operator="in", value=value)
 
     # Need ignore[override] because typeshed restricts __eq__ return value
     # https://github.com/python/mypy/issues/2783
@@ -958,13 +990,13 @@ class Session(Iterable[str]):
     Handles paging the query and parsing results
     """
 
-    url = "http://search.rcsb.org/rcsbsearch/v2/query"
+    url = RCSB_SEARCH_API_QUERY_URL
     query_id: str
     query: Query
     return_type: ReturnType
     start: int
     rows: int
-    computational: bool
+    return_content_type: List[ReturnContentType]
 
     def __init__(
         # parameter added below for computed model inclusion
@@ -1078,10 +1110,12 @@ class Session(Iterable[str]):
         """URL to edit this query in the RCSB PDB query editor"""
         data = json.dumps(self._make_params(), separators=(",", ":"))
         return (
-            f"http://search.rcsb.org/query-editor.html?json={urllib.parse.quote(data)}"
+            f"https://search.rcsb.org/query-editor.html?json={urllib.parse.quote(data)}"
         )
 
     def rcsb_query_builder_url(self) -> str:
         """URL to view this query on the RCSB PDB website query builder"""
-        data = json.dumps(self._make_params(), separators=(",", ":"))
-        return f"http://www.rcsb.org/search?request={urllib.parse.quote(data)}"
+        params = self._make_params()
+        params["request_options"]["paginate"]["rows"] = 25
+        data = json.dumps(params, separators=(",", ":"))
+        return f"https://www.rcsb.org/search?request={urllib.parse.quote(data)}"

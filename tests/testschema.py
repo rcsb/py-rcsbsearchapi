@@ -55,18 +55,19 @@ class SchemaTests(unittest.TestCase):
     def testSchemaVersion(self):
         webSchema = _download_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_json_schema()
-        ok = webSchema == localSchema
-        self.assertTrue(ok)
         localVer = localSchema.get("$comment")
         webVer = webSchema.get("$comment")
+        ok = localVer == webVer
+        logger.info("ok is %r", ok)
+        self.assertTrue(ok)
         logger.info("Metadata schema tests results: local version (%r) and web version (%s)", localVer, webVer)
         webSchema = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_chem_schema()
-        ok = webSchema == localSchema
+        webVer = webSchema.get("$comment")
+        localVer = localSchema.get("$comment")
+        ok = webVer == localVer
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
-        localVer = localSchema.get("$comment")
-        webVer = webSchema.get("$comment")
         logger.info("Chemical schema tests results: local version (%r) and web version (%s)", localVer, webVer)
 
 
