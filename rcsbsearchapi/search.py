@@ -43,8 +43,7 @@ ReturnType = Literal[
 ]
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
 SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
-SeqMode = ["simple", "prosite", "regex"]  # possible sequence motif formats
-SeqType = ["dna", "rna", "protein"]
+SeqMode = Literal["simple", "prosite", "regex"]  # possible sequence motif formats
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -325,11 +324,9 @@ class SequenceQuery(Terminal):
 class SeqMotifQuery(Terminal):
     """Special case of a terminal for protein, DNA, or RNA sequence queries"""
 
-    def __init__(self, value: str, pattern_type: Optional[str] = "simple", sequence_type: Optional[str] = "protein"):  # see later for literal
+    def __init__(self, value: str, pattern_type: Optional[SeqMode] = "simple", sequence_type: Optional[SequenceType] = "protein"):
         if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
             raise ValueError("The sequence motif must contain at least 2 characters")
-        elif (pattern_type not in SeqMode) or (sequence_type not in SeqType):
-            raise ValueError("The parameters of the query are incorrect")
         else:
             super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value,
                                                                       "pattern_type": pattern_type,

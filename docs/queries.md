@@ -152,6 +152,24 @@ results = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET" +
 for polyid in results("polymer_entity"):
     print(polyid)
 ```
+### Sequence Motif Search Example
+
+Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-6) page,
+using the sequence motif search function. 
+This query retrives occurences of the His2/Cys2 Zinc Finger DNA-binding domain as
+represented by its PROSITE signature. 
+```python
+from rcsbsearch.api import SeqMotifQuery
+
+# Use SeqMotifQuery class and add parameters
+results = SeqMotifQuery("C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
+                        pattern_type="prosite",
+                        sequence_type="protein")
+
+# results("polymer_entity") produces an iterator of IDs with return type - polymer entities
+for polyid in results("polymer_entity"):
+    print(polyid)
+```
 ## Sessions
 
 The result of executing a query (either by calling it or using `exec()`) is a

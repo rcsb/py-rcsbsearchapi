@@ -526,8 +526,9 @@ class SearchTests(unittest.TestCase):
 
         ok = False
         try:
-            _ = SeqMotifQuery("AAAA", "nothing", "nothing")  # this should fail
-        except ValueError:  # placeholder error to see actual type
+            q1 = SeqMotifQuery("AAAA", "nothing", "nothing")  # this should fail
+            _ = list(q1())
+        except requests.exceptions.HTTPError:
             ok = True
         self.assertTrue(ok)
         logger.info("SeqMotif Query with invalid parameters failed successfully: (%r)", ok)

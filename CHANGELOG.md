@@ -1,8 +1,8 @@
 # Changelog
 
-## v1.2.0 (2023-07-06)
+## v1.2.0 (2023-07-11)
 
-- Added support for sequence search
+- Added support for sequence search and sequence motif search
 - Updated Terminal class to allow for various types of searches
 - Documentation and code update
 
