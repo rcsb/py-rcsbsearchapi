@@ -168,3 +168,27 @@ results = SeqMotifQuery("C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
 for polyid in results("polymer_entity"):
     print(polyid)
 ```
+
+You can also use a regular expression (RegEx) to make a sequence motif search.
+As an example, here is a query for the zinc finger motif that binds Zn in a DNA-binding domain:
+```python
+from rcsbsearch.api import SeqMotifQuery
+
+results = SeqMotifQuery("C.{2,4}C.{12}H.{3,5}H", pattern_type="regex", sequence_type="protein")
+
+for polyid in results("polymer_entity"):
+    print(polyid)
+```
+
+Finally, you can use a standard amino acid sequence to make a sequence motif search. 
+X can be used to allow any amino acid in that position. 
+As an example, here is a query for SH3 domains:
+```python
+from rcsbsearch.api import SeqMotifQuery
+
+# By default, the pattern_type argument is "simple" and the sequence_type argument is "protein".
+results = SeqMotifQuery("XPPXP")  # X is used as a "variable residue" and can be any amino acid. 
+
+for polyid in results("polymer_entity"):
+    print(polyid)
+```

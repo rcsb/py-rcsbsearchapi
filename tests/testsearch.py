@@ -504,7 +504,7 @@ class SearchTests(unittest.TestCase):
 
     def testSeqMotifQuery(self):
         """Test firing off a SeqMotif query"""
-        q1 = SeqMotifQuery("AA")  # basic test, make sure standard query is instantiated properly
+        q1 = SeqMotifQuery("RK")  # basic test, make sure standard query is instantiated properly
         result = list(q1())
         ok = len(result) > 0
         self.assertTrue(ok)
@@ -515,6 +515,25 @@ class SearchTests(unittest.TestCase):
         ok = len(result) == 0
         self.assertTrue(ok)
         logger.info("Basic DNA SeqMotif query results: result_length : (%d) (this should be 0), ok : (%r)", len(result), ok)
+
+        q3 = SeqMotifQuery("CCGGCG", sequence_type="dna")
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Functional DNA query results: result_length : (%d), ok : (%r)", len(result), ok)
+
+        # rna query
+        q4 = SeqMotifQuery("AUXAU", sequence_type="rna")  # X is a variable for any amino acid in that position
+        result = list(q4())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Functional RNA query results: result_length : (%d), ok : (%r)", len(result), ok)
+
+        q5 = SeqMotifQuery("ATUAC")  # An rna query with T should yield no results
+        result = list(q5())
+        ok = len(result) == 0
+        self.assertTrue(ok)
+        logger.info("Basic Non-functional DNA query results: result_length : (%d), ok : (%r)", len(result), ok)
 
         ok = False
         try:
