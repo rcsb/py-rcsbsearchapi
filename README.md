@@ -164,7 +164,7 @@ using the sequence motif search function.
 This query retrives occurences of the His2/Cys2 Zinc Finger DNA-binding domain as
 represented by its PROSITE signature. 
 ```python
-from rcsbsearch.api import SeqMotifQuery
+from rcsbsearchapi.search import SeqMotifQuery
 
 # Use SeqMotifQuery class and add parameters
 results = SeqMotifQuery("C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
@@ -179,7 +179,7 @@ for polyid in results("polymer_entity"):
 You can also use a regular expression (RegEx) to make a sequence motif search.
 As an example, here is a query for the zinc finger motif that binds Zn in a DNA-binding domain:
 ```python
-from rcsbsearch.api import SeqMotifQuery
+from rcsbsearchapi.search import SeqMotifQuery
 
 results = SeqMotifQuery("C.{2,4}C.{12}H.{3,5}H", pattern_type="regex", sequence_type="protein")
 
@@ -187,16 +187,35 @@ for polyid in results("polymer_entity"):
     print(polyid)
 ```
 
-Finally, you can use a standard amino acid sequence to make a sequence motif search. 
+You can use a standard amino acid sequence to make a sequence motif search. 
 X can be used to allow any amino acid in that position. 
 As an example, here is a query for SH3 domains:
 ```python
-from rcsbsearch.api import SeqMotifQuery
+from rcsbsearchapi.search import SeqMotifQuery
 
 # By default, the pattern_type argument is "simple" and the sequence_type argument is "protein".
 results = SeqMotifQuery("XPPXP")  # X is used as a "variable residue" and can be any amino acid. 
 
 for polyid in results("polymer_entity"):
+    print(polyid)
+```
+
+All 3 of these pattern types can be used to search for DNA and RNA sequences as well.
+Demonstrated are 2 queries, one DNA and one RNA, using the simple pattern type:
+```python
+from rcsbsearchapi.search import SeqMotifQuery
+
+# DNA query: this is a query for a T-Box.
+dna = SeqMotifQuery("TCACACCT", sequence_type="dna")
+
+print("DNA results:")
+for polyid in dna("polymer_entity"):
+    print(polyid)
+
+# RNA query: 6C RNA motif
+rna = SeqMotifQuery("CCCCCC", sequence_type="rna")
+print("RNA results:")
+for polyid in rna("polymer_entity"):
     print(polyid)
 ```
 ## Supported Features
