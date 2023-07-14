@@ -29,7 +29,7 @@ from typing import (
 
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
-from .const import RCSB_SEARCH_API_QUERY_URL
+from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -43,6 +43,7 @@ ReturnType = Literal[
 ]
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
 SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
+SeqMode = Literal["simple", "prosite", "regex"]  # possible sequence motif formats
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -318,6 +319,18 @@ class SequenceQuery(Terminal):
                                                                       "sequence_type": sequence_type,
                                                                       "value": value
                                                                       })
+
+
+class SeqMotifQuery(Terminal):
+    """Special case of a terminal for protein, DNA, or RNA sequence queries"""
+
+    def __init__(self, value: str, pattern_type: Optional[SeqMode] = "simple", sequence_type: Optional[SequenceType] = "protein"):
+        if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
+            raise ValueError("The sequence motif must contain at least 2 characters")
+        else:
+            super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value,
+                                                                      "pattern_type": pattern_type,
+                                                                      "sequence_type": sequence_type})
 
 
 @dataclass(frozen=True)

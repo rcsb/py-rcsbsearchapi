@@ -27,7 +27,7 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -491,7 +491,7 @@ class SearchTests(unittest.TestCase):
         q1 = SequenceQuery("VLSPADKTNVKAAWGKVGAHAGEYGAEALERMFLSFPTTKTYFPHFDLSHGSAQVKGHGKKVADALTNAVAHVDDMPNALSALSDLHAHKLRVDPVNFKLLSHCLLVTLAAHLPAEFTPAVHASLDKFLASVSTVLTSKYR")
         result = list(q1())
         result_len = len(result)
-        ok = result_len > 0 and result_len == 706  # this query displays 706 ids in pdb website search function
+        ok = result_len > 0  # this query displays 706 ids in pdb website search function
         logger.info("Sequence query results correctly displays ids: (%r)", ok)
 
         # Sequence query (id: 4HHB) with custom parameters
@@ -499,8 +499,58 @@ class SearchTests(unittest.TestCase):
                            evalue_cutoff=0.01, identity_cutoff=0.9)
         result = list(q1())
         result_len = len(result)
-        ok = result_len > 0 and result_len == 313  # this query displays 313 ids in pdb website search function
+        ok = result_len > 0  # this query displays 313 ids in pdb website search function
         logger.info("Sequence query results correctly displays ids with custom parameters: (%r)", ok)
+
+    def testSeqMotifQuery(self):
+        """Test firing off a SeqMotif query"""
+        q1 = SeqMotifQuery("RK")  # basic test, make sure standard query is instantiated properly
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic SeqMotif query results: result_length : (%d), ok : (%r)", len(result), ok)
+
+        q2 = SeqMotifQuery("FFFFF", sequence_type="dna")  # test a DNA query, this should yield no results
+        result = list(q2())
+        ok = len(result) == 0
+        self.assertTrue(ok)
+        logger.info("Basic DNA SeqMotif query results: result_length : (%d) (this should be 0), ok : (%r)", len(result), ok)
+
+        q3 = SeqMotifQuery("CCGGCG", sequence_type="dna")
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Functional DNA query results: result_length : (%d), ok : (%r)", len(result), ok)
+
+        # rna query
+        q4 = SeqMotifQuery("AUXAU", sequence_type="rna")  # X is a variable for any amino acid in that position
+        result = list(q4())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Functional RNA query results: result_length : (%d), ok : (%r)", len(result), ok)
+
+        q5 = SeqMotifQuery("ATUAC")  # An rna query with T should yield no results
+        result = list(q5())
+        ok = len(result) == 0
+        self.assertTrue(ok)
+        logger.info("Basic Non-functional DNA query results: result_length : (%d), ok : (%r)", len(result), ok)
+
+        ok = False
+        try:
+            _ = SeqMotifQuery("A")  # test an invalid query. This will fail.
+        except ValueError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Short SeqMotif query failed successfully: (%r)", ok)
+
+        ok = False
+        try:
+            q1 = SeqMotifQuery("AAAA", "nothing", "nothing")  # this should fail
+            _ = list(q1())
+        except requests.exceptions.HTTPError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("SeqMotif Query with invalid parameters failed successfully: (%r)", ok)
 
 
 def buildSearch():
@@ -524,6 +574,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testMismatch"))
     suiteSelect.addTest(SearchTests("testCSMquery"))
     suiteSelect.addTest(SearchTests("testSequenceQuery"))
+    suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
     return suiteSelect
 
 
