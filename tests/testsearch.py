@@ -24,10 +24,10 @@ import time
 import unittest
 from itertools import islice
 import requests
-from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, fileUpload
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -552,6 +552,73 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("SeqMotif Query with invalid parameters failed successfully: (%r)", ok)
 
+    def testFileUpload(self):
+        """Test uploading a file. Used for structure queries.
+        As a unique URL is generated each time, the only common
+        denominator is that the return URL contains the file
+        name at the end of it, and that the first part of the
+        URL is the same."""
+        hemo = "./files/4hhb.cif"
+        x = fileUpload(hemo)
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
+        self.assertTrue(ok)
+        logger.info(".cif File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly. This is admittedly rather redundant.
+        self.assertTrue(ok)
+        logger.info(".cif File Upload check two: (%r)", ok)
+
+        zipfile = "./files/7n0r.cif.gz"  # gz files should also work by default
+        x = fileUpload(zipfile)
+        ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
+        self.assertTrue(ok)
+        logger.info(".cif.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".cif.gz File Upload check two: (%r)", ok)
+
+        pdbfile = "./files/4hhb.pdb"
+        x = fileUpload(pdbfile, "pdb")  # for non-cif files provide file extension
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
+        self.assertTrue(ok)
+        logger.info(".pdb File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".pdb File Upload check two: (%r)", ok)
+
+        zippdb = "./files/7n0r.pdb.gz"  # PDB Zip files should work as well.
+        x = fileUpload(zippdb, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".pdb.gz File Upload check two: (%r)", ok)
+
+        hemobcif = "./files/4hhb.bcif"
+        x = fileUpload(hemobcif, "bcif")  # must specify that file you are providing is bcif
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
+        self.assertTrue(ok)
+        logger.info(".bcif File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".bcif File Upload check two: (%r)", ok)
+
+        # test error handling
+
+        invalid = "./files/invalid.txt"
+        ok = False
+        try:
+            _ = fileUpload(invalid, "bcif")
+        except TypeError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("invalid query failed successfully: (%r)", ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -575,6 +642,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testCSMquery"))
     suiteSelect.addTest(SearchTests("testSequenceQuery"))
     suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    suiteSelect.addTest(SearchTests("testFileUpload"))
     return suiteSelect
 
 
