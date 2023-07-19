@@ -29,7 +29,7 @@ from typing import (
 
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
-from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS
+from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, STRUCT_SIM_SEARCH_SERVICE
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -44,6 +44,7 @@ ReturnType = Literal[
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
 SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
 SeqMode = Literal["simple", "prosite", "regex"]  # possible sequence motif formats
+StructSimEntryType = Literal["entry_id", "file_url", "file_upload"]  # possible entry types for structure similarity search
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -322,7 +323,7 @@ class SequenceQuery(Terminal):
 
 
 class SeqMotifQuery(Terminal):
-    """Special case of a terminal for protein, DNA, or RNA sequence queries"""
+    """Special case of a terminal for protein, DNA, or RNA sequence motif queries"""
 
     def __init__(self, value: str, pattern_type: Optional[SeqMode] = "simple", sequence_type: Optional[SequenceType] = "protein"):
         if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
@@ -331,6 +332,55 @@ class SeqMotifQuery(Terminal):
             super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value,
                                                                       "pattern_type": pattern_type,
                                                                       "sequence_type": sequence_type})
+
+
+class StructSimilarityQuery(Terminal):
+    """Special case of a terminal for structure similarity queries"""
+
+    def __init__(self, structure_search_type: Optional[StructSimEntryType] = "entry_id",
+                 value: Optional[str] = None,
+                 input_structure_type: Optional[str] = "assembly_id",
+                 input_structure_id: Optional[str] = "1",
+                 operator: str = "strict_shape_match",
+                 target_search_space: str = "assembly"
+                 ):
+        if structure_search_type == "entry_id":
+            if input_structure_type == "assembly_id":
+                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                    "operator": operator,
+                    "target_search_space": target_search_space,
+                    "value": {
+                        "entry_id": value,
+                        "assembly_id": input_structure_id
+                    }
+                })
+            elif input_structure_type == "chain_id":
+                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                    "operator": operator,
+                    "target_search_space": target_search_space,
+                    "value": {
+                        "entry_id": value,
+                        "asym_id": input_structure_id
+                    }
+                })
+        elif structure_search_type == "file_url":
+            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                "operator": operator,
+                "target_search_space": target_search_space,
+                "value": {
+                    "url": value,
+                    "format": input_structure_id
+                }
+            })
+        elif structure_search_type == "file_upload":
+            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                "operator": operator,
+                "target_search_space": target_search_space,
+                "value": {
+                    # "url": fileUploadFunction(value),
+                    "format": input_structure_id
+                }
+            })
 
 
 @dataclass(frozen=True)

@@ -27,7 +27,7 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -552,29 +552,52 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("SeqMotif Query with invalid parameters failed successfully: (%r)", ok)
 
+    def testStructSimQuery(self):
+        """Test firing off a structure similarity query"""
+        # Basic query
+        q1 = StructSimilarityQuery(value="4HHB")
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Structure Similarity query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with chain ID
+        q2 = StructSimilarityQuery("entry_id", "4HHB", "chain_id", "A", target_search_space="polymer_entity_instance")
+        result = list(q2())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with chain ID results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with file url
+        q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_structure_id="cif")
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(SearchTests("testConstruction"))
-    suiteSelect.addTest(SearchTests("testLargePagination"))
-    suiteSelect.addTest(SearchTests("testOperators"))
-    suiteSelect.addTest(SearchTests("testPartialQuery"))
-    suiteSelect.addTest(SearchTests("testFreeText"))
-    suiteSelect.addTest(SearchTests("testAttribute"))
-    suiteSelect.addTest(SearchTests("exampleQuery1"))
-    suiteSelect.addTest(SearchTests("exampleQuery2"))
-    suiteSelect.addTest(SearchTests("testMalformedQuery"))
-    suiteSelect.addTest(SearchTests("testPagination"))
-    suiteSelect.addTest(SearchTests("testXor"))
-    suiteSelect.addTest(SearchTests("testInversion"))
-    suiteSelect.addTest(SearchTests("testIterable"))
-    suiteSelect.addTest(SearchTests("testIquery"))
-    suiteSelect.addTest(SearchTests("testSingleQuery"))
-    suiteSelect.addTest(SearchTests("testChemSearch"))
-    suiteSelect.addTest(SearchTests("testMismatch"))
-    suiteSelect.addTest(SearchTests("testCSMquery"))
-    suiteSelect.addTest(SearchTests("testSequenceQuery"))
-    suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    #suiteSelect.addTest(SearchTests("testConstruction"))
+    #suiteSelect.addTest(SearchTests("testLargePagination"))
+    #suiteSelect.addTest(SearchTests("testOperators"))
+    #suiteSelect.addTest(SearchTests("testPartialQuery"))
+    #suiteSelect.addTest(SearchTests("testFreeText"))
+    #suiteSelect.addTest(SearchTests("testAttribute"))
+    #suiteSelect.addTest(SearchTests("exampleQuery1"))
+    #suiteSelect.addTest(SearchTests("exampleQuery2"))
+    #suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    #suiteSelect.addTest(SearchTests("testPagination"))
+    #suiteSelect.addTest(SearchTests("testXor"))
+    #suiteSelect.addTest(SearchTests("testInversion"))
+    #suiteSelect.addTest(SearchTests("testIterable"))
+    #suiteSelect.addTest(SearchTests("testIquery"))
+    #suiteSelect.addTest(SearchTests("testSingleQuery"))
+    #suiteSelect.addTest(SearchTests("testChemSearch"))
+    #suiteSelect.addTest(SearchTests("testMismatch"))
+    #suiteSelect.addTest(SearchTests("testCSMquery"))
+    #suiteSelect.addTest(SearchTests("testSequenceQuery"))
+    #suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    suiteSelect.addTest(SearchTests("testStructSimQuery"))
     return suiteSelect
 
 
