@@ -29,7 +29,7 @@ from typing import (
 
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
-from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, STRUCT_SIM_SEARCH_SERVICE
+from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, STRUCT_SIM_SEARCH_SERVICE, UPLOAD_URL, RETURN_UP_URL
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -45,6 +45,9 @@ ReturnContentType = Literal["experimental", "computational"]  # results_content_
 SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
 SeqMode = Literal["simple", "prosite", "regex"]  # possible sequence motif formats
 StructSimEntryType = Literal["entry_id", "file_url", "file_upload"]  # possible entry types for structure similarity search
+StructSimInputType = Literal["assembly_id", "chain_id"]
+StructSimSearchSpace = Literal["polymer_entity_instance", "assembly"]
+StructSimOperator = Literal["strict_shape_match", "relaxed_shape_match"]
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -64,6 +67,20 @@ TValue = Union[
 ]
 # Types valid for numeric operators
 TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]"]
+
+
+def fileUpload(filepath: str, fmt: str = "cif") -> str:
+    """Take a file given by a filepath, and return the
+    corresponding URL to use in a structure search. This URL
+    should then be passed through as part of the value parameter,
+    along with the format of the file. """
+    x = open(filepath, mode='rb')
+    res = requests.post(UPLOAD_URL, files={"file": x, "format": fmt}, timeout=None)
+    try:
+        spec = res.json()["key"]
+    except KeyError:
+        raise TypeError("There was an issue processing the file. Check the file format.")
+    return RETURN_UP_URL + spec
 
 
 class Query(ABC):
@@ -337,12 +354,12 @@ class SeqMotifQuery(Terminal):
 class StructSimilarityQuery(Terminal):
     """Special case of a terminal for structure similarity queries"""
 
-    def __init__(self, structure_search_type: Optional[StructSimEntryType] = "entry_id",
+    def __init__(self, structure_search_type: StructSimEntryType = "entry_id",
                  value: Optional[str] = None,
-                 input_structure_type: Optional[str] = "assembly_id",
-                 input_structure_id: Optional[str] = "1",
-                 operator: str = "strict_shape_match",
-                 target_search_space: str = "assembly"
+                 input_structure_type: Optional[StructSimInputType] = "assembly_id",
+                 input_structure_id: str = "1",
+                 operator: StructSimOperator = "strict_shape_match",
+                 target_search_space: StructSimSearchSpace = "assembly"
                  ):
         if structure_search_type == "entry_id":
             if input_structure_type == "assembly_id":
@@ -377,7 +394,7 @@ class StructSimilarityQuery(Terminal):
                 "operator": operator,
                 "target_search_space": target_search_space,
                 "value": {
-                    # "url": fileUploadFunction(value),
+                    "url": fileUpload(value),
                     "format": input_structure_id
                 }
             })

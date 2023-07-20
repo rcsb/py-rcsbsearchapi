@@ -218,6 +218,43 @@ print("RNA results:")
 for polyid in rna("polymer_entity"):
     print(polyid)
 ```
+### Structure Similarity Query Example
+
+The PDB archive can be queried using the 3D shape of a protein structure. To perform this query, 3D protein structure data must be provided as an input or parameter, A chain ID or assembly ID must be specified, whether the input structure data should be compared to Assemblies or Polymer Entity Instance (Chains) is required, and defining the search type as either strict or relaxed is required. More information on how Structure Similarity Queries work can be found on the [RCSB PDB Structure Similarity Search](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-similarity-search) page.
+```python
+from rcsbsearchapi.search import StructSimilarityQuery
+
+# Basic query: querying using entry ID and default values assembly ID "1", operator "strict", and target search space "Assemblies"
+q1 = StructSimilarityQuery(value="4HHB")
+
+# Same example but with parameters explicitly specified
+q1 = StructSimilarityQuery(structure_search_type="entry_id",
+                           value="4HHB",
+                           input_structure_type="assembly_id",
+                           input_structure_id="1",
+                           operator="strict_shape_match",
+                           target_search_space="assembly"
+                           )
+for id in q1("assembly"):
+    print(id)
+```
+Below is a more complex example that utilizes chain ID, relaxed search operator, and polymer entity instance or target search space. Specifying whether the input structure
+type is chain id or assembly id is very important. For example, specifying chain ID as the input structure type but inputting an assembly ID can lead to
+an error.
+```python
+from rcsbsearchapi.search import StructSimilarityQuery
+
+# More complex query with entry ID value "4HHB", chain ID "B", operator "relaxed", and target search space "Chains"
+q2 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   value="4HHB",
+                                   input_structure_type="chain_id",
+                                   input_structure_id="B",
+                                   operator="relaxed_shape_match",
+                                   target_search_space="polymer_entity_instance")
+list(q2())
+```
+
+
 ## Supported Features
 
 The following table lists the status of current and planned features.

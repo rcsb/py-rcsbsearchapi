@@ -24,10 +24,10 @@ import time
 import unittest
 from itertools import islice
 import requests
-from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, fileUpload, StructSimilarityQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -552,6 +552,73 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("SeqMotif Query with invalid parameters failed successfully: (%r)", ok)
 
+    def testFileUpload(self):
+        """Test uploading a file. Used for structure queries.
+        As a unique URL is generated each time, the only common
+        denominator is that the return URL contains the file
+        name at the end of it, and that the first part of the
+        URL is the same."""
+        hemo = "./files/4hhb.cif"
+        x = fileUpload(hemo)
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
+        self.assertTrue(ok)
+        logger.info(".cif File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly. This is admittedly rather redundant.
+        self.assertTrue(ok)
+        logger.info(".cif File Upload check two: (%r)", ok)
+
+        zipfile = "./files/7n0r.cif.gz"  # gz files should also work by default
+        x = fileUpload(zipfile)
+        ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
+        self.assertTrue(ok)
+        logger.info(".cif.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".cif.gz File Upload check two: (%r)", ok)
+
+        pdbfile = "./files/4hhb.pdb"
+        x = fileUpload(pdbfile, "pdb")  # for non-cif files provide file extension
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
+        self.assertTrue(ok)
+        logger.info(".pdb File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".pdb File Upload check two: (%r)", ok)
+
+        zippdb = "./files/7n0r.pdb.gz"  # PDB Zip files should work as well.
+        x = fileUpload(zippdb, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".pdb.gz File Upload check two: (%r)", ok)
+
+        hemobcif = "./files/4hhb.bcif"
+        x = fileUpload(hemobcif, "bcif")  # must specify that file you are providing is bcif
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
+        self.assertTrue(ok)
+        logger.info(".bcif File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".bcif File Upload check two: (%r)", ok)
+
+        # test error handling
+
+        invalid = "./files/invalid.txt"
+        ok = False
+        try:
+            _ = fileUpload(invalid, "bcif")
+        except TypeError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("invalid query failed successfully: (%r)", ok)
+
     def testStructSimQuery(self):
         """Test firing off a structure similarity query"""
         # Basic query
@@ -575,28 +642,56 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
 
+        # Query with file upload
+        q4 = StructSimilarityQuery("file_upload", "/Users/rusham/Downloads/4hhb.cif", input_structure_id="cif")
+        result = list(q4())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with file upload results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with relaxed operator
+        q5 = StructSimilarityQuery("entry_id", "4HHB", operator="relaxed_shape_match")
+        result = list(q5())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with relaxed operator results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with specifically polymer entity instance search space
+        q6 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   value="4HHB",
+                                   input_structure_type="chain_id",
+                                   input_structure_id="B",
+                                   operator="relaxed_shape_match",
+                                   target_search_space="polymer_entity_instance")
+        result = list(q6())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with polymer entity instance results: result length : (%d), ok : (%r)", len(result), ok)
+
+
 def buildSearch():
     suiteSelect = unittest.TestSuite()
-    #suiteSelect.addTest(SearchTests("testConstruction"))
-    #suiteSelect.addTest(SearchTests("testLargePagination"))
-    #suiteSelect.addTest(SearchTests("testOperators"))
-    #suiteSelect.addTest(SearchTests("testPartialQuery"))
-    #suiteSelect.addTest(SearchTests("testFreeText"))
-    #suiteSelect.addTest(SearchTests("testAttribute"))
-    #suiteSelect.addTest(SearchTests("exampleQuery1"))
-    #suiteSelect.addTest(SearchTests("exampleQuery2"))
-    #suiteSelect.addTest(SearchTests("testMalformedQuery"))
-    #suiteSelect.addTest(SearchTests("testPagination"))
-    #suiteSelect.addTest(SearchTests("testXor"))
-    #suiteSelect.addTest(SearchTests("testInversion"))
-    #suiteSelect.addTest(SearchTests("testIterable"))
-    #suiteSelect.addTest(SearchTests("testIquery"))
-    #suiteSelect.addTest(SearchTests("testSingleQuery"))
-    #suiteSelect.addTest(SearchTests("testChemSearch"))
-    #suiteSelect.addTest(SearchTests("testMismatch"))
-    #suiteSelect.addTest(SearchTests("testCSMquery"))
-    #suiteSelect.addTest(SearchTests("testSequenceQuery"))
-    #suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    suiteSelect.addTest(SearchTests("testConstruction"))
+    suiteSelect.addTest(SearchTests("testLargePagination"))
+    suiteSelect.addTest(SearchTests("testOperators"))
+    suiteSelect.addTest(SearchTests("testPartialQuery"))
+    suiteSelect.addTest(SearchTests("testFreeText"))
+    suiteSelect.addTest(SearchTests("testAttribute"))
+    suiteSelect.addTest(SearchTests("exampleQuery1"))
+    suiteSelect.addTest(SearchTests("exampleQuery2"))
+    suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    suiteSelect.addTest(SearchTests("testPagination"))
+    suiteSelect.addTest(SearchTests("testXor"))
+    suiteSelect.addTest(SearchTests("testInversion"))
+    suiteSelect.addTest(SearchTests("testIterable"))
+    suiteSelect.addTest(SearchTests("testIquery"))
+    suiteSelect.addTest(SearchTests("testSingleQuery"))
+    suiteSelect.addTest(SearchTests("testChemSearch"))
+    suiteSelect.addTest(SearchTests("testMismatch"))
+    suiteSelect.addTest(SearchTests("testCSMquery"))
+    suiteSelect.addTest(SearchTests("testSequenceQuery"))
+    suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    suiteSelect.addTest(SearchTests("testFileUpload"))
     suiteSelect.addTest(SearchTests("testStructSimQuery"))
     return suiteSelect
 
