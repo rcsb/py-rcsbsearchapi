@@ -3681,7 +3681,7 @@
               "context": "brief"
             }
           ],
-          "rcsb_current_maximum_value": 1686096000000,
+          "rcsb_current_maximum_value": 1688601600000,
           "rcsb_current_minimum_value": 711158400000
         },
         "initial_release_date": {
@@ -3710,7 +3710,7 @@
               "priority_order": 20
             }
           ],
-          "rcsb_current_maximum_value": 1686700800000,
+          "rcsb_current_maximum_value": 1689724800000,
           "rcsb_current_minimum_value": 105235200000
         },
         "release_status": {
@@ -4913,5 +4913,5 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "title": "Chemical Text Service Metadata",
   "description": "",
-  "$comment": "Schema version: 1.42.0"
+  "$comment": "Schema version: 1.42.3"
 }
