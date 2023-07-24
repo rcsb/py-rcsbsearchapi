@@ -246,3 +246,14 @@ q2 = StructSimilarityQuery(structure_search_type="entry_id",
                                    target_search_space="polymer_entity_instance")
 list(q2())
 ```
+Structure similarity queries also allow users to upload a file from their local computer or input a file url from the website to query the PDB archive for similar proteins. The file represents a target protein structure in the file formats "cif", "bcif", "pdb", "cif.gz", or "pdb.gz". If a user wants to use a file url for queries, the user must specify the structure search type, the value (being the url), and the file format of the file. This is also the same case for file upload, except the value is the absolute path leading to the file that is in the local machine. An example for file url is below for 4HHB (hemoglobin).
+```python
+from rcsbsearchapi.search import StructSimilarityQuery
+
+q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_structure_id="cif")
+
+# If using file upload, an example query would be like below:
+# q3 = StructSimilarityQuery("file_upload", "absolute path to the file", input_structure_id="file format")
+
+list(q3())
+```

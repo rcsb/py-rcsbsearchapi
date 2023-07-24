@@ -394,8 +394,8 @@ class StructSimilarityQuery(Terminal):
                 "operator": operator,
                 "target_search_space": target_search_space,
                 "value": {
-                    "url": fileUpload(value),
-                    "format": input_structure_id
+                    "url": fileUpload(value, input_structure_id),
+                    "format": "bcif"
                 }
             })
 

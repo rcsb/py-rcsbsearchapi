@@ -22,6 +22,7 @@ import platform
 import resource
 import time
 import unittest
+import os
 from itertools import islice
 import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
@@ -29,6 +30,7 @@ from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, fileUpload, StructSimilarityQuery
 
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
 logger = logging.getLogger()
@@ -39,6 +41,14 @@ class SearchTests(unittest.TestCase):
     def setUp(self):
         self.__startTime = time.time()
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
+        self.__dirPath = os.path.join(HERE, "test-fileUploadData")
+        self.__4hhbBcif = os.path.join(self.__dirPath, "4hhb.bcif")
+        self.__4hhbCif = os.path.join(self.__dirPath, "4hhb.cif")
+        self.__4hhbPdb = os.path.join(self.__dirPath, "4hhb.pdb")
+        self.__7n0rPdbGz = os.path.join(self.__dirPath, "7n0r.pdb.gz")
+        self.__7n0rCifGz = os.path.join(self.__dirPath, "7n0r.cif.gz")
+        self.__invalidTxt = os.path.join(self.__dirPath, "invalid.txt")
+        self.__4hhbAssembly1 = os.path.join(self.__dirPath, "4hhb-assembly1.cif.gz")
 
     def tearDown(self):
         unitS = "MB" if platform.system() == "Darwin" else "GB"
@@ -558,7 +568,7 @@ class SearchTests(unittest.TestCase):
         denominator is that the return URL contains the file
         name at the end of it, and that the first part of the
         URL is the same."""
-        hemo = "./files/4hhb.cif"
+        hemo = self.__4hhbCif
         x = fileUpload(hemo)
         ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
         self.assertTrue(ok)
@@ -568,7 +578,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".cif File Upload check two: (%r)", ok)
 
-        zipfile = "./files/7n0r.cif.gz"  # gz files should also work by default
+        zipfile = self.__7n0rCifGz  # gz files should also work by default
         x = fileUpload(zipfile)
         ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
         self.assertTrue(ok)
@@ -578,7 +588,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".cif.gz File Upload check two: (%r)", ok)
 
-        pdbfile = "./files/4hhb.pdb"
+        pdbfile = self.__4hhbPdb
         x = fileUpload(pdbfile, "pdb")  # for non-cif files provide file extension
         ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
         self.assertTrue(ok)
@@ -588,7 +598,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".pdb File Upload check two: (%r)", ok)
 
-        zippdb = "./files/7n0r.pdb.gz"  # PDB Zip files should work as well.
+        zippdb = self.__7n0rPdbGz  # PDB Zip files should work as well.
         x = fileUpload(zippdb, "pdb")
         ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
         self.assertTrue(ok)
@@ -598,7 +608,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".pdb.gz File Upload check two: (%r)", ok)
 
-        hemobcif = "./files/4hhb.bcif"
+        hemobcif = self.__4hhbBcif
         x = fileUpload(hemobcif, "bcif")  # must specify that file you are providing is bcif
         ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
         self.assertTrue(ok)
@@ -610,7 +620,7 @@ class SearchTests(unittest.TestCase):
 
         # test error handling
 
-        invalid = "./files/invalid.txt"
+        invalid = self.__invalidTxt
         ok = False
         try:
             _ = fileUpload(invalid, "bcif")
@@ -621,7 +631,7 @@ class SearchTests(unittest.TestCase):
 
     def testStructSimQuery(self):
         """Test firing off a structure similarity query"""
-        # Basic query
+        # Basic query - assembly ID
         q1 = StructSimilarityQuery(value="4HHB")
         result = list(q1())
         ok = len(result) > 0
@@ -643,7 +653,7 @@ class SearchTests(unittest.TestCase):
         logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with file upload
-        q4 = StructSimilarityQuery("file_upload", "/Users/rusham/Downloads/4hhb.cif", input_structure_id="cif")
+        q4 = StructSimilarityQuery("file_upload", self.__4hhbCif, input_structure_id="cif")
         result = list(q4())
         ok = len(result) > 0
         self.assertTrue(ok)
@@ -667,6 +677,27 @@ class SearchTests(unittest.TestCase):
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with polymer entity instance results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB Assembly 1 - cif zip file
+        q7 = StructSimilarityQuery("file_upload", self.__4hhbAssembly1, input_structure_id="cif")
+        result = list(q7())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB Assembly 1 cif zip file results : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB PDB file
+        q8 = StructSimilarityQuery("file_upload", self.__4hhbPdb, input_structure_id="pdb")
+        result = list(q8())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB PDB file results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB bcif file
+        q9 = StructSimilarityQuery("file_upload", self.__4hhbBcif, input_structure_id="bcif")
+        result = list(q9())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB bcif file results: result length : (%d), ok : (%r)", len(result), ok)
 
 
 def buildSearch():

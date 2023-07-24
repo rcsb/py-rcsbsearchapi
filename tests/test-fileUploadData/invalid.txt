@@ -1,0 +1,2 @@
+test file for fileUpload
+should yield error as it's not conventional file format
