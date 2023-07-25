@@ -22,6 +22,7 @@ import platform
 import resource
 import time
 import unittest
+import os
 from itertools import islice
 import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
@@ -39,6 +40,15 @@ class SearchTests(unittest.TestCase):
     def setUp(self):
         self.__startTime = time.time()
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
+        HERE = os.path.abspath(os.path.dirname(__file__))
+        self.__dirPath = os.path.join(HERE, "files")
+        self.__4hhbBcif = os.path.join(self.__dirPath, "4hhb.bcif")
+        self.__4hhbCif = os.path.join(self.__dirPath, "4hhb.cif")
+        self.__4hhbPdb = os.path.join(self.__dirPath, "4hhb.pdb")
+        self.__7n0rPdbGz = os.path.join(self.__dirPath, "7n0r.pdb.gz")
+        self.__7n0rCifGz = os.path.join(self.__dirPath, "7n0r.cif.gz")
+        self.__invalidTxt = os.path.join(self.__dirPath, "invalid.txt")
+        self.__4hhbAssembly1 = os.path.join(self.__dirPath, "4hhb-assembly1.cif.gz")
 
     def tearDown(self):
         unitS = "MB" if platform.system() == "Darwin" else "GB"
@@ -558,7 +568,8 @@ class SearchTests(unittest.TestCase):
         denominator is that the return URL contains the file
         name at the end of it, and that the first part of the
         URL is the same."""
-        hemo = "./files/4hhb.cif"
+
+        hemo = self.__4hhbCif
         x = fileUpload(hemo)
         ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
         self.assertTrue(ok)
@@ -568,7 +579,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".cif File Upload check two: (%r)", ok)
 
-        zipfile = "./files/7n0r.cif.gz"  # gz files should also work by default
+        zipfile = self.__7n0rCifGz  # gz files should also work by default
         x = fileUpload(zipfile)
         ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
         self.assertTrue(ok)
@@ -578,7 +589,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".cif.gz File Upload check two: (%r)", ok)
 
-        pdbfile = "./files/4hhb.pdb"
+        pdbfile = self.__4hhbPdb
         x = fileUpload(pdbfile, "pdb")  # for non-cif files provide file extension
         ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
         self.assertTrue(ok)
@@ -588,7 +599,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".pdb File Upload check two: (%r)", ok)
 
-        zippdb = "./files/7n0r.pdb.gz"  # PDB Zip files should work as well.
+        zippdb = self.__7n0rPdbGz  # PDB Zip files should work as well.
         x = fileUpload(zippdb, "pdb")
         ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
         self.assertTrue(ok)
@@ -598,7 +609,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".pdb.gz File Upload check two: (%r)", ok)
 
-        hemobcif = "./files/4hhb.bcif"
+        hemobcif = self.__4hhbBcif
         x = fileUpload(hemobcif, "bcif")  # must specify that file you are providing is bcif
         ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
         self.assertTrue(ok)
@@ -610,7 +621,7 @@ class SearchTests(unittest.TestCase):
 
         # test error handling
 
-        invalid = "./files/invalid.txt"
+        invalid = self.__invalidTxt
         ok = False
         try:
             _ = fileUpload(invalid, "bcif")
