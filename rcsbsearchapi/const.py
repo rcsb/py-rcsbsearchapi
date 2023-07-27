@@ -13,3 +13,5 @@ SEQMOTIF_SEARCH_SERVICE = "seqmotif"
 SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES = 25
 SEQMOTIF_SEARCH_MIN_CHARACTERS = 2
 RCSB_SEARCH_API_QUERY_URL = "https://search.rcsb.org/rcsbsearch/v2/query"
+UPLOAD_URL = "https://user-upload.rcsb.org/v1/putMultipart"
+RETURN_UP_URL = "https://user-upload.rcsb.org/v1/download/"

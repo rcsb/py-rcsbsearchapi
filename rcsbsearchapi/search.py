@@ -29,7 +29,7 @@ from typing import (
 
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
-from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS
+from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -63,6 +63,20 @@ TValue = Union[
 ]
 # Types valid for numeric operators
 TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]"]
+
+
+def fileUpload(filepath: str, fmt: str = "cif") -> str:
+    """Take a file given by a filepath, and return the
+    corresponding URL to use in a structure search. This URL
+    should then be passed through as part of the value parameter,
+    along with the format of the file. """
+    x = open(filepath, mode='rb')
+    res = requests.post(UPLOAD_URL, files={"file": x, "format": fmt}, timeout=None)
+    try:
+        spec = res.json()["key"]
+    except KeyError:
+        raise TypeError("There was an issue processing the file. Check the file format.")
+    return RETURN_UP_URL + spec
 
 
 class Query(ABC):
