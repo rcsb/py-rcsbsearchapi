@@ -718,7 +718,7 @@ class SearchTests(unittest.TestCase):
         result = list(q10())
         ok = len(result) > 0
         self.assertTrue(ok)
-        logger.info("File upload query using 4HHB bcif file results: result length : (%d), ok : (%r)", len(result), ok)
+        logger.info("File url query using mmcif file format, relaxed, and chains: result length : (%d), ok : (%r)", len(result), ok)
 
         # File url query with wrong combination of fire url and format (should fail)
         ok = False
