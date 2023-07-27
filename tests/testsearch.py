@@ -611,13 +611,23 @@ class SearchTests(unittest.TestCase):
 
         hemobcif = self.__4hhbBcif
         x = fileUpload(hemobcif, "bcif")  # must specify that file you are providing is bcif
-        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
         self.assertTrue(ok)
         logger.info(".bcif File Upload check one: (%r)", ok)
 
         ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
         self.assertTrue(ok)
         logger.info(".bcif File Upload check two: (%r)", ok)
+
+        hemoAssem = self.__4hhbAssembly1
+        x = fileUpload(hemoAssem)  # must specify that file you are providing is bcif
+        ok = (x[x.rfind("/") + 1:]) == "4hhb-assembly1.bcif"  # check that end of file name is 4hhb.bcif
+        self.assertTrue(ok)
+        logger.info(".bcif Assembly File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".bcif Assembly File Upload check two: (%r)", ok)
 
         # test error handling
 
