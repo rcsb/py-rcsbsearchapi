@@ -226,7 +226,7 @@ q1 = StructSimilarityQuery(value="4HHB")
 q1 = StructSimilarityQuery(structure_search_type="entry_id",
                            value="4HHB",
                            input_structure_type="assembly_id",
-                           input_structure_id="1",
+                           input_option="1",
                            operator="strict_shape_match",
                            target_search_space="assembly"
                            )
@@ -243,7 +243,7 @@ from rcsbsearchapi.search import StructSimilarityQuery
 q2 = StructSimilarityQuery(structure_search_type="entry_id",
                                    value="4HHB",
                                    input_structure_type="chain_id",
-                                   input_structure_id="B",
+                                   input_option="B",
                                    operator="relaxed_shape_match",
                                    target_search_space="polymer_entity_instance")
 list(q2())
@@ -252,10 +252,10 @@ Structure similarity queries also allow users to upload a file from their local 
 ```python
 from rcsbsearchapi.search import StructSimilarityQuery
 
-q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_structure_id="cif")
+q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="cif")
 
 # If using file upload, an example query would be like below:
-# q3 = StructSimilarityQuery("file_upload", "absolute path to the file", input_structure_id="file format")
+# q3 = StructSimilarityQuery("file_upload", "absolute path to the file", input_option="file format")
 
 list(q3())
 ```

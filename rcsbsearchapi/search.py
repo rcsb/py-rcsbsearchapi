@@ -357,7 +357,7 @@ class StructSimilarityQuery(Terminal):
     def __init__(self, structure_search_type: StructSimEntryType = "entry_id",
                  value: Optional[str] = None,
                  input_structure_type: Optional[StructSimInputType] = "assembly_id",
-                 input_structure_id: str = "1",
+                 input_option: str = "1",
                  operator: StructSimOperator = "strict_shape_match",
                  target_search_space: StructSimSearchSpace = "assembly"
                  ):
@@ -368,7 +368,7 @@ class StructSimilarityQuery(Terminal):
                     "target_search_space": target_search_space,
                     "value": {
                         "entry_id": value,
-                        "assembly_id": input_structure_id
+                        "assembly_id": input_option
                     }
                 })
             elif input_structure_type == "chain_id":
@@ -377,7 +377,7 @@ class StructSimilarityQuery(Terminal):
                     "target_search_space": target_search_space,
                     "value": {
                         "entry_id": value,
-                        "asym_id": input_structure_id
+                        "asym_id": input_option
                     }
                 })
         elif structure_search_type == "file_url":
@@ -386,7 +386,7 @@ class StructSimilarityQuery(Terminal):
                 "target_search_space": target_search_space,
                 "value": {
                     "url": value,
-                    "format": input_structure_id
+                    "format": input_option
                 }
             })
         elif structure_search_type == "file_upload":
@@ -394,7 +394,7 @@ class StructSimilarityQuery(Terminal):
                 "operator": operator,
                 "target_search_space": target_search_space,
                 "value": {
-                    "url": fileUpload(value, input_structure_id),
+                    "url": fileUpload(value, input_option),
                     "format": "bcif"
                 }
             })
