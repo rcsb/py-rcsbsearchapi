@@ -218,6 +218,53 @@ print("RNA results:")
 for polyid in rna("polymer_entity"):
     print(polyid)
 ```
+### Structure Similarity Query Example
+
+The PDB archive can be queried using the 3D shape of a protein structure. To perform this query, 3D protein structure data must be provided as an input or parameter, A chain ID or assembly ID must be specified, whether the input structure data should be compared to Assemblies or Polymer Entity Instance (Chains) is required, and defining the search type as either strict or relaxed is required. More information on how Structure Similarity Queries work can be found on the [RCSB PDB Structure Similarity Search](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-similarity-search) page.
+```python
+from rcsbsearchapi.search import StructSimilarityQuery
+
+# Basic query: querying using entry ID and default values assembly ID "1", operator "strict", and target search space "Assemblies"
+q1 = StructSimilarityQuery(value="4HHB")
+
+# Same example but with parameters explicitly specified
+q1 = StructSimilarityQuery(structure_search_type="entry_id",
+                           value="4HHB",
+                           input_structure_type="assembly_id",
+                           input_structure_id="1",
+                           operator="strict_shape_match",
+                           target_search_space="assembly"
+                           )
+for id in q1("assembly"):
+    print(id)
+```
+Below is a more complex example that utilizes chain ID, relaxed search operator, and polymer entity instance or target search space. Specifying whether the input structure
+type is chain id or assembly id is very important. For example, specifying chain ID as the input structure type but inputting an assembly ID can lead to
+an error.
+```python
+from rcsbsearchapi.search import StructSimilarityQuery
+
+# More complex query with entry ID value "4HHB", chain ID "B", operator "relaxed", and target search space "Chains"
+q2 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   value="4HHB",
+                                   input_structure_type="chain_id",
+                                   input_structure_id="B",
+                                   operator="relaxed_shape_match",
+                                   target_search_space="polymer_entity_instance")
+list(q2())
+```
+Structure similarity queries also allow users to upload a file from their local computer or input a file url from the website to query the PDB archive for similar proteins. The file represents a target protein structure in the file formats "cif", "bcif", "pdb", "cif.gz", or "pdb.gz". If a user wants to use a file url for queries, the user must specify the structure search type, the value (being the url), and the file format of the file. This is also the same case for file upload, except the value is the absolute path leading to the file that is in the local machine. An example for file url is below for 4HHB (hemoglobin).
+```python
+from rcsbsearchapi.search import StructSimilarityQuery
+
+q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_structure_id="cif")
+
+# If using file upload, an example query would be like below:
+# q3 = StructSimilarityQuery("file_upload", "absolute path to the file", input_structure_id="file format")
+
+list(q3())
+```
+
 ## Supported Features
 
 The following table lists the status of current and planned features.
@@ -229,7 +276,7 @@ The following table lists the status of current and planned features.
 - [x] Option to include computed structure models (CSMs) in search
 - [x] Sequence search
 - [x] Sequence motif search
-- [ ] Structural search
+- [x] Structural search
 - [ ] Structural motif search
 - [ ] Chemical search
 - [ ] Rich results using the Data API

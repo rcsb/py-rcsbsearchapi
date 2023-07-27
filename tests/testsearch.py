@@ -28,7 +28,7 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, fileUpload
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -640,6 +640,76 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("invalid query failed successfully: (%r)", ok)
 
+    def testStructSimQuery(self):
+        """Test firing off a structure similarity query"""
+        # Basic query - assembly ID
+        q1 = StructSimilarityQuery(value="4HHB")
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Structure Similarity query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with chain ID
+        q2 = StructSimilarityQuery("entry_id", "4HHB", "chain_id", "A", target_search_space="polymer_entity_instance")
+        result = list(q2())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with chain ID results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with file url
+        q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_structure_id="cif")
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with file upload
+        q4 = StructSimilarityQuery("file_upload", self.__4hhbCif, input_structure_id="cif")
+        result = list(q4())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with file upload results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with relaxed operator
+        q5 = StructSimilarityQuery("entry_id", "4HHB", operator="relaxed_shape_match")
+        result = list(q5())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with relaxed operator results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with specifically polymer entity instance search space
+        q6 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   value="4HHB",
+                                   input_structure_type="chain_id",
+                                   input_structure_id="B",
+                                   operator="relaxed_shape_match",
+                                   target_search_space="polymer_entity_instance")
+        result = list(q6())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with polymer entity instance results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB Assembly 1 - cif zip file
+        q7 = StructSimilarityQuery("file_upload", self.__4hhbAssembly1, input_structure_id="cif")
+        result = list(q7())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB Assembly 1 cif zip file results : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB PDB file
+        q8 = StructSimilarityQuery("file_upload", self.__4hhbPdb, input_structure_id="pdb")
+        result = list(q8())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB PDB file results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB bcif file
+        q9 = StructSimilarityQuery("file_upload", self.__4hhbBcif, input_structure_id="bcif")
+        result = list(q9())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB bcif file results: result length : (%d), ok : (%r)", len(result), ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -664,6 +734,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testSequenceQuery"))
     suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
     suiteSelect.addTest(SearchTests("testFileUpload"))
+    suiteSelect.addTest(SearchTests("testStructSimQuery"))
     return suiteSelect
 
 
