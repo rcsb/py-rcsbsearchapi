@@ -233,13 +233,13 @@ The PDB archive can be queried using the 3D shape of a protein structure. To per
 from rcsbsearchapi.search import StructSimilarityQuery
 
 # Basic query: querying using entry ID and default values assembly ID "1", operator "strict", and target search space "Assemblies"
-q1 = StructSimilarityQuery(value="4HHB")
+q1 = StructSimilarityQuery(entry_id="4HHB")
 
 # Same example but with parameters explicitly specified
 q1 = StructSimilarityQuery(structure_search_type="entry_id",
-                           value="4HHB",
-                           input_structure_type="assembly_id",
-                           input_option="1",
+                           entry_id="4HHB",
+                           structure_input_type="assembly_id",
+                           assembly_id="1",
                            operator="strict_shape_match",
                            target_search_space="assembly"
                            )
@@ -254,9 +254,9 @@ from rcsbsearchapi.search import StructSimilarityQuery
 
 # More complex query with entry ID value "4HHB", chain ID "B", operator "relaxed", and target search space "Chains"
 q2 = StructSimilarityQuery(structure_search_type="entry_id",
-                                   value="4HHB",
-                                   input_structure_type="chain_id",
-                                   input_option="B",
+                                   entry_id="4HHB",
+                                   structure_input_type="chain_id",
+                                   chain_id="B",
                                    operator="relaxed_shape_match",
                                    target_search_space="polymer_entity_instance")
 list(q2())
@@ -265,10 +265,14 @@ Structure similarity queries also allow users to upload a file from their local 
 ```python
 from rcsbsearchapi.search import StructSimilarityQuery
 
-q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="cif")
+q3 = StructSimilarityQuery(structure_search_type="file_url",
+                           file_url="https://files.rcsb.org/view/4HHB.cif",
+                           file_format="cif")
 
 # If using file upload, an example query would be like below:
-# q3 = StructSimilarityQuery("file_upload", "/absolute/path/to/file.cif", input_option="file format")
+# q3 = StructSimilarityQuery(structure_search_type="file_upload",
+#                            file_upload="/absolute/path/to/file.cif",
+#                            file_format="file format")
 
 list(q3())
 ```

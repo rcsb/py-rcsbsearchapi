@@ -360,49 +360,37 @@ class StructSimilarityQuery(Terminal):
     """Special case of a terminal for structure similarity queries"""
 
     def __init__(self, structure_search_type: StructSimEntryType = "entry_id",
-                 value: Optional[str] = None,
-                 input_structure_type: Optional[StructSimInputType] = "assembly_id",
-                 input_option: str = "1",
+                 entry_id: Optional[str] = None,
+                 file_url: Optional[str] = None,
+                 absolute_file_path: Optional[str] = None,
+                 structure_input_type: Optional[StructSimInputType] = "assembly_id",
+                 assembly_id: Optional[str] = "1",
+                 chain_id: Optional[str] = None,
                  operator: StructSimOperator = "strict_shape_match",
-                 target_search_space: StructSimSearchSpace = "assembly"
+                 target_search_space: StructSimSearchSpace = "assembly",
+                 file_format: Optional[str] = None
                  ):
+
+        parameters = {"operator": operator,
+                      "target_search_space": target_search_space}
+
         if structure_search_type == "entry_id":
-            if input_structure_type == "assembly_id":
-                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                    "operator": operator,
-                    "target_search_space": target_search_space,
-                    "value": {
-                        "entry_id": value,
-                        "assembly_id": input_option
-                    }
-                })
-            elif input_structure_type == "chain_id":
-                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                    "operator": operator,
-                    "target_search_space": target_search_space,
-                    "value": {
-                        "entry_id": value,
-                        "asym_id": input_option
-                    }
-                })
+            if structure_input_type == "assembly_id":
+                parameters["value"] = {"entry_id": entry_id,
+                                       "assembly_id": assembly_id}
+            elif structure_input_type == "chain_id":
+                parameters["value"] = {"entry_id": entry_id,
+                                       "asym_id": chain_id}
+
         elif structure_search_type == "file_url":
-            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                "operator": operator,
-                "target_search_space": target_search_space,
-                "value": {
-                    "url": value,
-                    "format": input_option
-                }
-            })
+            parameters["value"] = {"url": file_url,
+                                   "format": file_format}
+
         elif structure_search_type == "file_upload":
-            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                "operator": operator,
-                "target_search_space": target_search_space,
-                "value": {
-                    "url": fileUpload(value, input_option),
-                    "format": "bcif"
-                }
-            })
+            parameters["value"] = {"url": fileUpload(absolute_file_path, file_format),
+                                   "format": "bcif"}
+
+        super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters)
 
 
 @dataclass(frozen=True)
