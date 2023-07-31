@@ -264,43 +264,6 @@ q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", i
 
 list(q3())
 ```
-### Enabling Computational Biology Research
-
-This tool can be an integral resource for computational biologists performing data analysis or iterative processes on big datasets from the RCSB PDB. Our tool supports data automation which is essential for any researcher or computational biologists wanting to work with huge datasets. Furthermore, our tool can be incorporated within a larger research workflow to quickly and seamlessly retrieve RCSB PDB data in an automated way.
-
-Below is an example of how a computational biologist may use our tool for data automation to facilitate their research. The first query below finds protein structures with a similar protein sequence to the target protein. The retrieved data are then used as search parameters for a set of iterative search queries that find structurally similar proteins that are bound to drug molecules. Then, the researcher can use their own workflow to further investigate how the protein structures and drugs interact.
-```python
-q1 = SequenceQuery("DTHKSEIAHRFKDLGEEHFKGLVLIAFSQYLQQCPFDEHVKLVNEL" + 
-                   "TEFAKTCVADESHAGCEKSLHTLFGDELCKVASLRETYGDMADCCE" + 
-                   "KQEPERNECFLSHKDDSPDLPKLKPDPNTLCDEFKADEKKFWGKYL" + 
-                   "YEIARRHPYFYAPELLYYANKYNGVFQECCQAEDKGACLLPKIETM" + 
-                   "REKVLTSSARQRLRCASIQKFGERALKAWSVARLSQKFPKAEFVEV" + 
-                   "TKLVTDLTKVHKECCHGDLLECADDRADLAKYICDNQDTISSKLKE" + 
-                   "CCDKPLLEKSHCIAEVEKDAIPENLPPLTADFAEDKDVCKNYQEAK" + 
-                   "DAFLGSFLYEYSRRHPEYAVSVLLRLAKEYEATLEECCAKDDPHAC" +
-                   "YSTVFDKLKHLVDEPQNLIKQNCDQFEKLGEYGFQNALIVRYTRKV" + 
-                   "PQVSTPTLVEVSRSLGKVGTRCCTKPESERMPCTEDYLSLILNRLC" + 
-                   "VLHEKTPVSEKVTKCCTESLVNRRPCFSALTPDETYVPKAFDEKLF" + 
-                   "TFHADICTLPDTEKQIKKQTALVELLKHKPKATEEQLKTVMENFVA" +
-                   "FVDKCCAADDKEACFAVEGPKLVVSTQTALA") # sequence similarity query
-
-sequence_similarity_results = list(q1("polymer_entity"))
-print("Sequences similar to query:")
-print(sequence_similarity_results)
-
-for i in range(5):
-    similar_protein = sequence_similarity_results[i]
-
-    entry_id = similar_protein[:-2]
-    
-    drug_molecule_query = AttributeQuery("rcsb_nonpolymer_entity_annotation.comp_id", "exists", None) # attribute query for small molecule
-    struct_similarity_query = StructSimilarityQuery("entry_id", entry_id, "assembly_id", "1", "strict_shape_match", "assembly") # assemblyid = 1 by default
-
-    query = struct_similarity_query & drug_molecule_query
-
-    print("Protein structures similar to", similar_protein, "bound to a drug-like molecule:")
-    print(list(query("assembly")))
-```
 
 ## Supported Features
 
