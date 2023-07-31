@@ -13,6 +13,14 @@ features' below.
 
 This package requires python 3.7 or later.
 
+## Installation
+
+Get it from pypi:
+
+    pip install rcsbsearchapi
+
+Or, download from [github](https://github.com/rcsb/py-rcsbsearchapi)
+
 ## Example
 
 Here is a quick example of how the package is used. Two syntaxes are available for
@@ -283,14 +291,6 @@ The following table lists the status of current and planned features.
 
 Contributions are welcome for unchecked items!
 
-## Installation
-
-Get it from pypi:
-
-    pip install rcsbsearchapi
-
-Or, download from [github](https://github.com/rcsb/py-rcsbsearchapi)
-
 ## Documentation
 
 Detailed documentation is at [rcsbsearchapi.readthedocs.io](https://rcsbsearchapi.readthedocs.io/en/latest/)
@@ -316,10 +316,7 @@ You should also cite the RCSB PDB service this package utilizes:
 
 ## Attributions
 
-The source code for this project was originally written by [Spencer Bliven](https://github.com/sbliven) and forked
-from https://github.com/sbliven/rcsbsearch. We would like to express our tremendous
-gratitude for his generous efforts in designing such a comprehensive public utility
-Python package for interacting with the RCSB PDB search API, [rcsbsearch](https://rcsbsearchapi.readthedocs.io).
+The source code for this project was originally written by [Spencer Bliven](https://github.com/sbliven) and forked from [sbliven/rcsbsearch](https://github.com/sbliven/rcsbsearch). We would like to express our tremendous gratitude for his generous efforts in designing such a comprehensive public utility Python package for interacting with the RCSB PDB search API.
 
 ## Developers
 
