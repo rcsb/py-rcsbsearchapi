@@ -29,7 +29,7 @@ from typing import (
 
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
-from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE
+from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE, STRUCTMOTIF_SEARCH_SERVICE
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -398,6 +398,36 @@ class StructSimilarityQuery(Terminal):
                     "format": "bcif"
                 }
             })
+
+
+class Residue():
+    """This class is for defining residues. Should only be used as a dictionary."""
+    def __init__(self, label_asym: str, struct: str, label_id: int):
+        self.label_asym = label_asym
+        self.struct = struct
+        self.label_seq = label_id
+    
+    def to_dict(self):
+        return {"label_asym_id": self.label_asym,
+                "struct_oper_id": self.struct,
+                "label_seq_id": self.label_seq}
+
+
+class StructMotifQuery(Terminal):
+    """Special case of a terminal for structure motif queries
+    User will have to specify specifics of residue IDs unless
+    I can think of a better way to implement this"""
+    def __init__(self,
+                 value: dict,
+                 service: str = STRUCTMOTIF_SEARCH_SERVICE,
+                 entry_id: Optional[str] = None,
+                 residue_ids: Optional[list] = None,
+                 rcutoff: int = 2,
+                 atom_pairing_scheme: Optional[str] = None,
+                 exchanges: Optional[list] = None
+                 ):
+        # super().__init__()
+        pass
 
 
 @dataclass(frozen=True)
