@@ -297,10 +297,15 @@ class AttributeQuery(Terminal):
             service: specify what search service (i.e "text", "text_chem")
             negation: logical not
         """
-        super().__init__(params={"attribute": attribute,
-                                 "operator": operator,
-                                 "negation": negation,
-                                 "value": value}, service=service)
+        if value is not None:
+            super().__init__(params={"attribute": attribute,
+                                     "operator": operator,
+                                     "negation": negation,
+                                     "value": value}, service=service)
+        else:
+            super().__init__(params={"attribute": attribute,
+                                     "operator": operator,
+                                     "negation": negation}, service=service)
 
 
 class TextQuery(Terminal):
