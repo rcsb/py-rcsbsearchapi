@@ -29,7 +29,7 @@ from typing import (
 
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
-from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS
+from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -44,6 +44,10 @@ ReturnType = Literal[
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
 SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
 SeqMode = Literal["simple", "prosite", "regex"]  # possible sequence motif formats
+StructSimEntryType = Literal["entry_id", "file_url", "file_upload"]  # possible entry types for structure similarity search
+StructSimInputType = Literal["assembly_id", "chain_id"]  # Possible ID choices for structure similarity search
+StructSimSearchSpace = Literal["polymer_entity_instance", "assembly"]  # target search spaces for structure similarity search
+StructSimOperator = Literal["strict_shape_match", "relaxed_shape_match"]  # possible operators for structure similarity search
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -63,6 +67,20 @@ TValue = Union[
 ]
 # Types valid for numeric operators
 TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]"]
+
+
+def fileUpload(filepath: str, fmt: str = "cif") -> str:
+    """Take a file given by a filepath, and return the
+    corresponding URL to use in a structure search. This URL
+    should then be passed through as part of the value parameter,
+    along with the format of the file. """
+    x = open(filepath, mode='rb')
+    res = requests.post(UPLOAD_URL, files={"file": x, "format": fmt}, timeout=None)
+    try:
+        spec = res.json()["key"]
+    except KeyError:
+        raise TypeError("There was an issue processing the file. Check the file format.")
+    return RETURN_UP_URL + spec
 
 
 class Query(ABC):
@@ -279,10 +297,15 @@ class AttributeQuery(Terminal):
             service: specify what search service (i.e "text", "text_chem")
             negation: logical not
         """
-        super().__init__(params={"attribute": attribute,
-                                 "operator": operator,
-                                 "negation": negation,
-                                 "value": value}, service=service)
+        if value is not None:
+            super().__init__(params={"attribute": attribute,
+                                     "operator": operator,
+                                     "negation": negation,
+                                     "value": value}, service=service)
+        else:
+            super().__init__(params={"attribute": attribute,
+                                     "operator": operator,
+                                     "negation": negation}, service=service)
 
 
 class TextQuery(Terminal):
@@ -322,7 +345,7 @@ class SequenceQuery(Terminal):
 
 
 class SeqMotifQuery(Terminal):
-    """Special case of a terminal for protein, DNA, or RNA sequence queries"""
+    """Special case of a terminal for protein, DNA, or RNA sequence motif queries"""
 
     def __init__(self, value: str, pattern_type: Optional[SeqMode] = "simple", sequence_type: Optional[SequenceType] = "protein"):
         if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
@@ -331,6 +354,55 @@ class SeqMotifQuery(Terminal):
             super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value,
                                                                       "pattern_type": pattern_type,
                                                                       "sequence_type": sequence_type})
+
+
+class StructSimilarityQuery(Terminal):
+    """Special case of a terminal for structure similarity queries"""
+
+    def __init__(self, structure_search_type: StructSimEntryType = "entry_id",
+                 value: Optional[str] = None,
+                 input_structure_type: Optional[StructSimInputType] = "assembly_id",
+                 input_option: str = "1",
+                 operator: StructSimOperator = "strict_shape_match",
+                 target_search_space: StructSimSearchSpace = "assembly"
+                 ):
+        if structure_search_type == "entry_id":
+            if input_structure_type == "assembly_id":
+                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                    "operator": operator,
+                    "target_search_space": target_search_space,
+                    "value": {
+                        "entry_id": value,
+                        "assembly_id": input_option
+                    }
+                })
+            elif input_structure_type == "chain_id":
+                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                    "operator": operator,
+                    "target_search_space": target_search_space,
+                    "value": {
+                        "entry_id": value,
+                        "asym_id": input_option
+                    }
+                })
+        elif structure_search_type == "file_url":
+            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                "operator": operator,
+                "target_search_space": target_search_space,
+                "value": {
+                    "url": value,
+                    "format": input_option
+                }
+            })
+        elif structure_search_type == "file_upload":
+            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
+                "operator": operator,
+                "target_search_space": target_search_space,
+                "value": {
+                    "url": fileUpload(value, input_option),
+                    "format": "bcif"
+                }
+            })
 
 
 @dataclass(frozen=True)

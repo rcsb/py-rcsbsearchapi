@@ -22,12 +22,13 @@ import platform
 import resource
 import time
 import unittest
+import os
 from itertools import islice
 import requests
-from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -39,6 +40,15 @@ class SearchTests(unittest.TestCase):
     def setUp(self):
         self.__startTime = time.time()
         logger.info("Starting %s at %s", self.id(), time.strftime("%Y %m %d %H:%M:%S", time.localtime()))
+        HERE = os.path.abspath(os.path.dirname(__file__))
+        self.__dirPath = os.path.join(HERE, "files")
+        self.__4hhbBcif = os.path.join(self.__dirPath, "4hhb.bcif")
+        self.__4hhbCif = os.path.join(self.__dirPath, "4hhb.cif")
+        self.__4hhbPdb = os.path.join(self.__dirPath, "4hhb.pdb")
+        self.__7n0rPdbGz = os.path.join(self.__dirPath, "7n0r.pdb.gz")
+        self.__7n0rCifGz = os.path.join(self.__dirPath, "7n0r.cif.gz")
+        self.__invalidTxt = os.path.join(self.__dirPath, "invalid.txt")
+        self.__4hhbAssembly1 = os.path.join(self.__dirPath, "4hhb-assembly1.cif.gz")
 
     def tearDown(self):
         unitS = "MB" if platform.system() == "Darwin" else "GB"
@@ -552,6 +562,174 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("SeqMotif Query with invalid parameters failed successfully: (%r)", ok)
 
+    def testFileUpload(self):
+        """Test uploading a file. Used for structure queries.
+        As a unique URL is generated each time, the only common
+        denominator is that the return URL contains the file
+        name at the end of it, and that the first part of the
+        URL is the same."""
+
+        hemo = self.__4hhbCif
+        x = fileUpload(hemo)
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.cif
+        self.assertTrue(ok)
+        logger.info(".cif File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly. This is admittedly rather redundant.
+        self.assertTrue(ok)
+        logger.info(".cif File Upload check two: (%r)", ok)
+
+        zipfile = self.__7n0rCifGz  # gz files should also work by default
+        x = fileUpload(zipfile)
+        ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
+        self.assertTrue(ok)
+        logger.info(".cif.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".cif.gz File Upload check two: (%r)", ok)
+
+        pdbfile = self.__4hhbPdb
+        x = fileUpload(pdbfile, "pdb")  # for non-cif files provide file extension
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
+        self.assertTrue(ok)
+        logger.info(".pdb File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".pdb File Upload check two: (%r)", ok)
+
+        zippdb = self.__7n0rPdbGz  # PDB Zip files should work as well.
+        x = fileUpload(zippdb, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "7n0r.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x
+        self.assertTrue(ok)
+        logger.info(".pdb.gz File Upload check two: (%r)", ok)
+
+        hemobcif = self.__4hhbBcif
+        x = fileUpload(hemobcif, "bcif")  # must specify that file you are providing is bcif
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.bcif"  # check that end of file name is 4hhb.bcif
+        self.assertTrue(ok)
+        logger.info(".bcif File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".bcif File Upload check two: (%r)", ok)
+
+        hemoAssem = self.__4hhbAssembly1
+        x = fileUpload(hemoAssem)
+        ok = (x[x.rfind("/") + 1:]) == "4hhb-assembly1.bcif"
+        self.assertTrue(ok)
+        logger.info(".cif.gz Assembly File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".cif.gz Assembly File Upload check two: (%r)", ok)
+
+        # test error handling
+
+        invalid = self.__invalidTxt
+        ok = False
+        try:
+            _ = fileUpload(invalid, "bcif")
+        except TypeError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("invalid query failed successfully: (%r)", ok)
+
+    def testStructSimQuery(self):
+        """Test firing off a structure similarity query"""
+        # Basic query - assembly ID
+        q1 = StructSimilarityQuery(value="4HHB")
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Structure Similarity query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with chain ID
+        q2 = StructSimilarityQuery("entry_id", "4HHB", "chain_id", "A", target_search_space="polymer_entity_instance")
+        result = list(q2())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with chain ID results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with file url
+        q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="cif")
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with file upload
+        q4 = StructSimilarityQuery("file_upload", self.__4hhbCif, input_option="cif")
+        result = list(q4())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with file upload results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with relaxed operator
+        q5 = StructSimilarityQuery("entry_id", "4HHB", operator="relaxed_shape_match")
+        result = list(q5())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with relaxed operator results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with specifically polymer entity instance search space
+        q6 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   value="4HHB",
+                                   input_structure_type="chain_id",
+                                   input_option="B",
+                                   operator="relaxed_shape_match",
+                                   target_search_space="polymer_entity_instance")
+        result = list(q6())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Query with polymer entity instance results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB Assembly 1 - cif zip file
+        q7 = StructSimilarityQuery("file_upload", self.__4hhbAssembly1, input_option="cif")
+        result = list(q7())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB Assembly 1 cif zip file results : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB PDB file
+        q8 = StructSimilarityQuery("file_upload", self.__4hhbPdb, input_option="pdb")
+        result = list(q8())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB PDB file results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File upload query using 4HHB bcif file
+        q9 = StructSimilarityQuery("file_upload", self.__4hhbBcif, input_option="bcif")
+        result = list(q9())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File upload query using 4HHB bcif file results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File url query with mmcif file format, relaxed operator, and chains target search space
+        q10 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif",
+                                    input_option="cif",
+                                    operator="relaxed_shape_match",
+                                    target_search_space="polymer_entity_instance")
+        result = list(q10())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File url query using mmcif file format, relaxed, and chains: result length : (%d), ok : (%r)", len(result), ok)
+
+        # File url query with wrong combination of fire url and format (should fail)
+        ok = False
+        try:
+            q11 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="pdb")
+            result = list(q11())
+        except requests.HTTPError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("File url query with wrong file format failed successfully : (%r)", ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -575,6 +753,8 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testCSMquery"))
     suiteSelect.addTest(SearchTests("testSequenceQuery"))
     suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    suiteSelect.addTest(SearchTests("testFileUpload"))
+    suiteSelect.addTest(SearchTests("testStructSimQuery"))
     return suiteSelect
 
 

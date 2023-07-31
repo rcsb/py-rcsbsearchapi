@@ -1,0 +1,1 @@
+This is an invalid file that should cause the program to throw a type error when this is passed through the file upload function. 
