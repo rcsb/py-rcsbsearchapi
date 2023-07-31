@@ -253,7 +253,7 @@ from rcsbsearchapi.search import StructSimilarityQuery
 q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="cif")
 
 # If using file upload, an example query would be like below:
-# q3 = StructSimilarityQuery("file_upload", "absolute path to the file", input_option="file format")
+# q3 = StructSimilarityQuery("file_upload", "/absolute/path/to/file.cif", input_option="file format")
 
 list(q3())
 ```
