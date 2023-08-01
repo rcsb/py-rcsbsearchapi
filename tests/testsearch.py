@@ -29,6 +29,7 @@ from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATT
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload, StructureMotifResidue, StructMotifQuery
+from rcsbsearchapi.search import ChemSimilarityQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -862,6 +863,89 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Invalid structure_search_type caught correctly: (%r)", ok)
 
+    def testChemSimilarityQuery(self):
+        """Test firing off chemical similarity queries"""
+        # Basic query with default values: query type = formula and match subset = False
+        q1 = ChemSimilarityQuery(value="C12 H17 N4 O S")
+        result = list(q1())
+        ok = len(result) > 0
+        logger.info("Basic query with default values results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # query with type = formula and match subset = True
+        q2 = ChemSimilarityQuery(value="C12 H28 O4",
+                                 query_type="formula",
+                                 match_subset=True)
+        result = list(q2())
+        ok = len(result) > 0
+        logger.info("Query with type = formula and match subset = True results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (sterospecific) or graph-relaxed-stereo
+        q3 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                                 query_type="descriptor",
+                                 descriptor_type="SMILES",
+                                 match_type="graph-relaxed-stereo")
+        result = list(q3())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, SMILES, and graph-relaxed-stereo results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (including stereoisomers) or graph-relaxed
+        q4 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                                 query_type="descriptor",
+                                 descriptor_type="SMILES",
+                                 match_type="graph-relaxed")
+        result = list(q4())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, SMILES, and graph-relaxed results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (quick screen) or fingerprint-similarity
+        q5 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                                 query_type="descriptor",
+                                 descriptor_type="SMILES",
+                                 match_type="fingerprint-similarity")
+        result = list(q5())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, SMILES, and fingerprint-similarity results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = InChI, match type = substructure (sterospecific) or sub-struct-graph-relaxed-stereo
+        q6 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                 query_type="descriptor",
+                                 descriptor_type="InChI",
+                                 match_type="sub-struct-graph-relaxed-stereo")
+        result = list(q6())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, InChI, and sub-struct-graph-relaxed-stereo results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = InChI, match type = substructure (including stereoisomers) or sub-struct-graph-relaxed
+        q7 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                 query_type="descriptor",
+                                 descriptor_type="InChI",
+                                 match_type="sub-struct-graph-relaxed")
+        result = list(q7())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, InChI, and sub-struct-graph-relaxed results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = InChI, match type = exact match or graph-exact
+        q8 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                 query_type="descriptor",
+                                 descriptor_type="InChI",
+                                 match_type="graph-exact")
+        result = list(q8())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, InChI, and graph-exact results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Invalid query with invalid parameters
+        ok = False
+        try:
+            q9 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                     query_type="descriptor",
+                                     descriptor_type="something",  # unsupported parameter
+                                     match_type="something")  # unsupported parameter
+            result = list(q9())
+        except requests.HTTPError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Descriptor query type with invalid parameters failed successfully : (%r)", ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -888,6 +972,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testFileUpload"))
     suiteSelect.addTest(SearchTests("testStructSimQuery"))
     suiteSelect.addTest(SearchTests("testStructMotifQuery"))
+    suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
     return suiteSelect
 
 
