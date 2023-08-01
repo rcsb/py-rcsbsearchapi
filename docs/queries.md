@@ -260,6 +260,125 @@ q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", i
 list(q3())
 ```
 
+### Structure Motif Query Example
+
+The PDB Archive can also be queried by using a "motif" found in these 3D structures. To perform this type of query, an entry_id or a file URL/path must be provided, along with residues (which are parts of 3D structures.) This is the bare minimum needed to make a search, but there are lots of other parameters that can be added to a Structure Motif Query. 
+
+To make a Structure Motif Query, you must first define anywhere from 2-10 "residues" that will be used in the query. Each individual residue has a Chain ID, Operator, Residue Number, and Exchanges (optional) that must be delcared in that order, or using positional arguments. 
+
+Each residue can only have a maximum of 4 Exchanges, and each query can only have 16 exchanges total. Violating any of these rules will cause the package to throw an Assertion Error. 
+
+Examples of how to instantiate Residues can be found below. These can then be put into a list and passed through to a Structure Motif Query.
+```python
+from rcsbsearchapi.search import StructureMotifResidue
+
+# construct a Residue with a Chain ID of A, an operator of 1, a residue 
+# number of 192, and Exchanges of "LYS" and "HIS"
+Res1 = StructureMotifResidue("A", "1", 192, ["LYS", "HIS"])
+# as for what is a valid "Exchange", the package provides these as a literal,
+# and they should be type checked. 
+
+# you can also use positional arguments:
+# this query is the same as above. 
+Res2 = StructureMotifResidue(struct_oper_id="1", label_asym_id="A", exchanges=["LYS", "HIS"], label_seq_id=192)
+
+# after delcaring a minimum of 2 and as many as 10, they can be passed into a list for use in the query itself:
+Res3 = StructureMotifResidue("A", "1", 162)  # exchanges are optional
+
+ResList = [Res1, Res3]
+```
+From there, these Residues can be used in a query. As stated before, you can only include 2 - 10 residues in a query. If you fail to provide residues for a query, or provide the wrong amount, the package will throw a ValueError. 
+
+For a Structure Motif Query using an entry_id, the only other necessary value that must be passed into the query is the residue list. The default type of query is an entry_id query. 
+
+As this type of query has a lot of optional parameters, do *not* use positional arguments as more than likely an error will occur. 
+
+Below is an example of a basic entry_id Structure Motif Query, with the residues declared earlier:
+```python
+from rcsbsearchapi.search import StructMotifQuery
+
+q1 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
+list(q1())
+```
+Like with Structure Similarity Queries, a file url or filepath can also be provided to the program. These can take the place of an entry_id. 
+
+For a file url query, you *must* provide both a valid file URL (a string), and the files file extension (also as a string). Failure to provide these elements correctly will cause the package to throw an AssertionError. 
+
+Below is an example of the same query as above, only this time providing a file url:
+```python
+link = "https://files.rcsb.org/view/2MNR.cif"
+q2 = StructMotifQuery(querytype="file_url", url=link, file_extension="cif", residue_ids=ResList)
+# querytype MUST be provided. A mismatched query type will cause an error. 
+list(q2())
+```
+Like with Structure Similarity Queries, a filepath to a file may also be provided. This file must be a valid file accepted by the search API. A file extension must also be provided with the file upload. 
+
+The query would look something like this. Note that this is abstracted for the purpose of notebook portability. 
+
+```python
+filepath = "/absolute/path/to/file.cif"
+q3 = StructMotifQuery(querytype="file_upload", filepath=filepath, file_extension="cif", residue_ids=ResList)
+
+list(q3())
+```
+There are many additional parameters that Structure Motif Query supports. These include a variety of features such as backbone distance tolerance, side chain distance tolerance, angle tolerance, RMSD cutoff, limits(stop searching after this many hits), atom pairing schemes, motif pruning strategy, allowed structures, and excluded structures. These can be mixed and matched as needed to make accurate and useful queries. All of these have some default value which is used when a parameter isn't provided. These parameters conform to the defaults used by the Search API. 
+
+Below will demonstrate how to define these parameters using non-positional arguments: 
+```python
+# specifying backbone distance tolerance: 0-3, default is 1
+# allowed backbone distance tolerance in Angstrom. 
+backbone = StructMotifQuery(entry_id="2MNR", backbone_distance_tolerance=2, residue_ids=ResList)
+list(backbone())
+
+# specifying sidechain distance tolerance: 0-3, default is 1
+# allowed side-chain distance tolerance in Angstrom.
+sidechain = StructMotifQuery(entry_id="2MNR", side_chain_distance_tolerance=2, residue_ids=ResList)
+list(sidechain())
+
+# specifying angle tolerance: 0-3, default is 1
+# allowed angle tolerance in multiples of 20 degrees. 
+angle = StructMotifQuery(entry_id="2MNR", angle_tolerance=2, residue_ids=ResList)
+list(angle())
+
+# specifying RMSD cutoff: >=0, default is 2
+# Threshold above which hits will be filtered by RMSD
+rmsd = StructMotifQuery(entry_id="2MNR", rmsd_cutoff=1, residue_ids=ResList)
+list(rmsd())
+
+# specifying limit: >=0, default excluded
+# Stop accepting results after this many hits. 
+limit = StructMotifQuery(entry_id="2MNR", limit=100, residue_ids=ResList)
+list(limit())
+
+# specifying atom pairing scheme, default = "SIDE_CHAIN"
+# ENUM: "ALL", "BACKBONE", "SIDE_CHAIN", "PSUEDO_ATOMS"
+# this is typechecked by a literal. 
+# Which atoms to consider to compute RMSD scores and transformations. 
+atom = StructMotifQuery(entry_id="2MNR", atom_pairing_scheme="ALL", residue_ids=ResList)
+list(atom())
+
+# specifying motif pruning strategy, default = "KRUSKAL"
+# ENUM: "NONE", "KRUSKAL"
+# this is typechecked by a literal in the package. 
+# Specifies how many query motifs are "pruned". KRUSKAL leads to less stringent queries, and faster results.
+pruning = StructMotifQuery(entry_id="2MNR", motif_pruning_strategy="NONE", residue_ids=ResList)
+list(pruning())
+```
+The Structure Motif Query can be used to make some very specific queries. Below is an example of a query that retrives occurances of the enolase superfamily, a group of proteins diverse in sequence and structure that are all capable of abstracting a proton from a carboxylic acid. Position-specific exchanges are crucial to represent this superfamily accurately.
+```Python
+Res1 = StructureMotifResidue("A", "1", 162, ["LYS", "HIS"])
+Res2 = StructureMotifResidue("A", "1", 193)
+Res3 = StructureMotifResidue("A", "1", 219)
+Res4 = StructureMotifResidue("A", "1", 245, ["GLU", "ASP", "ASN"])
+Res5 = StructureMotifResidue("A", "1", 295, ["HIS", "LYS"])
+
+ResList = [Res1, Res2, Res3, Res4, Res5]
+
+query = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
+
+list(query())
+```
+
 ## Sessions
 
 The result of executing a query (either by calling it or using `exec()`) is a

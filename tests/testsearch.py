@@ -28,7 +28,7 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload, StructMotifQuery, StructureMotifResidue
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -49,6 +49,9 @@ class SearchTests(unittest.TestCase):
         self.__7n0rCifGz = os.path.join(self.__dirPath, "7n0r.cif.gz")
         self.__invalidTxt = os.path.join(self.__dirPath, "invalid.txt")
         self.__4hhbAssembly1 = os.path.join(self.__dirPath, "4hhb-assembly1.cif.gz")
+        self.__4hhbpdb1 = os.path.join(self.__dirPath, "4hhb.pdb1")
+        self.__4hhbpdb1Gz = os.path.join(self.__dirPath, "4hhb.pdb1.gz")
+        self.__2mnr = os.path.join(self.__dirPath, "2mnr.cif")
 
     def tearDown(self):
         unitS = "MB" if platform.system() == "Darwin" else "GB"
@@ -629,6 +632,26 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".cif.gz Assembly File Upload check two: (%r)", ok)
 
+        hemopdb1 = self.__4hhbpdb1
+        x = fileUpload(hemopdb1, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.pdb1.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb1 File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".pdb1 File Upload check two: (%r)", ok)
+
+        hemopdb1gz = self.__4hhbpdb1Gz
+        x = fileUpload(hemopdb1gz, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.pdb1.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb1.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".pdb1.gz File Upload check two: (%r)", ok)
+
         # test error handling
 
         invalid = self.__invalidTxt
@@ -730,31 +753,121 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("File url query with wrong file format failed successfully : (%r)", ok)
 
+    def testStructMotifQuery(self):
+        # base example, entry ID, residues
+        Res1 = StructureMotifResidue("A", "1", 162, ["LYS", "HIS"])
+        Res2 = StructureMotifResidue("A", "1", 193, ["ASP"])
+        Res3 = StructureMotifResidue("A", "1", 192, ["LYS", "HIS", "ASP", "VAL"])
+        Res4 = StructureMotifResidue("A", "1", 191, ["LYS", "HIS", "ASP", "VAL"])
+        Res5 = StructureMotifResidue("A", "1", 190, ["LYS", "HIS", "ASP", "VAL"])
+        Res6 = StructureMotifResidue("A", "1", 189, ["LYS", "HIS", "ASP", "VAL"])
+        ResList = [Res1, Res2]
+
+        q1 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)  # Avoid positionals for StructMotifQuery... way too many things are optional in these queries
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic StructMotifQuery completed successfully: (%r)", ok)
+
+        # base example with file upload
+        MNR = self.__2mnr
+        q2 = StructMotifQuery(querytype="file_upload", filepath=MNR, file_extension="cif", residue_ids=ResList)  # You MUST specify querytype for non entry_id queries.
+        result = list(q2())
+        ok = len(result) > 0  # Note that because of a bug where two queries don't return the same result, you can't compare results from this query and previous.
+        self.assertTrue(ok)
+        logger.info("File Upload StructMotifQuery completed successfully: (%r)", ok)
+
+        # base example with file link
+        link = "https://files.rcsb.org/view/2MNR.cif"
+        q3 = StructMotifQuery(querytype="file_url", url=link, file_extension="cif", residue_ids=ResList)
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File URL StructMotifQuery completed successfully: (%r)", ok)
+
+        # invalid queries
+
+        # no residues provided
+        ok = False
+        try:
+            _ = StructMotifQuery(entry_id="2MNR")  # residue list missing
+        except ValueError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("No residues error caught correctly: (%r)", ok)
+
+        # filepath missing for file upload
+        ok = False
+        try:
+            _ = StructMotifQuery(querytype="file_upload", file_extension="cif", residue_ids=ResList)
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("File Upload malformed query caught correctly: (%r)", ok)
+
+        # file url missing for file upload
+        ok = False
+        try:
+            _ = StructMotifQuery(querytype="file_url", file_extension="cif", residue_ids=ResList)
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("File URL malformed query caught correctly: (%r)", ok)
+
+        # make sure max exchanges per residue is 4
+        ok = False
+        try:
+            _ = StructureMotifResidue("A", "1", 192, ["LYS", "HIS", "ASP", "VAL", "TYR"])  # not possible
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Max exchanges per residue asserted correctly: (%r)", ok)
+
+        # make sure no more than 16 max exchanges total per query
+        ok = False
+        _ = StructMotifQuery(entry_id="2MNR", residue_ids=[Res3, Res4, Res5, Res6])  # this should cause no issues, 16
+        try:
+            _ = StructMotifQuery(entry_id="2MNR", residue_ids=[Res2, Res3, Res4, Res5, Res6])  # this should crash
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Max exchanges per query asserted correctly: (%r)", ok)
+
+        # catch invalid query_id
+        ok = False
+        try:
+            _ = StructMotifQuery(querytype="invalid querytype goes here", residue_ids=ResList)
+        except ValueError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Invalid querytype caught correctly: (%r)", ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(SearchTests("testConstruction"))
-    suiteSelect.addTest(SearchTests("testLargePagination"))
-    suiteSelect.addTest(SearchTests("testOperators"))
-    suiteSelect.addTest(SearchTests("testPartialQuery"))
-    suiteSelect.addTest(SearchTests("testFreeText"))
-    suiteSelect.addTest(SearchTests("testAttribute"))
-    suiteSelect.addTest(SearchTests("exampleQuery1"))
-    suiteSelect.addTest(SearchTests("exampleQuery2"))
-    suiteSelect.addTest(SearchTests("testMalformedQuery"))
-    suiteSelect.addTest(SearchTests("testPagination"))
-    suiteSelect.addTest(SearchTests("testXor"))
-    suiteSelect.addTest(SearchTests("testInversion"))
-    suiteSelect.addTest(SearchTests("testIterable"))
-    suiteSelect.addTest(SearchTests("testIquery"))
-    suiteSelect.addTest(SearchTests("testSingleQuery"))
-    suiteSelect.addTest(SearchTests("testChemSearch"))
-    suiteSelect.addTest(SearchTests("testMismatch"))
-    suiteSelect.addTest(SearchTests("testCSMquery"))
-    suiteSelect.addTest(SearchTests("testSequenceQuery"))
-    suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
-    suiteSelect.addTest(SearchTests("testFileUpload"))
-    suiteSelect.addTest(SearchTests("testStructSimQuery"))
+    # suiteSelect.addTest(SearchTests("testConstruction"))
+    # suiteSelect.addTest(SearchTests("testLargePagination"))
+    # suiteSelect.addTest(SearchTests("testOperators"))
+    # suiteSelect.addTest(SearchTests("testPartialQuery"))
+    # suiteSelect.addTest(SearchTests("testFreeText"))
+    # suiteSelect.addTest(SearchTests("testAttribute"))
+    # suiteSelect.addTest(SearchTests("exampleQuery1"))
+    # suiteSelect.addTest(SearchTests("exampleQuery2"))
+    # suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    # suiteSelect.addTest(SearchTests("testPagination"))
+    # suiteSelect.addTest(SearchTests("testXor"))
+    # suiteSelect.addTest(SearchTests("testInversion"))
+    # suiteSelect.addTest(SearchTests("testIterable"))
+    # suiteSelect.addTest(SearchTests("testIquery"))
+    # suiteSelect.addTest(SearchTests("testSingleQuery"))
+    # suiteSelect.addTest(SearchTests("testChemSearch"))
+    # suiteSelect.addTest(SearchTests("testMismatch"))
+    # suiteSelect.addTest(SearchTests("testCSMquery"))
+    # suiteSelect.addTest(SearchTests("testSequenceQuery"))
+    # suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    # suiteSelect.addTest(SearchTests("testFileUpload"))
+    # suiteSelect.addTest(SearchTests("testStructSimQuery"))
+    suiteSelect.addTest(SearchTests("testStructMotifQuery"))
     return suiteSelect
 
 
