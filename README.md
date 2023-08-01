@@ -264,6 +264,50 @@ q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", i
 
 list(q3())
 ```
+### Chemical Similarity Query
+
+When you have unique chemical information (e.g., a chemical formula or descriptor) you can use this information to find chemical components (e.g., drugs, inhibitors, modified residues, or building blocks such as amino acids, nucleotides, or sugars), so that it is similar to the formula or descriptor used in the query (perhaps one or two atoms/groups are different), is part of a larger molecule (i.e., the specified formula/descriptor is a substructure), or is exactly or very closely matches the formula or descriptor used in the query. 
+
+The search can also be used to identify PDB structures that include the chemical component(s) which match or are similar to the query. These structures can then be examined to learn about the interactions of the component within the structure. More information on Chemical Similarity Queries can be found on the [RCSB PDB Chemical Similarity Search](https://www.rcsb.org/docs/search-and-browse/advanced-search/chemical-similarity-search) page.
+
+To do a Chemical Similarity query, you must first specify one of two possible query options which are formula and descriptors. Formula allows queries to be made by providing a chemical formula. Descriptors allow you to search by chemical notations for example. Each Query option has its own distinct set of parameters, but both options require a value.
+
+The formula query option comes with a match subset parameter which allows users to search chemical components whose formula exactly match the query or matches any portion of the query. The descriptor query option comes with a descriptor type parameter and match type parameter. The descriptor type parameter specifies what type of descriptor the input value is. There are two options which are SMILES (Simplified Molecular Input Line Entry Specification) and InChI (International Chemical Identifier). The match type parameter has six options which are Similar Ligands (Quick Screen), Similar Ligands (Stereospecific), Similar Ligands (including Stereoisomers), Substructure (Stereospecific), Substructure (including Stereoisomers), and Exact match.
+
+When doing Chemical Similarity Queries in this tool, it is important to note that by default the query option is set to formula and match subset is set to False. An example of how that looks like is below.
+```python
+from rcsbsearchapi.search import ChemSimilarityQuery
+
+# Basic query with default values query type = formula and match subset = False
+q1 = ChemSimilarityQuery(value="C12 H17 N4 O S")
+
+# Same example but with all the parameters listed
+q1 = ChemSimilarityQuery(value="C12 H17 N4 O S",
+                         query_type="formula",
+                         match_subset=False)
+list(q1())
+```
+Below is are two examples of using query option descriptor. Both descriptor type parameters are also used.
+```python
+from rcsbsearchapi.search import ChemSimilarityQuery
+
+# Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (sterospecific) or graph-relaxed-stereo
+q2 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                         query_type="descriptor",
+                         descriptor_type="SMILES",
+                         match_type="graph-relaxed-stereo")
+list(q2())
+```
+```python
+from rcsbsearchapi.search import ChemSimilarityQuery
+
+# Query with type = descriptor, descriptor type = InChI, match type = substructure (sterospecific) or sub-struct-graph-relaxed-stereo
+q3 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                         query_type="descriptor",
+                         descriptor_type="InChI",
+                         match_type="sub-struct-graph-relaxed-stereo")
+list(q3())
+```
 
 ## Supported Features
 

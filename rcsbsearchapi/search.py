@@ -48,7 +48,7 @@ StructSimEntryType = Literal["entry_id", "file_url", "file_upload"]  # possible 
 StructSimInputType = Literal["assembly_id", "chain_id"]  # Possible ID choices for structure similarity search
 StructSimSearchSpace = Literal["polymer_entity_instance", "assembly"]  # target search spaces for structure similarity search
 StructSimOperator = Literal["strict_shape_match", "relaxed_shape_match"]  # possible operators for structure similarity search
-SubsetDescriptorType = Literal[True, False, "InChI", "SMILES"]  # possible subset matching or descriptor types parameters for chemical similarity search
+SubsetDescriptorType = Literal["InChI", "SMILES"]  # possible subset matching or descriptor types parameters for chemical similarity search
 ChemSimType = Literal["formula", "descriptor"]  # possible query types for chemical similarity search
 ChemSimMatchType = Literal["graph-relaxed-stereo", "graph-relaxed", "fingerprint-similarity",  # possible match types for descriptor query type (Chemical similarity search)
                            "sub-struct-graph-relaxed-stereo", "sub-struct-graph-relaxed", "graph-exact"]
@@ -407,8 +407,9 @@ class StructSimilarityQuery(Terminal):
 class ChemSimilarityQuery(Terminal):
     """Special case of Terminal for chemical similarity search queries"""
     def __init__(self, value: Optional[str] = None,
-                 chem_sim_type: ChemSimType = "formula",
-                 subset_descriptor_type: SubsetDescriptorType = False,
+                 query_type: ChemSimType = "formula",
+                 match_subset: Optional[bool] = False,
+                 descriptor_type: Optional[SubsetDescriptorType] = None,
                  match_type: Optional[ChemSimMatchType] = None):
         """Guide for making queries with query type - descriptor:
         left side of the dash: front end (website) options for Match Type
@@ -420,15 +421,18 @@ class ChemSimilarityQuery(Terminal):
         Substructure (including Stereoisomers) - "sub-struct-graph-relaxed"
         Exact match - "graph-exact"
         """
-        if chem_sim_type == "formula":
-            super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params={"value": value,
-                                                                      "type": chem_sim_type,
-                                                                      "match_subset": subset_descriptor_type})
-        elif chem_sim_type == "descriptor":
-            super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params={"value": value,
-                                                                      "type": chem_sim_type,
-                                                                      "descriptor_type": subset_descriptor_type,
-                                                                      "match_type": match_type})
+
+        parameters = {"value": value,
+                      "type": query_type}
+
+        if query_type == "formula":
+            parameters["match_subset"] = match_subset
+
+        elif query_type == "descriptor":
+            parameters["descriptor_type"] = descriptor_type
+            parameters["match_type"] = match_type
+
+        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters)
 
 
 @dataclass(frozen=True)
