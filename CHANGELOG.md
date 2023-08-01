@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.3.0 (2023-07-31)
+
+- Added support for structure similarity search
+- File upload feature of structure similarity search supported
+- Documentation and code update
+
 ## v1.2.0 (2023-07-11)
 
 - Added support for sequence search and sequence motif search
