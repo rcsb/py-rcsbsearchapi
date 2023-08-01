@@ -361,6 +361,18 @@ list(atom())
 # Specifies how many query motifs are "pruned". KRUSKAL leads to less stringent queries, and faster results.
 pruning = StructMotifQuery(entry_id="2MNR", motif_pruning_strategy="NONE", residue_ids=ResList)
 list(pruning())
+
+# specifying allowed structures, default excluded
+# specify the structures you wish to allow in the return result. As an example,
+# we could only allow the results from the limited query we ran earlier. 
+allowed = StructMotifQuery(entry_id="2MNR", allowed_structures=list(limit()), residue_ids=ResList)
+list(allowed())
+
+# specifying structures to exclude, default excluded
+# specify structures to exclude from a query. We could, for example,
+# exclude the results of the previous allowed query. 
+excluded = StructMotifQuery(entry_id="2MNR", excluded_structures=list(allowed()), residue_ids=ResList)
+list(excluded())
 ```
 The Structure Motif Query can be used to make some very specific queries. Below is an example of a query that retrives occurances of the enolase superfamily, a group of proteins diverse in sequence and structure that are all capable of abstracting a proton from a carboxylic acid. Position-specific exchanges are crucial to represent this superfamily accurately.
 ```Python
