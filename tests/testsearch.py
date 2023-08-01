@@ -671,7 +671,7 @@ class SearchTests(unittest.TestCase):
 
         # Query with file upload
         q4 = StructSimilarityQuery(structure_search_type="file_upload",
-                                   absolute_file_path=self.__4hhbCif,
+                                   file_path=self.__4hhbCif,
                                    file_format="cif")
         result = list(q4())
         ok = len(result) > 0
@@ -701,7 +701,7 @@ class SearchTests(unittest.TestCase):
 
         # File upload query using 4HHB Assembly 1 - cif zip file
         q7 = StructSimilarityQuery(structure_search_type="file_upload",
-                                   absolute_file_path=self.__4hhbAssembly1,
+                                   file_path=self.__4hhbAssembly1,
                                    file_format="cif")
         result = list(q7())
         ok = len(result) > 0
@@ -710,7 +710,7 @@ class SearchTests(unittest.TestCase):
 
         # File upload query using 4HHB PDB file
         q8 = StructSimilarityQuery(structure_search_type="file_upload",
-                                   absolute_file_path=self.__4hhbPdb,
+                                   file_path=self.__4hhbPdb,
                                    file_format="pdb")
         result = list(q8())
         ok = len(result) > 0
@@ -719,7 +719,7 @@ class SearchTests(unittest.TestCase):
 
         # File upload query using 4HHB bcif file
         q9 = StructSimilarityQuery(structure_search_type="file_upload",
-                                   absolute_file_path=self.__4hhbBcif,
+                                   file_path=self.__4hhbBcif,
                                    file_format="bcif")
         result = list(q9())
         ok = len(result) > 0

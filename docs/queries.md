@@ -255,13 +255,13 @@ from rcsbsearchapi.search import StructSimilarityQuery
 q3 = StructSimilarityQuery(structure_search_type="file_url",
                            file_url="https://files.rcsb.org/view/4HHB.cif",
                            file_format="cif")
-
-# If using file upload, an example query would be like below:
-# q3 = StructSimilarityQuery(structure_search_type="file_upload",
-#                            file_upload="/absolute/path/to/file.cif",
-#                            file_format="file format")
-
 list(q3())
+
+# If you want to upload your own structure file for similarity search, you can do so by using the `file_path` parameter:
+q4 = StructSimilarityQuery(structure_search_type="file_upload",
+                           file_path="/path/to/file.cif",  # specify local model file path
+                           file_format="cif")
+list(q4())
 ```
 
 ## Sessions

@@ -362,7 +362,7 @@ class StructSimilarityQuery(Terminal):
     def __init__(self, structure_search_type: StructSimEntryType = "entry_id",
                  entry_id: Optional[str] = None,
                  file_url: Optional[str] = None,
-                 absolute_file_path: Optional[str] = None,
+                 file_path: Optional[str] = None,
                  structure_input_type: Optional[StructSimInputType] = "assembly_id",
                  assembly_id: Optional[str] = "1",
                  chain_id: Optional[str] = None,
@@ -387,7 +387,7 @@ class StructSimilarityQuery(Terminal):
                                    "format": file_format}
 
         elif structure_search_type == "file_upload":
-            parameters["value"] = {"url": fileUpload(absolute_file_path, file_format),
+            parameters["value"] = {"url": fileUpload(file_path, file_format),
                                    "format": "bcif"}
 
         super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters)
