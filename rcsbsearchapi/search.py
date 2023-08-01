@@ -525,15 +525,17 @@ class ChemSimilarityQuery(Terminal):
                  match_subset: Optional[bool] = False,
                  descriptor_type: Optional[SubsetDescriptorType] = None,
                  match_type: Optional[ChemSimMatchType] = None):
-        """Guide for making queries with query type - descriptor:
-        left side of the dash: front end (website) options for Match Type
-        right side of the dash: corresponding options for Match Type using Python tool
-        Similar Ligands (Stereospecific) - "graph-relaxed-stereo"
-        Similar Ligands (including Stereoisomers) - "graph-relaxed"
-        Similar Ligands (Quick screen) - "fingerprint-similarity"
-        Substructure (Stereospecific) - "sub-struct-graph-relaxed-stereo"
-        Substructure (including Stereoisomers) - "sub-struct-graph-relaxed"
-        Exact match - "graph-exact"
+        """Guide for "descriptor_type" options:
+        +-------------------------------------------+-----------------------------------+
+        | Match Type                                | descriptor_type                   |
+        +===========================================+===================================+
+          Similar Ligands (Stereospecific)          | "graph-relaxed-stereo"
+          Similar Ligands (including Stereoisomers) | "graph-relaxed"
+          Similar Ligands (Quick screen)            | "fingerprint-similarity"
+          Substructure (Stereospecific)             | "sub-struct-graph-relaxed-stereo"
+          Substructure (including Stereoisomers)    | "sub-struct-graph-relaxed"
+          Exact match                               | "graph-exact"
+        +-------------------------------------------+-----------------------------------+
         """
 
         parameters = {"value": value,
