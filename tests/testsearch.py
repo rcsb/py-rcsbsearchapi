@@ -790,7 +790,8 @@ class SearchTests(unittest.TestCase):
 
         # base example with file upload
         MNR = self.__2mnr
-        q2 = StructMotifQuery(querytype="file_upload", filepath=MNR, file_extension="cif", residue_ids=ResList)  # You MUST specify querytype for non entry_id queries.
+        q2 = StructMotifQuery(structure_search_type="file_upload", file_path=MNR, file_extension="cif", residue_ids=ResList)
+        # You MUST specify structure_search_type for non entry_id queries.
         result = list(q2())
         ok = len(result) > 0  # Note that because of a bug where two queries don't return the same result, you can't compare results from this query and previous.
         self.assertTrue(ok)
@@ -798,7 +799,7 @@ class SearchTests(unittest.TestCase):
 
         # base example with file link
         link = "https://files.rcsb.org/view/2MNR.cif"
-        q3 = StructMotifQuery(querytype="file_url", url=link, file_extension="cif", residue_ids=ResList)
+        q3 = StructMotifQuery(structure_search_type="file_url", url=link, file_extension="cif", residue_ids=ResList)
         result = list(q3())
         ok = len(result) > 0
         self.assertTrue(ok)
@@ -818,7 +819,7 @@ class SearchTests(unittest.TestCase):
         # filepath missing for file upload
         ok = False
         try:
-            _ = StructMotifQuery(querytype="file_upload", file_extension="cif", residue_ids=ResList)
+            _ = StructMotifQuery(structure_search_type="file_upload", file_extension="cif", residue_ids=ResList)
         except AssertionError:
             ok = True
         self.assertTrue(ok)
@@ -827,7 +828,7 @@ class SearchTests(unittest.TestCase):
         # file url missing for file upload
         ok = False
         try:
-            _ = StructMotifQuery(querytype="file_url", file_extension="cif", residue_ids=ResList)
+            _ = StructMotifQuery(structure_search_type="file_url", file_extension="cif", residue_ids=ResList)
         except AssertionError:
             ok = True
         self.assertTrue(ok)
@@ -855,11 +856,11 @@ class SearchTests(unittest.TestCase):
         # catch invalid query_id
         ok = False
         try:
-            _ = StructMotifQuery(querytype="invalid querytype goes here", residue_ids=ResList)
+            _ = StructMotifQuery(structure_search_type="invalid structure_search_type goes here", residue_ids=ResList)
         except ValueError:
             ok = True
         self.assertTrue(ok)
-        logger.info("Invalid querytype caught correctly: (%r)", ok)
+        logger.info("Invalid structure_search_type caught correctly: (%r)", ok)
 
 
 def buildSearch():

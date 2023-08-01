@@ -440,13 +440,13 @@ class StructMotifQuery(Terminal):
     Positional arguments STRONGLY discouraged. """
 
     def __init__(self,
-                 querytype: StructEntryType = "entry_id",
+                 structure_search_type: StructEntryType = "entry_id",
                  backbone_distance_tolerance: StructMotifTolerance = 1,
                  side_chain_distance_tolerance: StructMotifTolerance = 1,
                  angle_tolerance: StructMotifTolerance = 1,
                  entry_id: Optional[str] = None,
                  url: Optional[str] = None,
-                 filepath: Optional[str] = None,
+                 file_path: Optional[str] = None,
                  file_extension: Optional[str] = None,
                  residue_ids: Optional[list[StructureMotifResidue]] = None,
                  rmsd_cutoff: int = 2,
@@ -462,18 +462,18 @@ class StructMotifQuery(Terminal):
         if len(residue_ids) > STRUCT_MOTIF_MAX_RESIDUES or len(residue_ids) < STRUCT_MOTIF_MIN_RESIDUES:
             raise ValueError("A Structure Motif Query Must contain 2-10 residues.")
         value = {}
-        if querytype == "entry_id":
+        if structure_search_type == "entry_id":
             assert entry_id and isinstance(entry_id, str), "You must provide a valid entry_id for an entry_id query"
             value["entry_id"] = entry_id
-        elif querytype == "file_url":
+        elif structure_search_type == "file_url":
             assert url and isinstance(url, str), "You must provide a url for a file_url query"
             assert file_extension and isinstance(file_extension, str), "you must provide a valid file extension"
             value["url"] = url
             value["format"] = file_extension
-        elif querytype == "file_upload":
-            assert filepath and isinstance(filepath, str), "you must provide a valid filepath"
+        elif structure_search_type == "file_upload":
+            assert file_path and isinstance(file_path, str), "you must provide a valid filepath"
             assert file_extension and isinstance(file_extension, str), "you must provide a valid file_extension"
-            value["url"] = fileUpload(filepath, file_extension)
+            value["url"] = fileUpload(file_path, file_extension)
             value["format"] = "bcif"
         else:
             raise ValueError("Invalid Query Type Provided")

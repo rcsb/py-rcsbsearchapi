@@ -311,8 +311,8 @@ For a file url query, you *must* provide both a valid file URL (a string), and t
 Below is an example of the same query as above, only this time providing a file url:
 ```python
 link = "https://files.rcsb.org/view/2MNR.cif"
-q2 = StructMotifQuery(querytype="file_url", url=link, file_extension="cif", residue_ids=ResList)
-# querytype MUST be provided. A mismatched query type will cause an error. 
+q2 = StructMotifQuery(structure_search_type="file_url", url=link, file_extension="cif", residue_ids=ResList)
+# structure_search_type MUST be provided. A mismatched query type will cause an error. 
 list(q2())
 ```
 Like with Structure Similarity Queries, a filepath to a file may also be provided. This file must be a valid file accepted by the search API. A file extension must also be provided with the file upload. 
@@ -320,7 +320,7 @@ Like with Structure Similarity Queries, a filepath to a file may also be provide
 The query would look something like this. Note that this is abstracted for the purpose of notebook portability.
 ```python
 filepath = "/absolute/path/to/file.cif"
-q3 = StructMotifQuery(querytype="file_upload", filepath=filepath, file_extension="cif", residue_ids=ResList)
+q3 = StructMotifQuery(structure_search_type="file_upload", file_path=filepath, file_extension="cif", residue_ids=ResList)
 
 list(q3())
 ```
