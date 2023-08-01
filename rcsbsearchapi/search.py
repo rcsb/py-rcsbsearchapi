@@ -30,7 +30,7 @@ from typing import (
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
 from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE
-from .const import STRUCTMOTIF_SEARCH_SERVICE, STRUCT_MOTIF_MIN_RESIDUES, STRUCT_MOTIF_MAX_RESIDUES
+from .const import STRUCTMOTIF_SEARCH_SERVICE, STRUCT_MOTIF_MIN_RESIDUES, STRUCT_MOTIF_MAX_RESIDUES, CHEM_SIM_SEARCH_SERVICE
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -58,6 +58,10 @@ StructMotifExchanges = Literal["ALA", "CYS", "ASP", "GLU", "PHE", "GLY",
 StructMotifTolerance = Literal[0, 1, 2, 3]
 StructMotifAtomPairing = Literal["ALL", "BACKBONE", "SIDE_CHAIN", "PSEUDO_ATOMS"]
 StructMotifPruning = Literal["NONE", "KRUSKAL"]
+SubsetDescriptorType = Literal["InChI", "SMILES"]  # possible subset matching or descriptor types parameters for chemical similarity search
+ChemSimType = Literal["formula", "descriptor"]  # possible query types for chemical similarity search
+ChemSimMatchType = Literal["graph-relaxed-stereo", "graph-relaxed", "fingerprint-similarity",  # possible match types for descriptor query type (Chemical similarity search)
+                           "sub-struct-graph-relaxed-stereo", "sub-struct-graph-relaxed", "graph-exact"]
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -512,6 +516,39 @@ class StructMotifQuery(Terminal):
         # now call super
 
         super().__init__(service=STRUCTMOTIF_SEARCH_SERVICE, params=params)
+
+
+class ChemSimilarityQuery(Terminal):
+    """Special case of Terminal for chemical similarity search queries"""
+    def __init__(self, value: Optional[str] = None,
+                 query_type: ChemSimType = "formula",
+                 match_subset: Optional[bool] = False,
+                 descriptor_type: Optional[SubsetDescriptorType] = None,
+                 match_type: Optional[ChemSimMatchType] = None):
+        """Guide for "descriptor_type" options:
+        +-------------------------------------------+-----------------------------------+
+        | Match Type                                | descriptor_type                   |
+        +===========================================+===================================+
+          Similar Ligands (Stereospecific)          | "graph-relaxed-stereo"
+          Similar Ligands (including Stereoisomers) | "graph-relaxed"
+          Similar Ligands (Quick screen)            | "fingerprint-similarity"
+          Substructure (Stereospecific)             | "sub-struct-graph-relaxed-stereo"
+          Substructure (including Stereoisomers)    | "sub-struct-graph-relaxed"
+          Exact match                               | "graph-exact"
+        +-------------------------------------------+-----------------------------------+
+        """
+
+        parameters = {"value": value,
+                      "type": query_type}
+
+        if query_type == "formula":
+            parameters["match_subset"] = match_subset
+
+        elif query_type == "descriptor":
+            parameters["descriptor_type"] = descriptor_type
+            parameters["match_type"] = match_type
+
+        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters)
 
 
 @dataclass(frozen=True)
