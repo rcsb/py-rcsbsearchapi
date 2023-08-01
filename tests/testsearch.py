@@ -643,35 +643,45 @@ class SearchTests(unittest.TestCase):
     def testStructSimQuery(self):
         """Test firing off a structure similarity query"""
         # Basic query - assembly ID
-        q1 = StructSimilarityQuery(value="4HHB")
+        q1 = StructSimilarityQuery(entry_id="4HHB")
         result = list(q1())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Basic Structure Similarity query results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with chain ID
-        q2 = StructSimilarityQuery("entry_id", "4HHB", "chain_id", "A", target_search_space="polymer_entity_instance")
+        q2 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   entry_id="4HHB",
+                                   structure_input_type="chain_id",
+                                   chain_id="A",
+                                   target_search_space="polymer_entity_instance")
         result = list(q2())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with chain ID results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with file url
-        q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="cif")
+        q3 = StructSimilarityQuery(structure_search_type="file_url",
+                                   file_url="https://files.rcsb.org/view/4HHB.cif",
+                                   file_format="cif")
         result = list(q3())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with file upload
-        q4 = StructSimilarityQuery("file_upload", self.__4hhbCif, input_option="cif")
+        q4 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbCif,
+                                   file_format="cif")
         result = list(q4())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with file upload results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with relaxed operator
-        q5 = StructSimilarityQuery("entry_id", "4HHB", operator="relaxed_shape_match")
+        q5 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   entry_id="4HHB",
+                                   operator="relaxed_shape_match")
         result = list(q5())
         ok = len(result) > 0
         self.assertTrue(ok)
@@ -679,9 +689,9 @@ class SearchTests(unittest.TestCase):
 
         # Query with specifically polymer entity instance search space
         q6 = StructSimilarityQuery(structure_search_type="entry_id",
-                                   value="4HHB",
-                                   input_structure_type="chain_id",
-                                   input_option="B",
+                                   entry_id="4HHB",
+                                   structure_input_type="chain_id",
+                                   chain_id="B",
                                    operator="relaxed_shape_match",
                                    target_search_space="polymer_entity_instance")
         result = list(q6())
@@ -690,29 +700,36 @@ class SearchTests(unittest.TestCase):
         logger.info("Query with polymer entity instance results: result length : (%d), ok : (%r)", len(result), ok)
 
         # File upload query using 4HHB Assembly 1 - cif zip file
-        q7 = StructSimilarityQuery("file_upload", self.__4hhbAssembly1, input_option="cif")
+        q7 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbAssembly1,
+                                   file_format="cif")
         result = list(q7())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("File upload query using 4HHB Assembly 1 cif zip file results : (%d), ok : (%r)", len(result), ok)
 
         # File upload query using 4HHB PDB file
-        q8 = StructSimilarityQuery("file_upload", self.__4hhbPdb, input_option="pdb")
+        q8 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbPdb,
+                                   file_format="pdb")
         result = list(q8())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("File upload query using 4HHB PDB file results: result length : (%d), ok : (%r)", len(result), ok)
 
         # File upload query using 4HHB bcif file
-        q9 = StructSimilarityQuery("file_upload", self.__4hhbBcif, input_option="bcif")
+        q9 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbBcif,
+                                   file_format="bcif")
         result = list(q9())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("File upload query using 4HHB bcif file results: result length : (%d), ok : (%r)", len(result), ok)
 
         # File url query with mmcif file format, relaxed operator, and chains target search space
-        q10 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif",
-                                    input_option="cif",
+        q10 = StructSimilarityQuery(structure_search_type="file_url",
+                                    file_url="https://files.rcsb.org/view/4HHB.cif",
+                                    file_format="cif",
                                     operator="relaxed_shape_match",
                                     target_search_space="polymer_entity_instance")
         result = list(q10())
@@ -723,7 +740,9 @@ class SearchTests(unittest.TestCase):
         # File url query with wrong combination of fire url and format (should fail)
         ok = False
         try:
-            q11 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="pdb")
+            q11 = StructSimilarityQuery(structure_search_type="file_url",
+                                        file_url="https://files.rcsb.org/view/4HHB.cif",
+                                        file_format="pdb")
             result = list(q11())
         except requests.HTTPError:
             ok = True
