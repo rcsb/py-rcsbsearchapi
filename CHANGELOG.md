@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.4.0 (2023-08-02)
+
+- Added support for structure motif search
+- Added support for chemical similarity search
+- Adjusted arguments for structure similarity search
+- Documentation and code update
+
 ## v1.3.0 (2023-07-31)
 
 - Added support for structure similarity search
