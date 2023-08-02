@@ -3152,7 +3152,7 @@
               "priority_order": 25
             }
           ],
-          "rcsb_current_maximum_value": 152.24,
+          "rcsb_current_maximum_value": 164.339,
           "rcsb_current_minimum_value": 45.4
         },
         "angle_gamma": {
@@ -4052,7 +4052,7 @@
                 "context": "brief"
               }
             ],
-            "rcsb_current_maximum_value": 1686873600000,
+            "rcsb_current_maximum_value": 1687737600000,
             "rcsb_current_minimum_value": -27080352000000
           },
           "pdbx_frequency": {
@@ -11150,7 +11150,8 @@
         ]
       },
       "minItems": 1,
-      "uniqueItems": true
+      "uniqueItems": true,
+      "rcsb_nested_indexing": true
     },
     "pdbx_molecule_features": {
       "type": "array",
@@ -14032,7 +14033,7 @@
               "priority_order": 20
             }
           ],
-          "rcsb_current_maximum_value": 1688947200000,
+          "rcsb_current_maximum_value": 1689811200000,
           "rcsb_current_minimum_value": 82339200000
         },
         "has_released_experimental_data": {
@@ -14094,7 +14095,7 @@
               "priority_order": 25
             }
           ],
-          "rcsb_current_maximum_value": 1689724800000,
+          "rcsb_current_maximum_value": 1690934400000,
           "rcsb_current_minimum_value": 201312000000
         },
         "major_revision": {
@@ -14144,7 +14145,7 @@
               "priority_order": 30
             }
           ],
-          "rcsb_current_maximum_value": 1689724800000,
+          "rcsb_current_maximum_value": 1690934400000,
           "rcsb_current_minimum_value": 973641600000
         },
         "status_code": {
@@ -23156,7 +23157,7 @@
               "priority_order": 18
             }
           ],
-          "rcsb_current_maximum_value": 37438348,
+          "rcsb_current_maximum_value": 37496104,
           "rcsb_current_minimum_value": 5
         }
       },
@@ -23304,7 +23305,7 @@
                 "context": "brief"
               }
             ],
-            "rcsb_current_maximum_value": 1067236,
+            "rcsb_current_maximum_value": 1067543,
             "rcsb_current_minimum_value": 1
           },
           "identity": {
@@ -26315,6 +26316,12 @@
                 "text": "Name",
                 "context": "brief"
               }
+            ],
+            "rcsb_search_group": [
+              {
+                "group_name": "Polymer Molecular Features",
+                "priority_order": 105
+              }
             ]
           },
           "provenance_source": {
@@ -26465,7 +26472,7 @@
                   "rcsb_search_group": [
                     {
                       "group_name": "Polymer Molecular Features",
-                      "priority_order": 105
+                      "priority_order": 110
                     }
                   ]
                 },
@@ -26490,7 +26497,7 @@
                   "rcsb_search_group": [
                     {
                       "group_name": "Polymer Molecular Features",
-                      "priority_order": 110
+                      "priority_order": 115
                     }
                   ]
                 }
@@ -27498,7 +27505,7 @@
             "rcsb_search_group": [
               {
                 "group_name": "Polymer Molecular Features",
-                "priority_order": 115
+                "priority_order": 120
               }
             ]
           },
@@ -27525,7 +27532,7 @@
             "rcsb_search_group": [
               {
                 "group_name": "Polymer Molecular Features",
-                "priority_order": 120
+                "priority_order": 125
               }
             ]
           },
@@ -33043,7 +33050,7 @@
                       "context": "brief"
                     }
                   ],
-                  "rcsb_current_maximum_value": 2,
+                  "rcsb_current_maximum_value": 4,
                   "rcsb_current_minimum_value": 1
                 },
                 "id": {
@@ -33289,5 +33296,5 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Text Service Metadata",
   "description": "",
-  "$comment": "Schema version: 1.42.3"
+  "$comment": "Schema version: 1.42.4"
 }
