@@ -295,11 +295,11 @@ Res1 = StructureMotifResidue("A", "1", 192, ["LYS", "HIS"])
 # as for what is a valid "Exchange", the package provides these as a literal,
 # and they should be type checked. 
 
-# you can also use positional arguments:
+# you can also specify the arguments:
 # this query is the same as above. 
 Res2 = StructureMotifResidue(struct_oper_id="1", chain_id="A", exchanges=["LYS", "HIS"], label_seq_id=192)
 
-# after delcaring a minimum of 2 and as many as 10, they can be passed into a list for use in the query itself:
+# after delcaring a minimum of 2 and as many as 10 residues, they can be passed into a list for use in the query itself:
 Res3 = StructureMotifResidue("A", "1", 162)  # exchanges are optional
 
 ResList = [Res1, Res3]
@@ -319,7 +319,7 @@ list(q1())
 ```
 Like with Structure Similarity Queries, a file url or filepath can also be provided to the program. These can take the place of an entry_id. 
 
-For a file url query, you *must* provide both a valid file URL (a string), and the files file extension (also as a string). Failure to provide these elements correctly will cause the package to throw an AssertionError. 
+For a file url query, you *must* provide both a valid file URL (a string), and the file's file extension (also as a string). Failure to provide these elements correctly will cause the package to throw an AssertionError. 
 
 Below is an example of the same query as above, only this time providing a file url:
 ```python
@@ -330,7 +330,7 @@ list(q2())
 ```
 Like with Structure Similarity Queries, a filepath to a file may also be provided. This file must be a valid file accepted by the search API. A file extension must also be provided with the file upload. 
 
-The query would look something like this. Note that this is abstracted for the purpose of notebook portability.
+The query would look something like this:
 ```python
 filepath = "/absolute/path/to/file.cif"
 q3 = StructMotifQuery(structure_search_type="file_upload", file_path=filepath, file_extension="cif", residue_ids=ResList)
