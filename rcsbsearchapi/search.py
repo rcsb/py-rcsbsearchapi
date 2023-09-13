@@ -168,8 +168,8 @@ class Query(ABC):
     
     def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
         s = Session(self, return_type, 0, return_content_type)
-        response = s._single_query(start=0)
-        return response["total_count"] if response is not None else 0
+        response = s._single_query()
+        return response["total_count"] if response is not None else None
         
 
     @overload
