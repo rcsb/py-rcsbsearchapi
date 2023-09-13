@@ -730,6 +730,25 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("File url query with wrong file format failed successfully : (%r)", ok)
 
+    def testCountRequest(self):
+        """Test firing off a count request"""
+        # Attribute query test
+        q1 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        result = q1.count()
+        ok = result > 0
+        self.assertTrue(ok)
+        logger.info("Attribute query results count: (%d), ok : (%r)", result, ok)
+
+        # File url query with wrong combination of fire url and format (should fail)
+        # ok = False
+        # try:
+        #     q11 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="pdb")
+        #     result = list(q11())
+        # except requests.HTTPError:
+        #     ok = True
+        # self.assertTrue(ok)
+        # logger.info("File url query with wrong file format failed successfully : (%r)", ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -755,6 +774,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
     suiteSelect.addTest(SearchTests("testFileUpload"))
     suiteSelect.addTest(SearchTests("testStructSimQuery"))
+    suiteSelect.addTest(SearchTests("testCountRequest"))
     return suiteSelect
 
 
