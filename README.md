@@ -19,7 +19,7 @@ Get it from pypi:
 
     pip install rcsbsearchapi
 
-Or, download from [github](https://github.com/rcsb/py-rcsbsearchapi)
+Or, download from [GitHub](https://github.com/rcsb/py-rcsbsearchapi)
 
 ## Example
 
