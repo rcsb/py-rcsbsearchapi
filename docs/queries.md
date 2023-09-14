@@ -259,7 +259,7 @@ list(q3())
 
 # If you want to upload your own structure file for similarity search, you can do so by using the `file_path` parameter:
 q4 = StructSimilarityQuery(structure_search_type="file_upload",
-                           file_path="/path/to/file.cif",  # specify local model file path
+                           file_path="/PATH/TO/FILE.cif",  # specify local model file path
                            file_format="cif")
 list(q4())
 ```
