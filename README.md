@@ -463,8 +463,8 @@ The following table lists the status of current and planned features.
 - [x] Sequence search
 - [x] Sequence motif search
 - [x] Structure similarity search
-- [ ] Structural motif search
-- [ ] Chemical search
+- [X] Structure motif search
+- [X] Chemical similarity search
 - [ ] Rich results using the Data API
 
 Contributions are welcome for unchecked items!
