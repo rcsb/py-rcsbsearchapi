@@ -409,10 +409,12 @@ class StructSimilarityQuery(Terminal):
 
 class StructureMotifResidue():
     """This class is for defining residues. For use with the Structure Motif Search. """
-    def __init__(self, chain_id: Optional[str] = None,
-                 struct_oper_id: Optional[str] = None,
-                 label_seq_id: Optional[str] = None,
-                 exchanges: Optional[List[StructMotifExchanges]] = None):
+    def __init__(
+        self, chain_id: Optional[str] = None,
+        struct_oper_id: Optional[str] = None,
+        label_seq_id: Optional[str] = None,
+        exchanges: Optional[list] = None  # List of StructMotifExchanges objects
+    ):
         assert chain_id, "You must provide a chain_id."
         assert struct_oper_id, "You must provide a struct_oper_id."
         assert label_seq_id, "You must provide a label_seq_id. "
@@ -443,23 +445,24 @@ class StructMotifQuery(Terminal):
 
     Positional arguments STRONGLY discouraged. """
 
-    def __init__(self,
-                 structure_search_type: StructEntryType = "entry_id",
-                 backbone_distance_tolerance: StructMotifTolerance = 1,
-                 side_chain_distance_tolerance: StructMotifTolerance = 1,
-                 angle_tolerance: StructMotifTolerance = 1,
-                 entry_id: Optional[str] = None,
-                 url: Optional[str] = None,
-                 file_path: Optional[str] = None,
-                 file_extension: Optional[str] = None,
-                 residue_ids: Optional[list[StructureMotifResidue]] = None,
-                 rmsd_cutoff: int = 2,
-                 atom_pairing_scheme: StructMotifAtomPairing = "SIDE_CHAIN",
-                 motif_pruning_strategy: StructMotifPruning = "KRUSKAL",
-                 allowed_structures: Optional[list[str]] = None,
-                 excluded_structures: Optional[list[str]] = None,
-                 limit: Optional[int] = None
-                 ):
+    def __init__(
+        self,
+        structure_search_type: StructEntryType = "entry_id",
+        backbone_distance_tolerance: StructMotifTolerance = 1,
+        side_chain_distance_tolerance: StructMotifTolerance = 1,
+        angle_tolerance: StructMotifTolerance = 1,
+        entry_id: Optional[str] = None,
+        url: Optional[str] = None,
+        file_path: Optional[str] = None,
+        file_extension: Optional[str] = None,
+        residue_ids: Optional[list] = None,  # List of StructureMotifResidue objects
+        rmsd_cutoff: int = 2,
+        atom_pairing_scheme: StructMotifAtomPairing = "SIDE_CHAIN",
+        motif_pruning_strategy: StructMotifPruning = "KRUSKAL",
+        allowed_structures: Optional[list] = None,  # List of strings
+        excluded_structures: Optional[list] = None,  # List of strings
+        limit: Optional[int] = None
+    ):
         # we will construct value, and then pass it through. That's like 95% of this lol
         if not residue_ids:
             raise ValueError("You must include residues in a Structure Motif Query")
