@@ -412,7 +412,15 @@ class StructureMotifResidue():
     def __init__(self, chain_id: Optional[str] = None,
                  struct_oper_id: Optional[str] = None,
                  label_seq_id: Optional[str] = None,
-                 exchanges: Optional[list[StructMotifExchanges]] = None):
+                 exchanges: Optional[list] = None
+        ):
+        """
+        Args:
+            chain_id (Optional[str], optional): chain ID as a string. Defaults to None.
+            struct_oper_id (Optional[str], optional): struct_oper_id. Defaults to None.
+            label_seq_id (Optional[str], optional): label_seq_id. Defaults to None.
+            exchanges (Optional[list], optional): List of StructMotifExchanges. Defaults to None.
+        """
         assert chain_id, "You must provide a chain_id."
         assert struct_oper_id, "You must provide a struct_oper_id."
         assert label_seq_id, "You must provide a label_seq_id. "
@@ -452,12 +460,12 @@ class StructMotifQuery(Terminal):
                  url: Optional[str] = None,
                  file_path: Optional[str] = None,
                  file_extension: Optional[str] = None,
-                 residue_ids: Optional[list[StructureMotifResidue]] = None,
+                 residue_ids: Optional[list] = None,  # List of StructureMotifResidue objects
                  rmsd_cutoff: int = 2,
                  atom_pairing_scheme: StructMotifAtomPairing = "SIDE_CHAIN",
                  motif_pruning_strategy: StructMotifPruning = "KRUSKAL",
-                 allowed_structures: Optional[list[str]] = None,
-                 excluded_structures: Optional[list[str]] = None,
+                 allowed_structures: Optional[list] = None,  # List of strings
+                 excluded_structures: Optional[list] = None,  # List of strings
                  limit: Optional[int] = None
                  ):
         # we will construct value, and then pass it through. That's like 95% of this lol
