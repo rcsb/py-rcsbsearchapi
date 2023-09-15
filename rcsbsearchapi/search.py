@@ -30,6 +30,7 @@ from typing import (
 import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
 from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE
+from .const import STRUCTMOTIF_SEARCH_SERVICE, STRUCT_MOTIF_MIN_RESIDUES, STRUCT_MOTIF_MAX_RESIDUES, CHEM_SIM_SEARCH_SERVICE
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -44,10 +45,23 @@ ReturnType = Literal[
 ReturnContentType = Literal["experimental", "computational"]  # results_content_type parameter list values
 SequenceType = Literal["dna", "rna", "protein"]  # possible sequence types for sequence searching
 SeqMode = Literal["simple", "prosite", "regex"]  # possible sequence motif formats
-StructSimEntryType = Literal["entry_id", "file_url", "file_upload"]  # possible entry types for structure similarity search
+StructEntryType = Literal["entry_id", "file_url", "file_upload"]  # possible entry types for structure similarity search
 StructSimInputType = Literal["assembly_id", "chain_id"]  # Possible ID choices for structure similarity search
 StructSimSearchSpace = Literal["polymer_entity_instance", "assembly"]  # target search spaces for structure similarity search
 StructSimOperator = Literal["strict_shape_match", "relaxed_shape_match"]  # possible operators for structure similarity search
+StructMotifExchanges = Literal["ALA", "CYS", "ASP", "GLU", "PHE", "GLY",
+                               "HIS", "ILE", "LYS", "LEU", "MET", "ASN",
+                               "PYL", "PRO", "GLN", "ARG", "SER", "THR",
+                               "SEC", "VAL", "TRP", "TYR", "DA", "DC",
+                               "DG", "DI", "DT", "DU", "A", "C", "G",
+                               "I", "U", "UNK", "N"]
+StructMotifTolerance = Literal[0, 1, 2, 3]
+StructMotifAtomPairing = Literal["ALL", "BACKBONE", "SIDE_CHAIN", "PSEUDO_ATOMS"]
+StructMotifPruning = Literal["NONE", "KRUSKAL"]
+SubsetDescriptorType = Literal["InChI", "SMILES"]  # possible subset matching or descriptor types parameters for chemical similarity search
+ChemSimType = Literal["formula", "descriptor"]  # possible query types for chemical similarity search
+ChemSimMatchType = Literal["graph-relaxed-stereo", "graph-relaxed", "fingerprint-similarity",  # possible match types for descriptor query type (Chemical similarity search)
+                           "sub-struct-graph-relaxed-stereo", "sub-struct-graph-relaxed", "graph-exact"]
 TAndOr = Literal["and", "or"]
 # All valid types for Terminal values
 TValue = Union[
@@ -359,50 +373,182 @@ class SeqMotifQuery(Terminal):
 class StructSimilarityQuery(Terminal):
     """Special case of a terminal for structure similarity queries"""
 
-    def __init__(self, structure_search_type: StructSimEntryType = "entry_id",
-                 value: Optional[str] = None,
-                 input_structure_type: Optional[StructSimInputType] = "assembly_id",
-                 input_option: str = "1",
+    def __init__(self, structure_search_type: StructEntryType = "entry_id",
+                 entry_id: Optional[str] = None,
+                 file_url: Optional[str] = None,
+                 file_path: Optional[str] = None,
+                 structure_input_type: Optional[StructSimInputType] = "assembly_id",
+                 assembly_id: Optional[str] = "1",
+                 chain_id: Optional[str] = None,
                  operator: StructSimOperator = "strict_shape_match",
-                 target_search_space: StructSimSearchSpace = "assembly"
+                 target_search_space: StructSimSearchSpace = "assembly",
+                 file_format: Optional[str] = None
                  ):
+
+        parameters = {"operator": operator,
+                      "target_search_space": target_search_space}
+
         if structure_search_type == "entry_id":
-            if input_structure_type == "assembly_id":
-                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                    "operator": operator,
-                    "target_search_space": target_search_space,
-                    "value": {
-                        "entry_id": value,
-                        "assembly_id": input_option
-                    }
-                })
-            elif input_structure_type == "chain_id":
-                super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                    "operator": operator,
-                    "target_search_space": target_search_space,
-                    "value": {
-                        "entry_id": value,
-                        "asym_id": input_option
-                    }
-                })
+            if structure_input_type == "assembly_id":
+                parameters["value"] = {"entry_id": entry_id,
+                                       "assembly_id": assembly_id}
+            elif structure_input_type == "chain_id":
+                parameters["value"] = {"entry_id": entry_id,
+                                       "asym_id": chain_id}
+
         elif structure_search_type == "file_url":
-            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                "operator": operator,
-                "target_search_space": target_search_space,
-                "value": {
-                    "url": value,
-                    "format": input_option
-                }
-            })
+            parameters["value"] = {"url": file_url,
+                                   "format": file_format}
+
         elif structure_search_type == "file_upload":
-            super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params={
-                "operator": operator,
-                "target_search_space": target_search_space,
-                "value": {
-                    "url": fileUpload(value, input_option),
-                    "format": "bcif"
-                }
-            })
+            parameters["value"] = {"url": fileUpload(file_path, file_format),
+                                   "format": "bcif"}
+
+        super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters)
+
+
+class StructureMotifResidue():
+    """This class is for defining residues. For use with the Structure Motif Search. """
+    def __init__(self, chain_id: Optional[str] = None,
+                 struct_oper_id: Optional[str] = None,
+                 label_seq_id: Optional[str] = None,
+                 exchanges: Optional[list[StructMotifExchanges]] = None):
+        assert chain_id, "You must provide a chain_id."
+        assert struct_oper_id, "You must provide a struct_oper_id."
+        assert label_seq_id, "You must provide a label_seq_id. "
+        self.label_asym = chain_id
+        self.struct_oper_id = struct_oper_id
+        self.label_seq_id = label_seq_id
+
+        if exchanges:
+            assert len(exchanges) <= 4, "No more than 4 allowed residues can be specified in an individual residue"
+            self.exchanges = exchanges
+        else:
+            self.exchanges = None
+
+    def to_dict(self):
+        return {"label_asym_id": self.label_asym,
+                "struct_oper_id": self.struct_oper_id,
+                "label_seq_id": self.label_seq_id}
+
+
+class StructMotifQuery(Terminal):
+    """Special case of a terminal for structure motif queries.
+
+    If you provide an entry_id, the other optional parameters can be ignored.
+    If you provide a file_url, you must also provide a file_extension.
+    If you provide a filepath, you must also provide a file_extension.
+
+    As is standard with Structure Motif Queries, you must include a list of residues.
+
+    Positional arguments STRONGLY discouraged. """
+
+    def __init__(self,
+                 structure_search_type: StructEntryType = "entry_id",
+                 backbone_distance_tolerance: StructMotifTolerance = 1,
+                 side_chain_distance_tolerance: StructMotifTolerance = 1,
+                 angle_tolerance: StructMotifTolerance = 1,
+                 entry_id: Optional[str] = None,
+                 url: Optional[str] = None,
+                 file_path: Optional[str] = None,
+                 file_extension: Optional[str] = None,
+                 residue_ids: Optional[list[StructureMotifResidue]] = None,
+                 rmsd_cutoff: int = 2,
+                 atom_pairing_scheme: StructMotifAtomPairing = "SIDE_CHAIN",
+                 motif_pruning_strategy: StructMotifPruning = "KRUSKAL",
+                 allowed_structures: Optional[list[str]] = None,
+                 excluded_structures: Optional[list[str]] = None,
+                 limit: Optional[int] = None
+                 ):
+        # we will construct value, and then pass it through. That's like 95% of this lol
+        if not residue_ids:
+            raise ValueError("You must include residues in a Structure Motif Query")
+        if len(residue_ids) > STRUCT_MOTIF_MAX_RESIDUES or len(residue_ids) < STRUCT_MOTIF_MIN_RESIDUES:
+            raise ValueError("A Structure Motif Query Must contain 2-10 residues.")
+        value = {}
+        if structure_search_type == "entry_id":
+            assert entry_id and isinstance(entry_id, str), "You must provide a valid entry_id for an entry_id query"
+            value["entry_id"] = entry_id
+        elif structure_search_type == "file_url":
+            assert url and isinstance(url, str), "You must provide a url for a file_url query"
+            assert file_extension and isinstance(file_extension, str), "you must provide a valid file extension"
+            value["url"] = url
+            value["format"] = file_extension
+        elif structure_search_type == "file_upload":
+            assert file_path and isinstance(file_path, str), "you must provide a valid filepath"
+            assert file_extension and isinstance(file_extension, str), "you must provide a valid file_extension"
+            value["url"] = fileUpload(file_path, file_extension)
+            value["format"] = "bcif"
+        else:
+            raise ValueError("Invalid Query Type Provided")
+        residue_id_dicts = []
+        exchanges = []
+        total_res = 0
+        for x in residue_ids:
+            residue_id_dicts.append(x.to_dict())
+            if x.exchanges:
+                exchanges.append({"residue_id": x.to_dict(),
+                                  "allowed": x.exchanges})
+                total_res += len(x.exchanges)
+                assert total_res <= 16, "No more than 16 allowed exchanges total per query, regardless of residue count."
+        value["residue_ids"] = residue_id_dicts
+
+        # assemble params. This is done differently from before because so many of these are optional here,
+        # and I'm not aware of a method to make inclusions be skipped if a value is NONE when
+        # declaring values on instantiation.
+
+        params = {"value": value,
+                  "backbone_distance_tolerance": backbone_distance_tolerance,
+                  "side_chain_distance_tolerance": side_chain_distance_tolerance,
+                  "angle_tolerance": angle_tolerance,
+                  "rmsd_cutoff": rmsd_cutoff,
+                  "atom_pairing_scheme": atom_pairing_scheme,
+                  "motif_pruning_strategy": motif_pruning_strategy}
+        if allowed_structures:
+            params["allowed_structures"] = allowed_structures
+        if excluded_structures:
+            params["excluded_structures"] = excluded_structures
+        if exchanges:
+            params["exchanges"] = exchanges
+        if limit:
+            params["limit"] = limit
+
+        # now call super
+
+        super().__init__(service=STRUCTMOTIF_SEARCH_SERVICE, params=params)
+
+
+class ChemSimilarityQuery(Terminal):
+    """Special case of Terminal for chemical similarity search queries"""
+    def __init__(self, value: Optional[str] = None,
+                 query_type: ChemSimType = "formula",
+                 match_subset: Optional[bool] = False,
+                 descriptor_type: Optional[SubsetDescriptorType] = None,
+                 match_type: Optional[ChemSimMatchType] = None):
+        """Guide for "descriptor_type" options:
+        +-------------------------------------------+-----------------------------------+
+        | Match Type                                | descriptor_type                   |
+        +===========================================+===================================+
+          Similar Ligands (Stereospecific)          | "graph-relaxed-stereo"
+          Similar Ligands (including Stereoisomers) | "graph-relaxed"
+          Similar Ligands (Quick screen)            | "fingerprint-similarity"
+          Substructure (Stereospecific)             | "sub-struct-graph-relaxed-stereo"
+          Substructure (including Stereoisomers)    | "sub-struct-graph-relaxed"
+          Exact match                               | "graph-exact"
+        +-------------------------------------------+-----------------------------------+
+        """
+
+        parameters = {"value": value,
+                      "type": query_type}
+
+        if query_type == "formula":
+            parameters["match_subset"] = match_subset
+
+        elif query_type == "descriptor":
+            parameters["descriptor_type"] = descriptor_type
+            parameters["match_type"] = match_type
+
+        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters)
 
 
 @dataclass(frozen=True)

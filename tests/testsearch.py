@@ -28,7 +28,8 @@ import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
 from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload
+from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload, StructureMotifResidue, StructMotifQuery
+from rcsbsearchapi.search import ChemSimilarityQuery
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -49,6 +50,9 @@ class SearchTests(unittest.TestCase):
         self.__7n0rCifGz = os.path.join(self.__dirPath, "7n0r.cif.gz")
         self.__invalidTxt = os.path.join(self.__dirPath, "invalid.txt")
         self.__4hhbAssembly1 = os.path.join(self.__dirPath, "4hhb-assembly1.cif.gz")
+        self.__4hhbpdb1 = os.path.join(self.__dirPath, "4hhb.pdb1")
+        self.__4hhbpdb1Gz = os.path.join(self.__dirPath, "4hhb.pdb1.gz")
+        self.__2mnr = os.path.join(self.__dirPath, "2mnr.cif")
 
     def tearDown(self):
         unitS = "MB" if platform.system() == "Darwin" else "GB"
@@ -629,6 +633,26 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info(".cif.gz Assembly File Upload check two: (%r)", ok)
 
+        hemopdb1 = self.__4hhbpdb1
+        x = fileUpload(hemopdb1, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.pdb1.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb1 File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".pdb1 File Upload check two: (%r)", ok)
+
+        hemopdb1gz = self.__4hhbpdb1Gz
+        x = fileUpload(hemopdb1gz, "pdb")
+        ok = (x[x.rfind("/") + 1:]) == "4hhb.pdb1.bcif"
+        self.assertTrue(ok)
+        logger.info(".pdb1.gz File Upload check one: (%r)", ok)
+
+        ok = RETURN_UP_URL in x  # check that beginning of URL is formed correctly.
+        self.assertTrue(ok)
+        logger.info(".pdb1.gz File Upload check two: (%r)", ok)
+
         # test error handling
 
         invalid = self.__invalidTxt
@@ -643,35 +667,45 @@ class SearchTests(unittest.TestCase):
     def testStructSimQuery(self):
         """Test firing off a structure similarity query"""
         # Basic query - assembly ID
-        q1 = StructSimilarityQuery(value="4HHB")
+        q1 = StructSimilarityQuery(entry_id="4HHB")
         result = list(q1())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Basic Structure Similarity query results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with chain ID
-        q2 = StructSimilarityQuery("entry_id", "4HHB", "chain_id", "A", target_search_space="polymer_entity_instance")
+        q2 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   entry_id="4HHB",
+                                   structure_input_type="chain_id",
+                                   chain_id="A",
+                                   target_search_space="polymer_entity_instance")
         result = list(q2())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with chain ID results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with file url
-        q3 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="cif")
+        q3 = StructSimilarityQuery(structure_search_type="file_url",
+                                   file_url="https://files.rcsb.org/view/4HHB.cif",
+                                   file_format="cif")
         result = list(q3())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with file url results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with file upload
-        q4 = StructSimilarityQuery("file_upload", self.__4hhbCif, input_option="cif")
+        q4 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbCif,
+                                   file_format="cif")
         result = list(q4())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Query with file upload results: result length : (%d), ok : (%r)", len(result), ok)
 
         # Query with relaxed operator
-        q5 = StructSimilarityQuery("entry_id", "4HHB", operator="relaxed_shape_match")
+        q5 = StructSimilarityQuery(structure_search_type="entry_id",
+                                   entry_id="4HHB",
+                                   operator="relaxed_shape_match")
         result = list(q5())
         ok = len(result) > 0
         self.assertTrue(ok)
@@ -679,9 +713,9 @@ class SearchTests(unittest.TestCase):
 
         # Query with specifically polymer entity instance search space
         q6 = StructSimilarityQuery(structure_search_type="entry_id",
-                                   value="4HHB",
-                                   input_structure_type="chain_id",
-                                   input_option="B",
+                                   entry_id="4HHB",
+                                   structure_input_type="chain_id",
+                                   chain_id="B",
                                    operator="relaxed_shape_match",
                                    target_search_space="polymer_entity_instance")
         result = list(q6())
@@ -690,29 +724,36 @@ class SearchTests(unittest.TestCase):
         logger.info("Query with polymer entity instance results: result length : (%d), ok : (%r)", len(result), ok)
 
         # File upload query using 4HHB Assembly 1 - cif zip file
-        q7 = StructSimilarityQuery("file_upload", self.__4hhbAssembly1, input_option="cif")
+        q7 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbAssembly1,
+                                   file_format="cif")
         result = list(q7())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("File upload query using 4HHB Assembly 1 cif zip file results : (%d), ok : (%r)", len(result), ok)
 
         # File upload query using 4HHB PDB file
-        q8 = StructSimilarityQuery("file_upload", self.__4hhbPdb, input_option="pdb")
+        q8 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbPdb,
+                                   file_format="pdb")
         result = list(q8())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("File upload query using 4HHB PDB file results: result length : (%d), ok : (%r)", len(result), ok)
 
         # File upload query using 4HHB bcif file
-        q9 = StructSimilarityQuery("file_upload", self.__4hhbBcif, input_option="bcif")
+        q9 = StructSimilarityQuery(structure_search_type="file_upload",
+                                   file_path=self.__4hhbBcif,
+                                   file_format="bcif")
         result = list(q9())
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("File upload query using 4HHB bcif file results: result length : (%d), ok : (%r)", len(result), ok)
 
         # File url query with mmcif file format, relaxed operator, and chains target search space
-        q10 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif",
-                                    input_option="cif",
+        q10 = StructSimilarityQuery(structure_search_type="file_url",
+                                    file_url="https://files.rcsb.org/view/4HHB.cif",
+                                    file_format="cif",
                                     operator="relaxed_shape_match",
                                     target_search_space="polymer_entity_instance")
         result = list(q10())
@@ -723,12 +764,187 @@ class SearchTests(unittest.TestCase):
         # File url query with wrong combination of fire url and format (should fail)
         ok = False
         try:
-            q11 = StructSimilarityQuery("file_url", "https://files.rcsb.org/view/4HHB.cif", input_option="pdb")
+            q11 = StructSimilarityQuery(structure_search_type="file_url",
+                                        file_url="https://files.rcsb.org/view/4HHB.cif",
+                                        file_format="pdb")
             result = list(q11())
         except requests.HTTPError:
             ok = True
         self.assertTrue(ok)
         logger.info("File url query with wrong file format failed successfully : (%r)", ok)
+
+    def testStructMotifQuery(self):
+        # base example, entry ID, residues
+        Res1 = StructureMotifResidue("A", "1", 162, ["LYS", "HIS"])
+        Res2 = StructureMotifResidue("A", "1", 193, ["ASP"])
+        Res3 = StructureMotifResidue("A", "1", 192, ["LYS", "HIS", "ASP", "VAL"])
+        Res4 = StructureMotifResidue("A", "1", 191, ["LYS", "HIS", "ASP", "VAL"])
+        Res5 = StructureMotifResidue("A", "1", 190, ["LYS", "HIS", "ASP", "VAL"])
+        Res6 = StructureMotifResidue("A", "1", 189, ["LYS", "HIS", "ASP", "VAL"])
+        ResList = [Res1, Res2]
+
+        q1 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)  # Avoid positionals for StructMotifQuery... way too many things are optional in these queries
+        result = list(q1())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic StructMotifQuery completed successfully: (%r)", ok)
+
+        # base example with file upload
+        MNR = self.__2mnr
+        q2 = StructMotifQuery(structure_search_type="file_upload", file_path=MNR, file_extension="cif", residue_ids=ResList)
+        # You MUST specify structure_search_type for non entry_id queries.
+        result = list(q2())
+        ok = len(result) > 0  # Note that because of a bug where two queries don't return the same result, you can't compare results from this query and previous.
+        self.assertTrue(ok)
+        logger.info("File Upload StructMotifQuery completed successfully: (%r)", ok)
+
+        # base example with file link
+        link = "https://files.rcsb.org/view/2MNR.cif"
+        q3 = StructMotifQuery(structure_search_type="file_url", url=link, file_extension="cif", residue_ids=ResList)
+        result = list(q3())
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("File URL StructMotifQuery completed successfully: (%r)", ok)
+
+        # invalid queries
+
+        # no residues provided
+        ok = False
+        try:
+            _ = StructMotifQuery(entry_id="2MNR")  # residue list missing
+        except ValueError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("No residues error caught correctly: (%r)", ok)
+
+        # filepath missing for file upload
+        ok = False
+        try:
+            _ = StructMotifQuery(structure_search_type="file_upload", file_extension="cif", residue_ids=ResList)
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("File Upload malformed query caught correctly: (%r)", ok)
+
+        # file url missing for file upload
+        ok = False
+        try:
+            _ = StructMotifQuery(structure_search_type="file_url", file_extension="cif", residue_ids=ResList)
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("File URL malformed query caught correctly: (%r)", ok)
+
+        # make sure max exchanges per residue is 4
+        ok = False
+        try:
+            _ = StructureMotifResidue("A", "1", 192, ["LYS", "HIS", "ASP", "VAL", "TYR"])  # not possible
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Max exchanges per residue asserted correctly: (%r)", ok)
+
+        # make sure no more than 16 max exchanges total per query
+        ok = False
+        _ = StructMotifQuery(entry_id="2MNR", residue_ids=[Res3, Res4, Res5, Res6])  # this should cause no issues, 16
+        try:
+            _ = StructMotifQuery(entry_id="2MNR", residue_ids=[Res2, Res3, Res4, Res5, Res6])  # this should crash
+        except AssertionError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Max exchanges per query asserted correctly: (%r)", ok)
+
+        # catch invalid query_id
+        ok = False
+        try:
+            _ = StructMotifQuery(structure_search_type="invalid structure_search_type goes here", residue_ids=ResList)
+        except ValueError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Invalid structure_search_type caught correctly: (%r)", ok)
+
+    def testChemSimilarityQuery(self):
+        """Test firing off chemical similarity queries"""
+        # Basic query with default values: query type = formula and match subset = False
+        q1 = ChemSimilarityQuery(value="C12 H17 N4 O S")
+        result = list(q1())
+        ok = len(result) > 0
+        logger.info("Basic query with default values results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # query with type = formula and match subset = True
+        q2 = ChemSimilarityQuery(value="C12 H28 O4",
+                                 query_type="formula",
+                                 match_subset=True)
+        result = list(q2())
+        ok = len(result) > 0
+        logger.info("Query with type = formula and match subset = True results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (sterospecific) or graph-relaxed-stereo
+        q3 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                                 query_type="descriptor",
+                                 descriptor_type="SMILES",
+                                 match_type="graph-relaxed-stereo")
+        result = list(q3())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, SMILES, and graph-relaxed-stereo results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (including stereoisomers) or graph-relaxed
+        q4 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                                 query_type="descriptor",
+                                 descriptor_type="SMILES",
+                                 match_type="graph-relaxed")
+        result = list(q4())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, SMILES, and graph-relaxed results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = SMILES, match type = similar ligands (quick screen) or fingerprint-similarity
+        q5 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+                                 query_type="descriptor",
+                                 descriptor_type="SMILES",
+                                 match_type="fingerprint-similarity")
+        result = list(q5())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, SMILES, and fingerprint-similarity results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = InChI, match type = substructure (sterospecific) or sub-struct-graph-relaxed-stereo
+        q6 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                 query_type="descriptor",
+                                 descriptor_type="InChI",
+                                 match_type="sub-struct-graph-relaxed-stereo")
+        result = list(q6())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, InChI, and sub-struct-graph-relaxed-stereo results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = InChI, match type = substructure (including stereoisomers) or sub-struct-graph-relaxed
+        q7 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                 query_type="descriptor",
+                                 descriptor_type="InChI",
+                                 match_type="sub-struct-graph-relaxed")
+        result = list(q7())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, InChI, and sub-struct-graph-relaxed results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Query with type = descriptor, descriptor type = InChI, match type = exact match or graph-exact
+        q8 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                 query_type="descriptor",
+                                 descriptor_type="InChI",
+                                 match_type="graph-exact")
+        result = list(q8())
+        ok = len(result) > 0
+        logger.info("Query with using type - descriptor, InChI, and graph-exact results: result length : (%d), ok : (%r)", len(result), ok)
+
+        # Invalid query with invalid parameters
+        ok = False
+        try:
+            q9 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+                                     query_type="descriptor",
+                                     descriptor_type="something",  # unsupported parameter
+                                     match_type="something")  # unsupported parameter
+            result = list(q9())
+        except requests.HTTPError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Descriptor query type with invalid parameters failed successfully : (%r)", ok)
 
 
 def buildSearch():
@@ -755,6 +971,8 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
     suiteSelect.addTest(SearchTests("testFileUpload"))
     suiteSelect.addTest(SearchTests("testStructSimQuery"))
+    suiteSelect.addTest(SearchTests("testStructMotifQuery"))
+    suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
     return suiteSelect
 
 

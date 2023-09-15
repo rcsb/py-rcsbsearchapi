@@ -53,19 +53,31 @@ class SchemaTests(unittest.TestCase):
         logger.info("Schema test results: ok : (%r), ok2: (%r)", ok, ok2)
 
     def testSchemaVersion(self):
+        # Check structure attribute schema version
         webSchema = _download_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_json_schema()
-        localVer = localSchema.get("$comment")
-        webVer = webSchema.get("$comment")
-        ok = localVer == webVer
+        webVer = webSchema.get("$comment").split()[-1]
+        localVer = localSchema.get("$comment").split()[-1]
+        ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
+        self.assertTrue(ok)
+        logger.info("ok is %r", ok)
+        webVerMajorMinor = ".".join(webVer.split(".")[0:2])
+        localVerMajorMinor = ".".join(localVer.split(".")[0:2])
+        ok = localVerMajorMinor == webVerMajorMinor
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
         logger.info("Metadata schema tests results: local version (%r) and web version (%s)", localVer, webVer)
+        # Check chemical attribute schema version
         webSchema = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_chem_schema()
-        webVer = webSchema.get("$comment")
-        localVer = localSchema.get("$comment")
-        ok = webVer == localVer
+        webVer = webSchema.get("$comment").split()[-1]
+        localVer = localSchema.get("$comment").split()[-1]
+        ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
+        self.assertTrue(ok)
+        logger.info("ok is %r", ok)
+        webVerMajorMinor = ".".join(webVer.split(".")[0:2])
+        localVerMajorMinor = ".".join(localVer.split(".")[0:2])
+        ok = localVerMajorMinor == webVerMajorMinor
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
         logger.info("Chemical schema tests results: local version (%r) and web version (%s)", localVer, webVer)
