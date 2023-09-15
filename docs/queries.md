@@ -90,10 +90,7 @@ list(query())
 ```
 ### Computed Structure Models
 
-The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type)
-page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below.
-This query returns ID's for experimental and computed models associated with "hemoglobin". 
-Queries with only computed models or only experimental models can be made.
+The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type) page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below. This query returns IDs for experimental and computed structure models associated with "hemoglobin". Queries for *only* computed models or *only* experimental models can also be made (default).
 ```python
 from rcsbsearchapi.search import TextQuery
 
