@@ -15,13 +15,13 @@ This package requires python 3.7 or later.
 
 ## Installation
 
-Get it from pypi:
+Get it from PyPI:
 
     pip install rcsbsearchapi
 
 Or, download from [GitHub](https://github.com/rcsb/py-rcsbsearchapi)
 
-## Example
+## Examples
 
 Here is a quick example of how the package is used. Two syntaxes are available for
 constructing queries: an "operator" API using python's comparators, and a "fluent"
@@ -105,7 +105,7 @@ list(query())
 ### Computed Structure Models
 
 The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type)
-page provides information on how to include Computed Models into a search query. Here is a code example below.
+page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below.
 This query returns ID's for experimental and computed models associated with "hemoglobin". 
 Queries with only computed models or only experimental models can be made.
 ```python

@@ -22,8 +22,7 @@ q4 = attrs.rcsb_entry_info.polymer_entity_count_DNA >= 1
 ```
 Attributes are available from the rcsb_attributes object and can be tab-completed.
 They can additionally be constructed from strings using the `Attr(attribute)`
-constructor. For a full list of attributes, please refer to the [RCSB
-schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
+constructor. For a full list of attributes, please refer to the [RCSB PDB schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 
 `Terminal`s are combined into `Group`s using python's bitwise operators. This is
 analogous to how bitwise operators act on python `set` objects. The operators are
@@ -70,7 +69,7 @@ for assemblyid in results:
 ```
 ### Structural Attribute Search and Chemical Attribute Search Combination
 
-Grouping of a Structural Attribute query and Chemical Attribute query is permitted as long as grouping is done correctly and search services are specified accordingly. Not the example below. More details on attributes that are available for text searches can be found on the [RCSB PDB Search API](https://search.rcsb.org/#search-attributes) page.
+Grouping of a Structural Attribute query and Chemical Attribute query is permitted as long as grouping is done correctly and search services are specified accordingly. More details on attributes that are available for text searches can be found on the [RCSB PDB Search API](https://search.rcsb.org/#search-attributes) page.
 ```python
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi.search import AttributeQuery
@@ -92,7 +91,7 @@ list(query())
 ### Computed Structure Models
 
 The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type)
-page provides information on how to include Computed Models into a search query. Here is a code example below.
+page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below.
 This query returns ID's for experimental and computed models associated with "hemoglobin". 
 Queries with only computed models or only experimental models can be made.
 ```python

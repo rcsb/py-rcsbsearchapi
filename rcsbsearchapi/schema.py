@@ -1,4 +1,4 @@
-"""Parse the full RCSB search schema
+"""Parse the full RCSB PDB search schema
 
 Provides access to all valid attributes for search queries.
 """

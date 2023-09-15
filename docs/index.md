@@ -1,6 +1,6 @@
-# rcsbsearchapi - Query protein structures from python
+# rcsbsearchapi - Query protein structures from Python
 
-The `rcsbsearchapi` package provides a python interface to the [RCSB Search API](http://search.rcsb.org/). Use it to fetch lists of PDB IDs corresponding to advanced query searches.
+The `rcsbsearchapi` package provides a Python interface to the [RCSB PDB Search API](http://search.rcsb.org/). Use it to fetch lists of PDB IDs corresponding to advanced query searches.
 
 ```{toctree}
 ---
@@ -14,7 +14,7 @@ api.rst
 
 ## Availability
 
-Get it from pypi:
+Get it from PyPI:
 
     pip install rcsbsearchapi
 
@@ -31,7 +31,7 @@ Please cite the rcsbsearchapi package by URL:
 
 > https://rcsbsearchapi.readthedocs.io
 
-You should also cite the RCSB service this package utilizes:
+You should also cite the RCSB PDB service this package utilizes:
 
 > Yana Rose, Jose M. Duarte, Robert Lowe, Joan Segura, Chunxiao Bi, Charmi
 > Bhikadiya, Li Chen, Alexander S. Rose, Sebastian Bittrich, Stephen K. Burley,
