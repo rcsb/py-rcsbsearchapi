@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.1 (2023-09-14)
+
+- Bug fix
+
 ## v1.4.0 (2023-08-02)
 
 - Added support for structure motif search

@@ -412,7 +412,7 @@ class StructureMotifResidue():
     def __init__(self, chain_id: Optional[str] = None,
                  struct_oper_id: Optional[str] = None,
                  label_seq_id: Optional[str] = None,
-                 exchanges: Optional[list[StructMotifExchanges]] = None):
+                 exchanges: Optional[List[StructMotifExchanges]] = None):
         assert chain_id, "You must provide a chain_id."
         assert struct_oper_id, "You must provide a struct_oper_id."
         assert label_seq_id, "You must provide a label_seq_id. "
