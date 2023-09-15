@@ -2,7 +2,7 @@
 
 ## Installation
 
-Get it from pypi:
+Get it from PyPI:
 
     pip install rcsbsearchapi
 
@@ -20,12 +20,11 @@ A runnable jupyter notebook with this example is available in [notebooks/quickst
 An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/rcsb/py-rcsbsearchapi/master?labpath=notebooks%2Fcovid.ipynb)
 
-### Operator example
+### Operator Example
 
-Here is an example from the [RCSB Search
-API](http://search.rcsb.org/#search-example-1) page, using the operator syntax. This
-query finds symmetric dimers having a twofold rotation with the DNA-binding domain of
-a heat-shock transcription factor.
+Here is an example from the [RCSB PDB Search API](http://search.rcsb.org/#search-example-1) page, using the operator syntax. 
+This query finds symmetric dimers having a twofold rotation with the DNA-binding
+domain of a heat-shock transcription factor.
 ```python
 from rcsbsearchapi.search import TextQuery
 from rcsbsearchapi import rcsb_attributes as attrs
@@ -43,8 +42,7 @@ query = q1 & (q2 & q3 & q4)
 for assemblyid in query("assembly"):
     print(assemblyid)
 ```
-For a full list of attributes, please refer to the [RCSB
-schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
+For a full list of attributes, please refer to the [RCSB PDB schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 
 ### Fluent Example
 
@@ -68,7 +66,7 @@ for assemblyid in results:
 ```
 ### Structural Attribute Search and Chemical Attribute Search Combination
 
-Grouping of a Structural Attribute query and Chemical Attribute query is permitted as long as grouping is done correctly and search services are specified accordingly. Not the example below. More details on attributes that are available for text searches can be found on the [RCSB PDB Search API](https://search.rcsb.org/#search-attributes) page.
+Grouping of a Structural Attribute query and Chemical Attribute query is permitted as long as grouping is done correctly and search services are specified accordingly. More details on attributes that are available for text searches can be found on the [RCSB PDB Search API](https://search.rcsb.org/#search-attributes) page.
 ```python
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 from rcsbsearchapi.search import AttributeQuery
@@ -89,10 +87,7 @@ list(query())
 ```
 ### Computed Structure Models
 
-The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type)
-page provides information on how to include Computed Models into a search query. Here is a code example below.
-This query returns ID's for experimental and computed models associated with "hemoglobin". 
-Queries with only computed models or only experimental models can be made.
+The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type) page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below. This query returns IDs for experimental and computed structure models associated with "hemoglobin". Queries for *only* computed models or *only* experimental models can also be made (default).
 ```python
 from rcsbsearchapi.search import TextQuery
     
