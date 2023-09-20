@@ -972,9 +972,9 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Counting results of chemical Attribute query: (%d), ok : (%r)", result, ok)
 
-        q4 = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET" 
-                           + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI" 
-                           + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ" 
+        q4 = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET"
+                           + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI"
+                           + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ"
                            + "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS", 1, 0.9)
         result = q4.count()
         ok = result == len(list(q4()))
@@ -993,7 +993,7 @@ class SearchTests(unittest.TestCase):
 
         q6 = StructSimilarityQuery(
             structure_search_type="entry_id",
-            entry_id="4HHB",  ## Structure Similarity Query
+            entry_id="4HHB",  # Structure Similarity Query
             structure_input_type="assembly_id",
             assembly_id="1",
             operator="strict_shape_match",
