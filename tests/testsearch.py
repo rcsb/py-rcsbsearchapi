@@ -946,7 +946,6 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Descriptor query type with invalid parameters failed successfully : (%r)", ok)
 
-
     def testResultsCount(self):
         """Test firing off a results count request"""
         # Attribute query test
@@ -962,39 +961,44 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Counting results of Text query: (%d), ok : (%r)", result, ok)
 
-        q3 = AttributeQuery("drugbank_info.brand_names", "contains_phrase", "tylenol",
-                CHEMICAL_ATTRIBUTE_SEARCH_SERVICE # this constant specifies "text_chem" service
-                )
+        q3 = AttributeQuery(
+            "drugbank_info.brand_names",
+            "contains_phrase",
+            "tylenol",
+            CHEMICAL_ATTRIBUTE_SEARCH_SERVICE  # this constant specifies "text_chem" service
+        )
         result = q3.count()
         ok = result == len(list(q3()))
         self.assertTrue(ok)
         logger.info("Counting results of chemical Attribute query: (%d), ok : (%r)", result, ok)
 
-        q4 = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET" +
-                    "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI" +
-                    "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ" +
-                    "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS", 1, 0.9)
+        q4 = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET" 
+                           + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI" 
+                           + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ" 
+                           + "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS", 1, 0.9)
         result = q4.count()
         ok = result == len(list(q4()))
         self.assertTrue(ok)
         logger.info("Counting results of Sequence query: (%d), ok : (%r)", result, ok)
-        
 
-        q5 = SeqMotifQuery("C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
-                        pattern_type="prosite",
-                        sequence_type="protein")
+        q5 = SeqMotifQuery(
+            "C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
+            pattern_type="prosite",
+            sequence_type="protein"
+        )
         result = q5.count()
         ok = result == len(list(q5()))
         self.assertTrue(ok)
         logger.info("Counting results of Sequence motif query: (%d), ok : (%r)", result, ok)
 
-        q6 = StructSimilarityQuery(structure_search_type="entry_id",
-                           entry_id="4HHB",## Structure Similarity Query
-                           structure_input_type="assembly_id",
-                           assembly_id="1",
-                           operator="strict_shape_match",
-                           target_search_space="assembly"
-                           )
+        q6 = StructSimilarityQuery(
+            structure_search_type="entry_id",
+            entry_id="4HHB",  ## Structure Similarity Query
+            structure_input_type="assembly_id",
+            assembly_id="1",
+            operator="strict_shape_match",
+            target_search_space="assembly"
+        )
         result = q6.count()
         ok = result == len(list(q6()))
         self.assertTrue(ok)
@@ -1046,6 +1050,7 @@ class SearchTests(unittest.TestCase):
         ok = result == len(list(q11())) + len(list(q12())) - len(list(q13()))
         self.assertTrue(ok)
         logger.info("Counting results of queries combined with &: (%d), ok : (%r)", result, ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
