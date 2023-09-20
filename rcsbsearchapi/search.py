@@ -180,6 +180,11 @@ class Query(ABC):
         """Evaluate this query and return an iterator of all result IDs"""
         return self.exec(return_type, rows, return_content_type)
 
+    def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
+        s = Session(self, return_type, 0, return_content_type)
+        response = s._single_query()
+        return response["total_count"] if response else 0
+
     @overload
     def and_(self, other: "Query") -> "Query":
         ...
