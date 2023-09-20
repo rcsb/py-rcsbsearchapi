@@ -181,6 +181,7 @@ class Query(ABC):
         return self.exec(return_type, rows, return_content_type)
 
     def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
+        # pylint: disable=dangerous-default-value
         s = Session(self, return_type, 0, return_content_type)
         response = s._single_query()
         return response["total_count"] if response else 0
