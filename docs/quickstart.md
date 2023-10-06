@@ -98,6 +98,17 @@ q2 = q1(return_content_type=["computational", "experimental"])
 
 list(q2)
 ```
+### Obtaining only Result Counts 
+
+If only the number of queries is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
+```python
+from rcsbsearchapi.search import TextQuery
+
+q1 = TextQuery("hemoglobin")
+
+# similar to exec, return_type and return_content_type can also be specified
+q1.count()
+```
 ### Return Types and Attribute Search
 
 A search query can return different result types when a return type is specified. 
