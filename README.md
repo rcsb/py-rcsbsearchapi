@@ -140,7 +140,7 @@ for polyInst in q1("polymer_instance"):
 for mol in q1("mol_definition"):
     print(mol)
 ```
-### Couting Results
+### Counting Results
 
 If only the number of results is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
 ```python
