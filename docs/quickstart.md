@@ -98,17 +98,6 @@ q2 = q1(return_content_type=["computational", "experimental"])
 
 list(q2)
 ```
-### Obtaining only Result Counts 
-
-If only the number of queries is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
-```python
-from rcsbsearchapi.search import TextQuery
-
-q1 = TextQuery("hemoglobin")
-
-# similar to exec, return_type and return_content_type can also be specified
-q1.count()
-```
 ### Return Types and Attribute Search
 
 A search query can return different result types when a return type is specified. 
@@ -136,6 +125,17 @@ for polyInst in q1("polymer_instance"):
 # Molecular definitions
 for mol in q1("mol_definition"):
     print(mol)
+```
+### Couting Results
+
+If only the number of results is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
+```python
+from rcsbsearchapi.search import TextQuery
+
+q1 = TextQuery("hemoglobin")
+
+# N.B., Just as shown above for `query()`, `return_type` and `return_content_type` can also be specified as parameters to `count()`
+q1.count()
 ```
 ### Protein Sequence Search Example
 
