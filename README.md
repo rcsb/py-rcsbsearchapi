@@ -8,7 +8,7 @@
 
 Python interface for the RCSB PDB Search API.
 
-This package requires python 3.7 or later.
+This package requires Python 3.7 or later.
 
 ## Installation
 
@@ -139,6 +139,17 @@ for polyInst in q1("polymer_instance"):
 # Molecular definitions
 for mol in q1("mol_definition"):
     print(mol)
+```
+### Counting Results
+
+If only the number of results is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
+```python
+from rcsbsearchapi.search import TextQuery
+
+q1 = TextQuery("hemoglobin")
+
+# N.B., Just as shown above for `query()`, `return_type` and `return_content_type` can also be specified as parameters to `count()`
+q1.count()
 ```
 ### Protein Sequence Search Example
 

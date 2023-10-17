@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.2 (2023-10-17)
+
+- Add support for count queries
+
 ## v1.4.1 (2023-09-14)
 
 - Bug fix

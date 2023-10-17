@@ -946,6 +946,111 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Descriptor query type with invalid parameters failed successfully : (%r)", ok)
 
+    def testResultsCount(self):
+        """Test firing off a results count request"""
+        # Attribute query test
+        q1 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        result = q1.count()
+        ok = result == len(list(q1()))
+        self.assertTrue(ok)
+        logger.info("Counting results of structural Attribute query: (%d), ok : (%r)", result, ok)
+
+        q2 = TextQuery("hemoglobin")
+        result = q2.count()
+        ok = result == len(list(q2()))
+        self.assertTrue(ok)
+        logger.info("Counting results of Text query: (%d), ok : (%r)", result, ok)
+
+        q3 = AttributeQuery(
+            "drugbank_info.brand_names",
+            "contains_phrase",
+            "tylenol",
+            CHEMICAL_ATTRIBUTE_SEARCH_SERVICE  # this constant specifies "text_chem" service
+        )
+        result = q3.count()
+        ok = result == len(list(q3()))
+        self.assertTrue(ok)
+        logger.info("Counting results of chemical Attribute query: (%d), ok : (%r)", result, ok)
+
+        q4 = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET"
+                           + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI"
+                           + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ"
+                           + "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS", 1, 0.9)
+        result = q4.count()
+        ok = result == len(list(q4()))
+        self.assertTrue(ok)
+        logger.info("Counting results of Sequence query: (%d), ok : (%r)", result, ok)
+
+        q5 = SeqMotifQuery(
+            "C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
+            pattern_type="prosite",
+            sequence_type="protein"
+        )
+        result = q5.count()
+        ok = result == len(list(q5()))
+        self.assertTrue(ok)
+        logger.info("Counting results of Sequence motif query: (%d), ok : (%r)", result, ok)
+
+        q6 = StructSimilarityQuery(
+            structure_search_type="entry_id",
+            entry_id="4HHB",  # Structure Similarity Query
+            structure_input_type="assembly_id",
+            assembly_id="1",
+            operator="strict_shape_match",
+            target_search_space="assembly"
+        )
+        result = q6.count()
+        ok = result == len(list(q6()))
+        self.assertTrue(ok)
+        logger.info("Counting results of Structure similarity query: (%d), ok : (%r)", result, ok)
+
+        Res1 = StructureMotifResidue("A", "1", 162, ["LYS", "HIS"])
+        Res2 = StructureMotifResidue("A", "1", 193)
+        Res3 = StructureMotifResidue("A", "1", 219)
+        Res4 = StructureMotifResidue("A", "1", 245, ["GLU", "ASP", "ASN"])
+        Res5 = StructureMotifResidue("A", "1", 295, ["HIS", "LYS"])
+        ResList = [Res1, Res2, Res3, Res4, Res5]
+        q7 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
+        result = q7.count()
+        ok = result == len(list(q7()))
+        self.assertTrue(ok)
+        logger.info("Counting results of Structure motif query: (%d), ok : (%r)", result, ok)
+
+        q8 = ChemSimilarityQuery(value="C12 H17 N4 O S")
+        result = q8.count()
+        ok = result == len(list(q8()))
+        self.assertTrue(ok)
+        logger.info("Counting results of Chemical similarity query: (%d), ok : (%r)", result, ok)
+
+        ok = False
+        q9 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR")
+        try:
+            _ = q9.count()
+        except requests.HTTPError:
+            ok = True
+        self.assertTrue(ok)
+        logger.info("Counting results of Attribute query type with invalid parameters failed successfully : (%r)", ok)
+
+        q10 = TextQuery(" ")
+        result = q10.count()
+        ok = result == 0
+        self.assertTrue(ok)
+        logger.info("Counting results of empty Text query failed successfully : (%r)", ok)
+
+        q11 = TextQuery("heat-shock transcription factor")
+        q12 = AttributeQuery("rcsb_struct_symmetry.symbol", "exact_match", "C2")
+        q13 = q11 & q12
+        result = q13.count()
+        ok = result == len(list(q13()))
+        self.assertTrue(ok)
+        logger.info("Counting results queries combined with &: (%d), ok : (%r)", result, ok)
+
+        q14 = q11 | q12
+        result = q14.count()
+        ok = result == len(list(q11())) + len(list(q12())) - len(list(q13()))
+        self.assertTrue(ok)
+        logger.info("Counting results of queries combined with &: (%d), ok : (%r)", result, ok)
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -973,6 +1078,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testStructSimQuery"))
     suiteSelect.addTest(SearchTests("testStructMotifQuery"))
     suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
+    suiteSelect.addTest(SearchTests("testResultsCount"))
     return suiteSelect
 
 
