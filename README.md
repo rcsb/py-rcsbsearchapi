@@ -8,7 +8,7 @@
 
 Python interface for the RCSB PDB Search API.
 
-This package requires python 3.7 or later.
+This package requires Python 3.7 or later.
 
 ## Installation
 
