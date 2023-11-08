@@ -456,6 +456,32 @@ q3 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-
 list(q3())
 ```
 
+### Faceted Queries
+```python
+from rcsbsearchapi.search import AttributeQuery, Facet, Range
+
+q = AttributeQuery("rcsb_accession_info.initial_release_date", operator="greater", value="2019-08-20")
+q.facets(facets=Facet("Methods", "terms", "exptl.method"))
+
+empty_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental") 
+
+empty_q.facets(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
+
+empty_q.facets(return_type="polymer_entity", facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
+
+empty_q.facets(facets=Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1))
+
+empty_q.facets(facets=Facet("Resolution Combined", "range", "rcsb_entry_info.resolution_combined", ranges=[Range(None,2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]))
+
+empty_q.facets(facets=Facet("Release Date", "date_range", "rcsb_accession_info.initial_release_date", ranges=[Range(None,"2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]))
+
+empty_q.facets(facets=Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name"))
+
+f1 = Facet("Polymer Entity Types", "terms", "rcsb_entry_info.selected_polymer_entity_types")
+f2 = Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year")
+empty_q.facets(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2]));
+```
+
 ## Supported Features
 
 The following table lists the status of current and planned features.

@@ -64,6 +64,7 @@ ChemSimMatchType = Literal["graph-relaxed-stereo", "graph-relaxed", "fingerprint
                            "sub-struct-graph-relaxed-stereo", "sub-struct-graph-relaxed", "graph-exact"]
 TAndOr = Literal["and", "or"]
 VerbosityLevel = Literal["compact", "minimal", "verbose"]
+AggregationType = Literal["terms", "histogram", "date_histogram", "range", "date_range", "cardinality"]
 # All valid types for Terminal values
 TValue = Union[
     str,
@@ -183,9 +184,17 @@ class Query(ABC):
 
     def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
         # pylint: disable=dangerous-default-value
+        """Get the number of results found by this query"""
         s = Session(self, return_type, 0, return_content_type)
         response = s._single_query()
         return response["total_count"] if response else 0
+    
+    def facets(self, return_type: ReturnType = "entry", facets: List["Facet"] = None):
+        """Perform a facets query and return the buckets"""
+        s = Session(self, return_type=return_type, rows=0, facets=facets)
+        # print("DEBUG ------ QUERY EDITOR: ", s.rcsb_query_editor_url())
+        response = s._single_query()
+        return response["facets"] if response else []
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -559,6 +568,92 @@ class ChemSimilarityQuery(Terminal):
             parameters["match_type"] = match_type
 
         super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters)
+
+
+@dataclass(frozen=True)
+class Range:
+    """Primarily for use with "range" and "date_range" aggregations with the Facet class.
+    include_upper and include_lower should not be used with Facet queries."""
+
+    start: Optional[Union[str, float]] = None
+    end: Optional[Union[str, float]] = None
+    include_lower: Optional[bool] = None
+    include_upper: Optional[bool] = None
+
+    def to_dict(self) -> dict:
+        d = {}
+        if self.start is not None:
+            d["from"] = self.start
+        if self.end is not None:
+            d["to"] = self.end
+        if self.include_lower is not None:
+            d["include_lower"] = self.include_lower
+        if self.include_upper is not None:
+            d["include_upper"] = self.include_upper
+        return d
+
+
+class Facet:
+
+    def __init__(
+        self, 
+        name: str, 
+        aggregation_type: AggregationType, 
+        attribute: str, 
+        interval: Optional[Union[int, str]] = None, 
+        ranges: Optional[List[Range]] = None,
+        min_interval_population: Optional[int] = None, 
+        max_num_intervals: Optional[int] = None,
+        precision_threshold: Optional[int] = None,
+        nested_facets: Optional[List["Facet"]] = None
+    ):
+        self.name = name
+        self.aggregation_type = aggregation_type
+        self.attribute = attribute
+        self.interval = interval
+        self.ranges = ranges
+        self.min_interval_population = min_interval_population
+        self.max_num_intervals = max_num_intervals
+        self.precision_threshold = precision_threshold
+        self.nested_facets = nested_facets
+
+        if self.aggregation_type == "terms":
+            if self.min_interval_population is None:
+                self.min_interval_population = 1
+            if self.max_num_intervals is None:
+                self.max_num_intervals = 65536
+        elif self.aggregation_type == "histogram":
+            if self.min_interval_population is None:
+                self.min_interval_population = 1
+        elif self.aggregation_type == "date_histogram":
+            if self.min_interval_population is None:
+                self.min_interval_population = 1
+
+    def to_dict(self) -> dict:
+        facet_dict = dict(name=self.name, aggregation_type=self.aggregation_type, attribute=self.attribute)
+        if self.interval is not None:
+            facet_dict["interval"] = self.interval
+        if self.ranges is not None:
+            facet_dict["ranges"] = [r.to_dict() for r in self.ranges]
+        if self.min_interval_population is not None:
+            facet_dict["min_interval_population"] = self.min_interval_population
+        if self.max_num_intervals is not None:
+            facet_dict["max_num_intervals"] = self.max_num_intervals
+        if self.precision_threshold is not None:
+            facet_dict["precision_threshold"] = self.precision_threshold
+        if self.nested_facets is not None:
+            facet_dict["facets"] = []
+            for f in self.nested_facets:
+                facet_dict["facets"].append(f.to_dict())
+        return facet_dict
+
+    # def exec(self, query: Query = None, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]):
+    #     s = Session(query, return_type, 0, return_content_type, facets=self)
+    #     response = s._single_query()
+    #     return response["facets"] if response else []
+
+    # def __call__(self, query: Query = None, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]):
+    #     return self.exec(query, return_type, return_content_type)
 
 
 @dataclass(frozen=True)
@@ -1241,7 +1336,7 @@ class Session(Iterable[str]):
 
     def __init__(
         # parameter added below for computed model inclusion
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact"
+        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact", facets: Union[Facet, List[Facet]] = None
         # pylint: disable=dangerous-default-value
     ):
         self.query_id = Session.make_uuid()
@@ -1251,6 +1346,7 @@ class Session(Iterable[str]):
         self.rows = rows
         self.return_content_type = return_content_type
         self.results_verbosity = results_verbosity
+        self.facets = facets
 
     @staticmethod
     def make_uuid() -> str:
@@ -1270,13 +1366,21 @@ class Session(Iterable[str]):
 
     def _make_params(self, start=0):
         "Generate GET parameters as a dict"
-        return dict(
+        query_dict = dict(
             query=self.query.to_dict(),
             return_type=self.return_type,
             request_info=dict(query_id=self.query_id, src="ui"),  # "TODO" src deprecated?
             # v1 -> v2: pager parameter is renamed to paginate and results_content_type parameter added (which has a list as its value)
             request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type, results_verbosity=self.results_verbosity),
         )
+        if self.facets is not None:
+            if type(self.facets) is list:
+                query_dict["request_options"]["facets"] = []
+                for facet in self.facets:
+                    query_dict["request_options"]["facets"].append(facet.to_dict())
+            else:
+                query_dict["request_options"]["facets"] = [self.facets.to_dict()]
+        return query_dict
 
     def _single_query(self, start=0) -> Optional[Dict]:
         "Fires a single query"

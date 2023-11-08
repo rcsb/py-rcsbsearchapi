@@ -950,8 +950,8 @@ class SearchTests(unittest.TestCase):
         """Test firing off a results count request"""
         # Attribute query test
         q1 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
-        result = q1.count()
-        ok = result == len(list(q1()))
+        result = q1.count("assembly")
+        ok = result == len(list(q1("assembly")))
         self.assertTrue(ok)
         logger.info("Counting results of structural Attribute query: (%d), ok : (%r)", result, ok)
 
@@ -1051,6 +1051,11 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Counting results of queries combined with &: (%d), ok : (%r)", result, ok)
 
+    def testResultsVerbosity(self):
+        """Test firing off a results count request"""
+        # Attribute query test
+        pass
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -1079,6 +1084,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testStructMotifQuery"))
     suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
     suiteSelect.addTest(SearchTests("testResultsCount"))
+    suiteSelect.addTest(SearchTests("testResultsVerbosity"))
     return suiteSelect
 
 
