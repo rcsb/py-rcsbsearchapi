@@ -710,10 +710,10 @@ class FilterFacet:
 
     def __init__(
         self,
-        filter: Union[TerminalFilter, GroupFilter],
+        filters: Union[TerminalFilter, GroupFilter],
         facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
     ):
-        self.filter = filter
+        self.filter = filters
         self.facets = facets if isinstance(facets, list) else [facets]
 
     def to_dict(self):
