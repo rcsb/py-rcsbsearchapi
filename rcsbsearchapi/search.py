@@ -172,7 +172,7 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    # def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], 
+    # def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"],
     # results_verbosity: VerbosityLevel = "compact") -> "Session":
     def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
         # pylint: disable=dangerous-default-value
@@ -180,7 +180,7 @@ class Query(ABC):
         # return Session(self, return_type, rows, return_content_type, results_verbosity)
         return Session(self, return_type, rows, return_content_type)
 
-    # def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], 
+    # def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"],
     # results_verbosity: VerbosityLevel = "compact") -> "Session":
     def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
         # pylint: disable=dangerous-default-value
