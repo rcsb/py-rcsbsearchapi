@@ -172,14 +172,16 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    # def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
+    # def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], 
+    # results_verbosity: VerbosityLevel = "compact") -> "Session":
     def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
         # return Session(self, return_type, rows, return_content_type, results_verbosity)
         return Session(self, return_type, rows, return_content_type)
 
-    # def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
+    # def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], 
+    # results_verbosity: VerbosityLevel = "compact") -> "Session":
     def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
@@ -192,7 +194,7 @@ class Query(ABC):
         s = Session(self, return_type, 0, return_content_type)
         response = s._single_query()
         return response["total_count"] if response else 0
-    
+
     def facets(self, return_type: ReturnType = "entry", facets: List[Union["Facet", "FilterFacet"]] = None) -> List:
         """Perform a facets query and return the buckets"""
         s = Session(self, return_type=return_type, rows=0, facets=facets)
@@ -600,13 +602,13 @@ class Range:
 class Facet:
 
     def __init__(
-        self, 
-        name: str, 
-        aggregation_type: AggregationType, 
-        attribute: str, 
-        interval: Optional[Union[int, str]] = None, 
+        self,
+        name: str,
+        aggregation_type: AggregationType,
+        attribute: str,
+        interval: Optional[Union[int, str]] = None,
         ranges: Optional[List[Range]] = None,
-        min_interval_population: Optional[int] = None, 
+        min_interval_population: Optional[int] = None,
         max_num_intervals: Optional[int] = None,
         precision_threshold: Optional[int] = None,
         nested_facets: Optional[Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]]] = None
@@ -668,7 +670,7 @@ class TerminalFilter:
     """
     Terminal filter class for use with FilterFacet queries
     """
-    
+
     def __init__(
         self,
         attribute: str,
@@ -688,13 +690,13 @@ class TerminalFilter:
         if self.value is not None:
             tf_dict["parameters"]["value"] = self.value
         return tf_dict
-    
+
 
 class GroupFilter:
     """
     Group filter class for use with FilterFacet queries
     """
-    
+
     def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
         self.logical_operator = logical_operator,
         self.nodes = nodes
@@ -705,7 +707,7 @@ class GroupFilter:
 
 class FilterFacet:
     """Facet queries using Filters"""
-    
+
     def __init__(
         self,
         filter: Union[TerminalFilter, GroupFilter],
@@ -1398,12 +1400,12 @@ class Session(Iterable[str]):
 
     def __init__(
         # parameter added below for computed model inclusion
-        self, 
-        query: Query, 
-        return_type: ReturnType = "entry", 
-        rows: int = 10000, 
-        return_content_type: List[ReturnContentType] = ["experimental"], 
-        # results_verbosity: VerbosityLevel = "compact", 
+        self,
+        query: Query,
+        return_type: ReturnType = "entry",
+        rows: int = 10000,
+        return_content_type: List[ReturnContentType] = ["experimental"],
+        # results_verbosity: VerbosityLevel = "compact",
         facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None
         # pylint: disable=dangerous-default-value
     ):

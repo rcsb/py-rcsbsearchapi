@@ -1059,14 +1059,14 @@ class SearchTests(unittest.TestCase):
 
     def testFacetQuery(self):
         """Test firing off Facets queries and Filter Facet queries"""
-        
+
         q1 = AttributeQuery("rcsb_accession_info.initial_release_date", operator="greater", value="2019-08-20")
         result = q1.facets(facets=Facet("Methods", "terms", "exptl.method"))
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Basic Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        blank_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental") 
+        blank_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental")
 
         result = blank_q.facets(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
         ok = len(result) > 0
@@ -1083,12 +1083,26 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Date Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        result = blank_q.facets(facets=Facet("Resolution Combined", "range", "rcsb_entry_info.resolution_combined", ranges=[Range(None,2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]))
+        result = blank_q.facets(
+            facets=Facet(
+                "Resolution Combined",
+                "range",
+                "rcsb_entry_info.resolution_combined",
+                ranges=[Range(None, 2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]
+            )
+        )
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
-        
-        result = blank_q.facets(facets=Facet("Release Date", "date_range", "rcsb_accession_info.initial_release_date", ranges=[Range(None,"2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]))
+
+        result = blank_q.facets(
+            facets=Facet(
+                "Release Date",
+                "date_range",
+                "rcsb_accession_info.initial_release_date",
+                ranges=[Range(None, "2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]
+            )
+        )
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Date Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1104,7 +1118,7 @@ class SearchTests(unittest.TestCase):
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Multi-dimensional Facet query results: result length : (%d), ok : (%r)", len(result), ok)
-        
+
         tf1 = TerminalFilter("rcsb_polymer_instance_annotation.type", "exact_match", value="CATH")
         tf2 = TerminalFilter("rcsb_polymer_instance_annotation.annotation_lineage.id", "in", ["2.140.10.30", "2.120.10.80"])
         ff1 = FilterFacet(tf2, Facet("CATH Domains", "terms", "rcsb_polymer_instance_annotation.annotation_lineage.id", min_interval_population=1))
