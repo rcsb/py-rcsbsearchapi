@@ -172,15 +172,19 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
+    # def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
+    def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return Session(self, return_type, rows, return_content_type, results_verbosity)
+        # return Session(self, return_type, rows, return_content_type, results_verbosity)
+        return Session(self, return_type, rows, return_content_type)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
+    # def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
+    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return self.exec(return_type, rows, return_content_type, results_verbosity)
+        # return self.exec(return_type, rows, return_content_type, results_verbosity)
+        return self.exec(return_type, rows, return_content_type)
 
     def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
         # pylint: disable=dangerous-default-value
@@ -189,7 +193,7 @@ class Query(ABC):
         response = s._single_query()
         return response["total_count"] if response else 0
     
-    def facets(self, return_type: ReturnType = "entry", facets: List["Facet"] = None):
+    def facets(self, return_type: ReturnType = "entry", facets: List[Union["Facet", "FilterFacet"]] = None) -> List:
         """Perform a facets query and return the buckets"""
         s = Session(self, return_type=return_type, rows=0, facets=facets)
         # print("DEBUG ------ QUERY EDITOR: ", s.rcsb_query_editor_url())
@@ -605,7 +609,7 @@ class Facet:
         min_interval_population: Optional[int] = None, 
         max_num_intervals: Optional[int] = None,
         precision_threshold: Optional[int] = None,
-        nested_facets: Optional[List["Facet"]] = None
+        nested_facets: Optional[Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]]] = None
     ):
         self.name = name
         self.aggregation_type = aggregation_type
@@ -615,7 +619,7 @@ class Facet:
         self.min_interval_population = min_interval_population
         self.max_num_intervals = max_num_intervals
         self.precision_threshold = precision_threshold
-        self.nested_facets = nested_facets
+        self.nested_facets = nested_facets if isinstance(nested_facets, list) or nested_facets is None else [nested_facets]
 
         if self.aggregation_type == "terms":
             if self.min_interval_population is None:
@@ -628,6 +632,9 @@ class Facet:
         elif self.aggregation_type == "date_histogram":
             if self.min_interval_population is None:
                 self.min_interval_population = 1
+        elif self.aggregation_type == "cardinality":
+            if self.precision_threshold is None:
+                self.precision_threshold = 40000
 
     def to_dict(self) -> dict:
         facet_dict = dict(name=self.name, aggregation_type=self.aggregation_type, attribute=self.attribute)
@@ -642,9 +649,10 @@ class Facet:
         if self.precision_threshold is not None:
             facet_dict["precision_threshold"] = self.precision_threshold
         if self.nested_facets is not None:
-            facet_dict["facets"] = []
-            for f in self.nested_facets:
-                facet_dict["facets"].append(f.to_dict())
+            # facet_dict["facets"] = []
+            # for f in self.nested_facets:
+            #     facet_dict["facets"].append(f.to_dict())
+            facet_dict["facets"] = [f.to_dict() for f in self.nested_facets if f is not None]
         return facet_dict
 
     # def exec(self, query: Query = None, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]):
@@ -654,6 +662,60 @@ class Facet:
 
     # def __call__(self, query: Query = None, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]):
     #     return self.exec(query, return_type, return_content_type)
+
+
+class TerminalFilter:
+    """
+    Terminal filter class for use with FilterFacet queries
+    """
+    
+    def __init__(
+        self,
+        attribute: str,
+        operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"],
+        value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None,
+        negation: bool = False,
+        case_sensitive: bool = False
+    ):
+        self.attribute = attribute
+        self.operator = operator
+        self.value = value
+        self.negation = negation
+        self.case_sensitive = case_sensitive
+
+    def to_dict(self):
+        tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
+        if self.value is not None:
+            tf_dict["parameters"]["value"] = self.value
+        return tf_dict
+    
+
+class GroupFilter:
+    """
+    Group filter class for use with FilterFacet queries
+    """
+    
+    def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
+        self.logical_operator = logical_operator,
+        self.nodes = nodes
+
+    def to_dict(self):
+        return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
+
+
+class FilterFacet:
+    """Facet queries using Filters"""
+    
+    def __init__(
+        self,
+        filter: Union[TerminalFilter, GroupFilter],
+        facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
+    ):
+        self.filter = filter
+        self.facets = facets if isinstance(facets, list) else [facets]
+
+    def to_dict(self):
+        return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
 
 @dataclass(frozen=True)
@@ -1336,7 +1398,13 @@ class Session(Iterable[str]):
 
     def __init__(
         # parameter added below for computed model inclusion
-        self, query: Query, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact", facets: Union[Facet, List[Facet]] = None
+        self, 
+        query: Query, 
+        return_type: ReturnType = "entry", 
+        rows: int = 10000, 
+        return_content_type: List[ReturnContentType] = ["experimental"], 
+        # results_verbosity: VerbosityLevel = "compact", 
+        facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None
         # pylint: disable=dangerous-default-value
     ):
         self.query_id = Session.make_uuid()
@@ -1345,7 +1413,7 @@ class Session(Iterable[str]):
         self.start = 0
         self.rows = rows
         self.return_content_type = return_content_type
-        self.results_verbosity = results_verbosity
+        # self.results_verbosity = results_verbosity
         self.facets = facets
 
     @staticmethod
@@ -1371,13 +1439,12 @@ class Session(Iterable[str]):
             return_type=self.return_type,
             request_info=dict(query_id=self.query_id, src="ui"),  # "TODO" src deprecated?
             # v1 -> v2: pager parameter is renamed to paginate and results_content_type parameter added (which has a list as its value)
-            request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type, results_verbosity=self.results_verbosity),
+            # request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type, results_verbosity=self.results_verbosity),
+            request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type),
         )
         if self.facets is not None:
             if type(self.facets) is list:
-                query_dict["request_options"]["facets"] = []
-                for facet in self.facets:
-                    query_dict["request_options"]["facets"].append(facet.to_dict())
+                query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.facets]
             else:
                 query_dict["request_options"]["facets"] = [self.facets.to_dict()]
         return query_dict

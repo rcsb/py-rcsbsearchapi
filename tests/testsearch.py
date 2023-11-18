@@ -30,6 +30,7 @@ from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload, StructureMotifResidue, StructMotifQuery
 from rcsbsearchapi.search import ChemSimilarityQuery
+from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -947,7 +948,7 @@ class SearchTests(unittest.TestCase):
         logger.info("Descriptor query type with invalid parameters failed successfully : (%r)", ok)
 
     def testResultsCount(self):
-        """Test firing off a results count request"""
+        """Test firing off results count requests"""
         # Attribute query test
         q1 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
         result = q1.count("assembly")
@@ -1051,10 +1052,88 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Counting results of queries combined with &: (%d), ok : (%r)", result, ok)
 
-    def testResultsVerbosity(self):
-        """Test firing off a results count request"""
-        # Attribute query test
-        pass
+    # def testResultsVerbosity(self):
+    #     """Test firing off a results count request"""
+    #     # Attribute query test
+    #     pass
+
+    def testFacetQuery(self):
+        """Test firing off Facets queries and Filter Facet queries"""
+        
+        q1 = AttributeQuery("rcsb_accession_info.initial_release_date", operator="greater", value="2019-08-20")
+        result = q1.facets(facets=Facet("Methods", "terms", "exptl.method"))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Basic Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        blank_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental") 
+
+        result = blank_q.facets(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Terms Facet query on Empty query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        result = blank_q.facets(return_type="polymer_entity", facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        result = blank_q.facets(facets=Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Date Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        result = blank_q.facets(facets=Facet("Resolution Combined", "range", "rcsb_entry_info.resolution_combined", ranges=[Range(None,2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+        
+        result = blank_q.facets(facets=Facet("Release Date", "date_range", "rcsb_accession_info.initial_release_date", ranges=[Range(None,"2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Date Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        result = blank_q.facets(facets=Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name"))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Cardinality Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        f1 = Facet("Polymer Entity Types", "terms", "rcsb_entry_info.selected_polymer_entity_types")
+        f2 = Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year")
+        result = blank_q.facets(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2]))
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Multi-dimensional Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+        
+        tf1 = TerminalFilter("rcsb_polymer_instance_annotation.type", "exact_match", value="CATH")
+        tf2 = TerminalFilter("rcsb_polymer_instance_annotation.annotation_lineage.id", "in", ["2.140.10.30", "2.120.10.80"])
+        ff1 = FilterFacet(tf2, Facet("CATH Domains", "terms", "rcsb_polymer_instance_annotation.annotation_lineage.id", min_interval_population=1))
+        ff2 = FilterFacet(tf1, ff1)
+        result = blank_q.facets("polymer_instance", ff2)
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Filter Facet query results: result length : (%d), ok : (%r)", len(result), ok)
+
+        tf3 = TerminalFilter("rcsb_struct_symmetry.kind", "exact_match", value="Global Symmetry", negation=False)
+        f3 = Facet("ec_terms", "terms", "rcsb_polymer_entity.rcsb_ec_lineage.id")
+        f4 = Facet("sym_symbol_terms", "terms", "rcsb_struct_symmetry.symbol", nested_facets=f3)
+        ff3 = FilterFacet(tf3, f4)
+        q2 = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
+        q3 = AttributeQuery("rcsb_assembly_info.polymer_entity_instance_count", operator="greater", value=1)
+        q4 = q2 & q3
+        result = q4.facets("assembly", ff3)
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Filter Facet query with Multi-dimensional facets results: result length : (%d), ok : (%r)", len(result), ok)
+
+        tf4 = TerminalFilter("rcsb_polymer_entity_group_membership.aggregation_method", "exact_match", value="sequence_identity")
+        tf5 = TerminalFilter("rcsb_polymer_entity_group_membership.similarity_cutoff", "equals", value=100)
+        gf1 = GroupFilter("and", [tf4, tf5])
+        ff4 = FilterFacet(gf1, Facet("Distinct Protein Sequence Count", "cardinality", "rcsb_polymer_entity_group_membership.group_id"))
+        result = blank_q.facets("polymer_entity", ff4)
+        ok = len(result) > 0
+        self.assertTrue(ok)
+        logger.info("Group Filter Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
 
 def buildSearch():
@@ -1084,7 +1163,8 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testStructMotifQuery"))
     suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
     suiteSelect.addTest(SearchTests("testResultsCount"))
-    suiteSelect.addTest(SearchTests("testResultsVerbosity"))
+    # suiteSelect.addTest(SearchTests("testResultsVerbosity"))
+    suiteSelect.addTest(SearchTests("testFacetQuery"))
     return suiteSelect
 
 

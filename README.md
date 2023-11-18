@@ -457,29 +457,74 @@ list(q3())
 ```
 
 ### Faceted Queries
+In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. The `facets()` function runs the query `q` using the specified facet(s), and returns a list of dictionaries:
 ```python
 from rcsbsearchapi.search import AttributeQuery, Facet, Range
 
 q = AttributeQuery("rcsb_accession_info.initial_release_date", operator="greater", value="2019-08-20")
 q.facets(facets=Facet("Methods", "terms", "exptl.method"))
+```
 
-empty_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental") 
+Terms faceting is a multi-bucket aggregation where buckets are dynamically built - one per unique value. We can specify the minimum count (`>= 0`) for a bucket to be returned using the parameter `min_interval_population` (default value `1`). We can also control the number of buckets returned (`<= 65336`) using the parameter `max_num_intervals` (default value `65336`).
+```python
+# This is the default query, used by the RCSB Search API when no query is explicitly specified.
+blank_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental") 
 
-empty_q.facets(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
+blank_q.facets(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
+```
 
-empty_q.facets(return_type="polymer_entity", facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
+Histogram facets build fixed-sized buckets (intervals) over numeric values. The size of the intervals must be specified in the parameter `interval`. We can also specify `min_interval_population` if desired.
+```python
+blank_q.facets(return_type="polymer_entity", facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
+```
 
-empty_q.facets(facets=Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1))
+Similar to histogram facets, date histogram facetes build buckets over date values. For date histogram aggregations, we must specify `interval="year"`. Again, we may also specify `min_interval_population`.
+```python
+blank_q.facets(facets=Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1))
+```
 
-empty_q.facets(facets=Facet("Resolution Combined", "range", "rcsb_entry_info.resolution_combined", ranges=[Range(None,2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]))
+We can define the buckets ourselves by using range facets. In order to specify the ranges, we use the `Range` class. Note that the range includes the `start` value and excludes the `end` value (`include_lower` and `include_upper` should not be specified). If the `start` or `end` is omitted, the minimum or maximum boundaries will be used by default. The buckets should be provided as a list of `Range` objects to the `ranges` parameter.  
+```python
+blank_q.facets(facets=Facet("Resolution Combined", "range", "rcsb_entry_info.resolution_combined", ranges=[Range(None,2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]))
+```
 
-empty_q.facets(facets=Facet("Release Date", "date_range", "rcsb_accession_info.initial_release_date", ranges=[Range(None,"2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]))
+Date range facets allow us to specify date values as bucket ranges, using [date math expressions](https://search.rcsb.org/#date-math-expressions).
+```python
+blank_q.facets(facets=Facet("Release Date", "date_range", "rcsb_accession_info.initial_release_date", ranges=[Range(None,"2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]))
+```
 
-empty_q.facets(facets=Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name"))
+Cardinality facets return a single value: the count of distinct values returned for a given field. A `precision_threshold` (`<= 40000`, default value `40000`) may be specified.
+```python
+blank_q.facets(facets=Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name"))
+```
 
+Filters allow us to filter documents that contribute to bucket count. Similar to queries, we can group several `TerminalFilter`s into a single `GroupFilter`. We can combine a filter with a facet using the `FilterFacet` class. Here are some examples:
+```python
 f1 = Facet("Polymer Entity Types", "terms", "rcsb_entry_info.selected_polymer_entity_types")
 f2 = Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year")
-empty_q.facets(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2]));
+blank_q.facets(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2]))
+
+from rcsbsearchapi.search import TerminalFilter, GroupFilter, FilterFacet
+tf1 = TerminalFilter("rcsb_polymer_instance_annotation.type", "exact_match", value="CATH")
+tf2 = TerminalFilter("rcsb_polymer_instance_annotation.annotation_lineage.id", "in", ["2.140.10.30", "2.120.10.80"])
+ff2 = FilterFacet(tf2, Facet("CATH Domains", "terms", "rcsb_polymer_instance_annotation.annotation_lineage.id", min_interval_population=1))
+ff1 = FilterFacet(tf1, ff2)
+blank_q.facets("polymer_instance", ff1)
+
+tf1 = TerminalFilter("rcsb_struct_symmetry.kind", "exact_match", value="Global Symmetry", negation=False)
+f2 = Facet("ec_terms", "terms", "rcsb_polymer_entity.rcsb_ec_lineage.id")
+f1 = Facet("sym_symbol_terms", "terms", "rcsb_struct_symmetry.symbol", nested_facets=f2)
+ff = FilterFacet(tf1, f1)
+q1 = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
+q2 = AttributeQuery("rcsb_assembly_info.polymer_entity_instance_count", operator="greater", value=1)
+q = q1 & q2
+q.facets("assembly", ff)
+
+tf1 = TerminalFilter("rcsb_polymer_entity_group_membership.aggregation_method", "exact_match", value="sequence_identity")
+tf2 = TerminalFilter("rcsb_polymer_entity_group_membership.similarity_cutoff", "equals", value=100)
+gf = GroupFilter("and", [tf1, tf2])
+ff = FilterFacet(gf, Facet("Distinct Protein Sequence Count", "cardinality", "rcsb_polymer_entity_group_membership.group_id"))
+blank_q.facets("polymer_entity", ff)
 ```
 
 ## Supported Features
