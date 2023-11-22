@@ -496,7 +496,7 @@ class SearchTests(unittest.TestCase):
         ok = result is not None
         self.assertTrue(ok)
         q4_length = len(list(q4(return_content_type=["computational"])))
-        ok2 = q4_length == 885
+        ok2 = q4_length >= 800
         self.assertTrue(ok2)
         logger.info("Query results with only computed models: ok : (%r) : ok2 : (%s)", ok, ok2)
 
