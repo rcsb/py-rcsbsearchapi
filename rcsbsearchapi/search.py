@@ -1475,27 +1475,29 @@ class Session(Iterable[str]):
         response = self._single_query(start=start)
         if response is None:
             return  # be explicit for mypy
-        result_set = response["result_set"] if response else []
+        identifiers = self._extract_identifiers(response)
+        # result_set = response["result_set"] if response else []
         start += self.rows
-        logging.debug("Got %s ids", len(result_set))
+        logging.debug("Got %s ids", len(identifiers))
 
-        if len(result_set) == 0:
+        if len(identifiers) == 0:
             return
-        yield from result_set
+        yield from identifiers
 
         total = response["total_count"]
 
         while start < total:
-            assert len(result_set) == self.rows
+            assert len(identifiers) == self.rows
             req_count += 1
             if req_count == REQUESTS_PER_SECOND:
                 time.sleep(1.2)  # This prevents the user from bottlenecking the server with requests.
                 req_count = 0
             response = self._single_query(start=start)
-            result_set = response["result_set"] if response else []
-            logging.debug("Got %s ids", len(result_set))
+            identifiers = self._extract_identifiers(response)
+            # result_set = response["result_set"] if response else []
+            logging.debug("Got %s ids", len(identifiers))
             start += self.rows
-            yield from result_set
+            yield from identifiers
 
     def iquery(self, limit: Optional[int] = None) -> List[str]:
         """Evaluate the query and display an interactive progress bar.
@@ -1508,18 +1510,21 @@ class Session(Iterable[str]):
         if response is None:
             return []
         total = response["total_count"]
-        result_set = response["result_set"] if response else []
-        if limit is not None and len(result_set) >= limit:
-            return result_set[:limit]
+        identifiers = self._extract_identifiers(response)
+        # result_set = response["result_set"] if response else []
+        if limit is not None and len(identifiers) >= limit:
+            return identifiers[:limit]
 
         pages = math.ceil((total if limit is None else min(total, limit)) / self.rows)
 
         for page in trange(1, pages, initial=1, total=pages):
             response = self._single_query(page * self.rows)
-            next_results = response["result_set"] if response else []
-            result_set.extend(next_results)
+            # next_results = response["result_set"] if response else []
+            # result_set.extend(next_results)
+            ids = self._extract_identifiers(response)
+            identifiers.extend(ids)
 
-        return result_set[:limit]
+        return identifiers[:limit]
 
     def rcsb_query_editor_url(self) -> str:
         """URL to edit this query in the RCSB PDB query editor"""
