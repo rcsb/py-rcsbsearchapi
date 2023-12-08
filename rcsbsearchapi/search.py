@@ -600,8 +600,8 @@ class Range:
 
 
 class Facet:
-    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data. 
-    Facets arrange search results into categories (buckets) based on the requested field values. 
+    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data.
+    Facets arrange search results into categories (buckets) based on the requested field values.
     """
     def __init__(
         self,
