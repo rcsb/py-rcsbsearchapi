@@ -31,7 +31,7 @@
           } ],
           "rcsb_search_group" : [ {
             "group_name" : "Chemical Components",
-            "priority_order" : 45
+            "priority_order" : 70
           } ],
           "rcsb_current_maximum_value" : 5496.513,
           "rcsb_current_minimum_value" : 2.014
@@ -283,7 +283,7 @@
         "properties" : {
           "action_type" : {
             "type" : "string",
-            "enum" : [ "Create component", "Initial release", "Modify aromatic_flag", "Modify atom id", "Modify charge", "Modify component atom id", "Modify component comp_id", "Modify coordinates", "Modify descriptor", "Modify formal charge", "Modify formula", "Modify identifier", "Modify internal type", "Modify leaving atom flag", "Modify linking type", "Modify model coordinates code", "Modify name", "Modify one letter code", "Modify parent residue", "Modify processing site", "Modify subcomponent list", "Modify synonyms", "Modify value order", "Obsolete component", "Other modification" ],
+            "enum" : [ "Create component", "Initial release", "Modify aromatic_flag", "Modify atom id", "Modify backbone", "Modify charge", "Modify component atom id", "Modify component comp_id", "Modify coordinates", "Modify descriptor", "Modify formal charge", "Modify formula", "Modify identifier", "Modify internal type", "Modify leaving atom flag", "Modify linking type", "Modify model coordinates code", "Modify name", "Modify one letter code", "Modify parent residue", "Modify processing site", "Modify subcomponent list", "Modify synonyms", "Modify value order", "Obsolete component", "Other modification" ],
             "description" : "The action associated with this audit record.",
             "rcsb_description" : [ {
               "text" : "The action associated with this audit record.",
@@ -1967,7 +1967,7 @@
             } ],
             "rcsb_search_group" : [ {
               "group_name" : "Chemical Components",
-              "priority_order" : 75
+              "priority_order" : 100
             } ]
           },
           "provenance_source" : {
@@ -2063,7 +2063,7 @@
                   } ],
                   "rcsb_search_group" : [ {
                     "group_name" : "Chemical Components",
-                    "priority_order" : 85
+                    "priority_order" : 110
                   } ]
                 },
                 "name" : {
@@ -2080,7 +2080,7 @@
                   } ],
                   "rcsb_search_group" : [ {
                     "group_name" : "Chemical Components",
-                    "priority_order" : 80
+                    "priority_order" : 105
                   } ]
                 }
               },
@@ -2273,7 +2273,7 @@
           } ],
           "rcsb_search_group" : [ {
             "group_name" : "Chemical Components",
-            "priority_order" : 40
+            "priority_order" : 65
           } ]
         },
         "SMILES" : {
@@ -2330,7 +2330,7 @@
           } ],
           "rcsb_search_group" : [ {
             "group_name" : "Chemical Components",
-            "priority_order" : 55
+            "priority_order" : 80
           } ],
           "rcsb_current_maximum_value" : 48.0,
           "rcsb_current_minimum_value" : 0.0
@@ -2348,7 +2348,7 @@
           } ],
           "rcsb_search_group" : [ {
             "group_name" : "Chemical Components",
-            "priority_order" : 50
+            "priority_order" : 75
           } ],
           "rcsb_current_maximum_value" : 352.0,
           "rcsb_current_minimum_value" : 0.0
@@ -2366,7 +2366,7 @@
           } ],
           "rcsb_search_group" : [ {
             "group_name" : "Chemical Components",
-            "priority_order" : 60
+            "priority_order" : 85
           } ],
           "rcsb_current_maximum_value" : 727.0,
           "rcsb_current_minimum_value" : 0.0
@@ -2384,7 +2384,7 @@
           } ],
           "rcsb_search_group" : [ {
             "group_name" : "Chemical Components",
-            "priority_order" : 65
+            "priority_order" : 90
           } ],
           "rcsb_current_maximum_value" : 116.0,
           "rcsb_current_minimum_value" : 0.0
@@ -2410,7 +2410,7 @@
             "text" : "Chemical Component Deposition Date",
             "context" : "brief"
           } ],
-          "rcsb_current_maximum_value" : 1.6939584E12,
+          "rcsb_current_maximum_value" : 1.7004384E12,
           "rcsb_current_minimum_value" : 7.111584E11
         },
         "initial_release_date" : {
@@ -2430,7 +2430,7 @@
             "group_name" : "Chemical Components",
             "priority_order" : 20
           } ],
-          "rcsb_current_maximum_value" : 1.6945632E12,
+          "rcsb_current_maximum_value" : 1.7018208E12,
           "rcsb_current_minimum_value" : 1.052352E11
         },
         "release_status" : {
@@ -2547,12 +2547,12 @@
             } ],
             "rcsb_search_group" : [ {
               "group_name" : "Chemical Components",
-              "priority_order" : 70
+              "priority_order" : 95
             } ]
           },
           "resource_name" : {
             "type" : "string",
-            "enum" : [ "CAS", "CCDC/CSD", "ChEBI", "ChEMBL", "DrugBank", "Pharos", "PubChem", "RESID" ],
+            "enum" : [ "CAS", "CCDC/CSD", "COD", "ChEBI", "ChEMBL", "DrugBank", "Pharos", "PubChem", "RESID" ],
             "examples" : [ "CCDC/CSD" ],
             "description" : "The resource name for the related chemical reference.",
             "rcsb_search_context" : [ "exact-match" ],
@@ -2565,6 +2565,10 @@
               "value" : "CCDC/CSD",
               "detail" : "Cambridge Crystallographic Data Center",
               "name" : "CCDC/CSD"
+            }, {
+              "value" : "COD",
+              "detail" : "Crystallography Open Database",
+              "name" : "COD"
             }, {
               "value" : "ChEBI",
               "detail" : "Chemical Entities of Biological Interest (ChEBI)",
@@ -2618,6 +2622,12 @@
           "context_value" : "CCDC/CSD",
           "attributes" : [ {
             "examples" : [ "QAXDEZ", "XEGJEA" ],
+            "path" : "rcsb_chem_comp_related.resource_accession_code"
+          } ]
+        }, {
+          "context_value" : "COD",
+          "attributes" : [ {
+            "examples" : [ 2236573, 7229993 ],
             "path" : "rcsb_chem_comp_related.resource_accession_code"
           } ]
         }, {
@@ -3037,19 +3047,54 @@
           "type" : "array",
           "items" : {
             "type" : "string",
-            "examples" : [ "approved;nutraceutical" ],
-            "description" : "The DrugBank drug drug groups.",
-            "rcsb_search_context" : [ "full-text" ],
-            "rcsb_full_text_priority" : 1,
+            "enum" : [ "approved", "experimental", "illicit", "investigational", "nutraceutical", "vet_approved", "withdrawn" ],
+            "examples" : [ "approved", "nutraceutical" ],
+            "description" : "The DrugBank drug groups determine their drug development status.",
+            "rcsb_search_context" : [ "exact-match" ],
+            "rcsb_full_text_priority" : 10,
+            "rcsb_enum_annotated" : [ {
+              "value" : "approved",
+              "detail" : "A drug that has been approved in at least one jurisdiction, at some point in time",
+              "name" : "Approved"
+            }, {
+              "value" : "experimental",
+              "detail" : "A compound that has been shown experimentally to bind specific proteins in mammals, bacteria, viruses, fungi, or parasites",
+              "name" : "Experimental"
+            }, {
+              "value" : "illicit",
+              "detail" : "A drug that is scheduled in at least one jurisdiction, at some point in time",
+              "name" : "Illicit"
+            }, {
+              "value" : "investigational",
+              "detail" : "A drug that is in some phase of the drug approval process in at least one jurisdiction",
+              "name" : "Investigational"
+            }, {
+              "value" : "nutraceutical",
+              "detail" : "A drug that is a pharmaceutical-grade and standardized nutrient (with confirmed or unconfirmed health benefits)",
+              "name" : "Nutraceutical"
+            }, {
+              "value" : "vet_approved",
+              "detail" : "A drug that has been approved in at least one jurisdiction, at some point in time for the treatment of animals",
+              "name" : "Vet Approved"
+            }, {
+              "value" : "withdrawn",
+              "detail" : "A previously approved drug that has been withdrawn from the market in at least one jurisdiction, at some point in time",
+              "name" : "Withdrawn"
+            } ],
             "rcsb_description" : [ {
-              "text" : "The DrugBank drug drug groups.",
+              "text" : "The DrugBank drug groups determine their drug development status.",
               "context" : "dictionary"
             }, {
-              "text" : "Drug Groups (Drugbank Info)",
+              "text" : "Drug Groups",
               "context" : "brief"
+            } ],
+            "rcsb_search_group" : [ {
+              "group_name" : "Chemical Components",
+              "priority_order" : 40
             } ]
           },
-          "uniqueItems" : false
+          "minItems" : 1,
+          "uniqueItems" : true
         },
         "drugbank_id" : {
           "type" : "string",
@@ -3131,6 +3176,124 @@
             } ]
           },
           "uniqueItems" : false
+        },
+        "drug_products" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "properties" : {
+              "approved" : {
+                "type" : "string",
+                "enum" : [ "N", "Y" ],
+                "description" : "Indicates whether this drug has been approved by the regulating government.",
+                "rcsb_search_context" : [ "exact-match" ],
+                "rcsb_full_text_priority" : 10,
+                "rcsb_description" : [ {
+                  "text" : "Indicates whether this drug has been approved by the regulating government.",
+                  "context" : "dictionary"
+                }, {
+                  "text" : "Drug Is Approved",
+                  "context" : "brief"
+                } ],
+                "rcsb_search_group" : [ {
+                  "group_name" : "Chemical Components",
+                  "priority_order" : 45
+                } ]
+              },
+              "country" : {
+                "type" : "string",
+                "enum" : [ "Canada", "EU", "US" ],
+                "examples" : [ "Canada" ],
+                "description" : "The country where this commercially available drug has been approved.",
+                "rcsb_search_context" : [ "exact-match" ],
+                "rcsb_full_text_priority" : 10,
+                "rcsb_description" : [ {
+                  "text" : "The country where this commercially available drug has been approved.",
+                  "context" : "dictionary"
+                }, {
+                  "text" : "Drug Market Availability",
+                  "context" : "brief"
+                } ],
+                "rcsb_search_group" : [ {
+                  "group_name" : "Chemical Components",
+                  "priority_order" : 60
+                } ]
+              },
+              "ended_marketing_on" : {
+                "type" : "string",
+                "format" : "date",
+                "examples" : [ "2003-07-30" ],
+                "description" : "The ending date for market approval.",
+                "rcsb_search_context" : [ "default-match" ],
+                "rcsb_description" : [ {
+                  "text" : "The ending date for market approval.",
+                  "context" : "dictionary"
+                }, {
+                  "text" : "Drug Marketing End",
+                  "context" : "brief"
+                } ],
+                "rcsb_search_group" : [ {
+                  "group_name" : "Chemical Components",
+                  "priority_order" : 55
+                } ],
+                "rcsb_current_maximum_value" : 2.5430112E12,
+                "rcsb_current_minimum_value" : -1.0729152E12
+              },
+              "name" : {
+                "type" : "string",
+                "examples" : [ "Hivid Tab 0.375mg" ],
+                "description" : "The proprietary name(s) provided by the manufacturer for any commercially available products containing this drug.",
+                "rcsb_description" : [ {
+                  "text" : "The proprietary name(s) provided by the manufacturer for any commercially available products containing this drug.",
+                  "context" : "dictionary"
+                } ]
+              },
+              "source" : {
+                "type" : "string",
+                "enum" : [ "DPD", "EMA", "FDA NDC" ],
+                "examples" : [ "DPD" ],
+                "description" : "Source of this product information. For example, a value of DPD indicates this information was retrieved from the Canadian Drug Product Database.",
+                "rcsb_enum_annotated" : [ {
+                  "value" : "DPD",
+                  "detail" : "Canadian Drug Product Database"
+                }, {
+                  "value" : "EMA",
+                  "detail" : "European Medcines Agency"
+                }, {
+                  "value" : "FDA NDC",
+                  "detail" : "United States Food and Drug Administration National Drug Code"
+                } ],
+                "rcsb_description" : [ {
+                  "text" : "Source of this product information. For example, a value of DPD indicates this information was retrieved from the Canadian Drug Product Database.",
+                  "context" : "dictionary"
+                } ]
+              },
+              "started_marketing_on" : {
+                "type" : "string",
+                "format" : "date",
+                "examples" : [ "1992-12-31" ],
+                "description" : "The starting date for market approval.",
+                "rcsb_search_context" : [ "default-match" ],
+                "rcsb_description" : [ {
+                  "text" : "The starting date for market approval.",
+                  "context" : "dictionary"
+                }, {
+                  "text" : "Drug Marketing Start",
+                  "context" : "brief"
+                } ],
+                "rcsb_search_group" : [ {
+                  "group_name" : "Chemical Components",
+                  "priority_order" : 50
+                } ],
+                "rcsb_current_maximum_value" : 3.3766848E12,
+                "rcsb_current_minimum_value" : -2.8401408E12
+              }
+            },
+            "additionalProperties" : false
+          },
+          "minItems" : 1,
+          "uniqueItems" : true,
+          "rcsb_nested_indexing" : true
         }
       },
       "additionalProperties" : false,
@@ -3246,5 +3409,5 @@
   "$schema" : "http://json-schema.org/draft-04/schema#",
   "title" : "Chemical Text Service Metadata",
   "description" : "",
-  "$comment" : "Schema version: 1.42.9"
+  "$comment" : "Schema version: 1.43.2"
 }
