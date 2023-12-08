@@ -195,7 +195,7 @@ class Query(ABC):
         response = s._single_query()
         return response["total_count"] if response else 0
 
-    def facets(self, return_type: ReturnType = "entry", facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]]= None) -> List:
+    def facets(self, return_type: ReturnType = "entry", facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]] = None) -> List:
         """Perform a facets query and return the buckets"""
         s = Session(self, return_type=return_type, rows=0, facets=facets)
         # print("DEBUG ------ QUERY EDITOR: ", s.rcsb_query_editor_url())
@@ -600,7 +600,8 @@ class Range:
 
 
 class Facet:
-    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data. Facets arrange search results into categories (buckets) based on the requested field values. 
+    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data. 
+    Facets arrange search results into categories (buckets) based on the requested field values. 
     """
     def __init__(
         self,
@@ -620,12 +621,19 @@ class Facet:
             name (str): Specifies the name of the aggregation.
             aggregation_type (AggregationType): Specifies the type of the aggregation. Can be "terms", "histogram", "date_histogram", "range", "date_range", or "cardinality".
             attribute (str): Specifies the full attribute name to aggregate on.
-            interval (Optional[Union[int, str]], optional): Size of the intervals into which a given set of values is divided. Required only for use with "histogram" and "date_histogram" aggregation types (defaults to None if not included).
-            ranges (Optional[List[Range]], optional): A set of ranges, each representing a bucket. Note that this aggregation includes the 'from' value and excludes the 'to' value for each range. Should be a list of Range objects (leave the "include_lower" and "include_upper" fields empty). Required only for use with "range" and "date_range" aggregation types (defaults to None if not included).
-            min_interval_population (Optional[int], optional): Minimum number of items (>= 0) in the bin required for the bin to be returned. Only for use with "terms", "histogram", and "date_histogram" facets (defaults to 1 for these aggregation types, otherwise defaults to None).
-            max_num_intervals (Optional[int], optional): Maximum number of intervals (<= 65336) to return for a given facet. Only for use with "terms" aggregation type (defaults to 65336 for this aggregation type, otherwise defaults to None).
-            precision_threshold (Optional[int], optional): Allows to trade memory for accuracy, and defines a unique count (<= 40000) below which counts are expected to be close to accurate. Only for use with "cardinality" aggregation type (defaults to 40000 for this aggregation type, otherwise defaults to None).
-            nested_facets (Optional[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;, List[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;]]]], optional): Enables multi-dimensional aggregations. Should contain a List of Facets or FilterFacets. Can be used with any aggregation type. Defaults to None.
+            interval (Optional[Union[int, str]], optional): Size of the intervals into which a given set of values is divided. Required only for use with
+            "histogram" and "date_histogram" aggregation types (defaults to None if not included).
+            ranges (Optional[List[Range]], optional): A set of ranges, each representing a bucket. Note that this aggregation includes the 'from' value and
+            excludes the 'to' value for each range. Should be a list of Range objects (leave the "include_lower" and "include_upper" fields empty). Required
+            only for use with "range" and "date_range" aggregation types (defaults to None if not included).
+            min_interval_population (Optional[int], optional): Minimum number of items (>= 0) in the bin required for the bin to be returned. Only for use with
+            "terms", "histogram", and "date_histogram" facets (defaults to 1 for these aggregation types, otherwise defaults to None).
+            max_num_intervals (Optional[int], optional): Maximum number of intervals (<= 65336) to return for a given facet. Only for use with "terms"
+            aggregation type (defaults to 65336 for this aggregation type, otherwise defaults to None).
+            precision_threshold (Optional[int], optional): Allows to trade memory for accuracy, and defines a unique count (<= 40000) below which counts are
+            expected to be close to accurate. Only for use with "cardinality" aggregation type (defaults to 40000 for this aggregation type, otherwise defaults to None).
+            nested_facets (Optional[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;, List[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;]]]], optional): Enables
+            multi-dimensional aggregations. Should contain a List of Facets or FilterFacets. Can be used with any aggregation type. Defaults to None.
         """
         self.name = name
         self.aggregation_type = aggregation_type
