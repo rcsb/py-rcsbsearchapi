@@ -1240,7 +1240,6 @@ class Value(Generic[T]):
         return attr.less_or_equal(self.value)
 
 
-
 @dataclass(frozen=True)
 class Range:
     """Primarily for use with "range" and "date_range" aggregations with the Facet class.
@@ -1381,7 +1380,7 @@ class GroupFilter:
         return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
 
 
-class FilterFacet:  
+class FilterFacet:
     """Facet queries using Filters"""
 
     def __init__(
