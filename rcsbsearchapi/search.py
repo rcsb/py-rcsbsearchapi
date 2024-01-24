@@ -577,172 +577,6 @@ class ChemSimilarityQuery(Terminal):
 
 
 @dataclass(frozen=True)
-class Range:
-    """Primarily for use with "range" and "date_range" aggregations with the Facet class.
-    include_upper and include_lower should not be used with Facet queries."""
-
-    start: Union[str, float] = None
-    end: Union[str, float] = None
-    include_lower: Optional[bool] = None
-    include_upper: Optional[bool] = None
-
-    def to_dict(self) -> dict:
-        d = {}
-        if self.start is not None:
-            d["from"] = self.start
-        if self.end is not None:
-            d["to"] = self.end
-        if self.include_lower is not None:
-            d["include_lower"] = self.include_lower
-        if self.include_upper is not None:
-            d["include_upper"] = self.include_upper
-        return d
-
-
-class Facet:
-    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data.
-    Facets arrange search results into categories (buckets) based on the requested field values.
-    """
-    def __init__(
-        self,
-        name: str,
-        aggregation_type: AggregationType,
-        attribute: str,
-        interval: Optional[Union[int, str]] = None,
-        ranges: Optional[List[Range]] = None,
-        min_interval_population: Optional[int] = None,
-        max_num_intervals: Optional[int] = None,
-        precision_threshold: Optional[int] = None,
-        nested_facets: Optional[Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]]] = None
-    ):
-        """Initialize Facet object for use in a faceted query.
-
-        Args:
-            name (str): Specifies the name of the aggregation.
-            aggregation_type (AggregationType): Specifies the type of the aggregation. Can be "terms", "histogram", "date_histogram", "range", "date_range", or "cardinality".
-            attribute (str): Specifies the full attribute name to aggregate on.
-            interval (Optional[Union[int, str]], optional): Size of the intervals into which a given set of values is divided. Required only for use with
-            "histogram" and "date_histogram" aggregation types (defaults to None if not included).
-            ranges (Optional[List[Range]], optional): A set of ranges, each representing a bucket. Note that this aggregation includes the 'from' value and
-            excludes the 'to' value for each range. Should be a list of Range objects (leave the "include_lower" and "include_upper" fields empty). Required
-            only for use with "range" and "date_range" aggregation types (defaults to None if not included).
-            min_interval_population (Optional[int], optional): Minimum number of items (>= 0) in the bin required for the bin to be returned. Only for use with
-            "terms", "histogram", and "date_histogram" facets (defaults to 1 for these aggregation types, otherwise defaults to None).
-            max_num_intervals (Optional[int], optional): Maximum number of intervals (<= 65336) to return for a given facet. Only for use with "terms"
-            aggregation type (defaults to 65336 for this aggregation type, otherwise defaults to None).
-            precision_threshold (Optional[int], optional): Allows to trade memory for accuracy, and defines a unique count (<= 40000) below which counts are
-            expected to be close to accurate. Only for use with "cardinality" aggregation type (defaults to 40000 for this aggregation type, otherwise defaults to None).
-            nested_facets (Optional[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;, List[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;]]]], optional): Enables
-            multi-dimensional aggregations. Should contain a List of Facets or FilterFacets. Can be used with any aggregation type. Defaults to None.
-        """
-        self.name = name
-        self.aggregation_type = aggregation_type
-        self.attribute = attribute
-        self.interval = interval
-        self.ranges = ranges
-        self.min_interval_population = min_interval_population
-        self.max_num_intervals = max_num_intervals
-        self.precision_threshold = precision_threshold
-        self.nested_facets = nested_facets if isinstance(nested_facets, list) or nested_facets is None else [nested_facets]
-
-        if self.aggregation_type == "terms":
-            if self.min_interval_population is None:
-                self.min_interval_population = 1
-            if self.max_num_intervals is None:
-                self.max_num_intervals = 65536
-        elif self.aggregation_type == "histogram":
-            if self.min_interval_population is None:
-                self.min_interval_population = 1
-        elif self.aggregation_type == "date_histogram":
-            if self.min_interval_population is None:
-                self.min_interval_population = 1
-        elif self.aggregation_type == "cardinality":
-            if self.precision_threshold is None:
-                self.precision_threshold = 40000
-
-    def to_dict(self) -> dict:
-        facet_dict = dict(name=self.name, aggregation_type=self.aggregation_type, attribute=self.attribute)
-        if self.interval is not None:
-            facet_dict["interval"] = self.interval
-        if self.ranges is not None:
-            facet_dict["ranges"] = [r.to_dict() for r in self.ranges]
-        if self.min_interval_population is not None:
-            facet_dict["min_interval_population"] = self.min_interval_population
-        if self.max_num_intervals is not None:
-            facet_dict["max_num_intervals"] = self.max_num_intervals
-        if self.precision_threshold is not None:
-            facet_dict["precision_threshold"] = self.precision_threshold
-        if self.nested_facets is not None:
-            # facet_dict["facets"] = []
-            # for f in self.nested_facets:
-            #     facet_dict["facets"].append(f.to_dict())
-            facet_dict["facets"] = [f.to_dict() for f in self.nested_facets if f is not None]
-        return facet_dict
-
-    # def exec(self, query: Query = None, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]):
-    #     s = Session(query, return_type, 0, return_content_type, facets=self)
-    #     response = s._single_query()
-    #     return response["facets"] if response else []
-
-    # def __call__(self, query: Query = None, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]):
-    #     return self.exec(query, return_type, return_content_type)
-
-
-class TerminalFilter:
-    """
-    Terminal filter class for use with FilterFacet queries
-    """
-
-    def __init__(
-        self,
-        attribute: str,
-        operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"],
-        value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None,
-        negation: bool = False,
-        case_sensitive: bool = False
-    ):
-        self.attribute = attribute
-        self.operator = operator
-        self.value = value
-        self.negation = negation
-        self.case_sensitive = case_sensitive
-
-    def to_dict(self):
-        tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
-        if self.value is not None:
-            tf_dict["parameters"]["value"] = self.value
-        return tf_dict
-
-
-class GroupFilter:
-    """
-    Group filter class for use with FilterFacet queries
-    """
-
-    def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
-        self.logical_operator = logical_operator,
-        self.nodes = nodes
-
-    def to_dict(self):
-        return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
-
-
-class FilterFacet:
-    """Facet queries using Filters"""
-
-    def __init__(
-        self,
-        filters: Union[TerminalFilter, GroupFilter],
-        facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
-    ):
-        self.filter = filters
-        self.facets = facets if isinstance(facets, list) else [facets]
-
-    def to_dict(self):
-        return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
-
-
-@dataclass(frozen=True)
 class Group(Query):
     """AND and OR combinations of queries"""
 
@@ -1404,6 +1238,162 @@ class Value(Generic[T]):
         ):
             return NotImplemented
         return attr.less_or_equal(self.value)
+
+
+
+@dataclass(frozen=True)
+class Range:
+    """Primarily for use with "range" and "date_range" aggregations with the Facet class.
+    include_upper and include_lower should not be used with Facet queries."""
+
+    start: Union[str, float] = None
+    end: Union[str, float] = None
+    include_lower: Optional[bool] = None
+    include_upper: Optional[bool] = None
+
+    def to_dict(self) -> dict:
+        d = {}
+        if self.start is not None:
+            d["from"] = self.start
+        if self.end is not None:
+            d["to"] = self.end
+        if self.include_lower is not None:
+            d["include_lower"] = self.include_lower
+        if self.include_upper is not None:
+            d["include_upper"] = self.include_upper
+        return d
+
+
+class Facet:
+    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data.
+    Facets arrange search results into categories (buckets) based on the requested field values.
+    """
+    def __init__(
+        self,
+        name: str,
+        aggregation_type: AggregationType,
+        attribute: str,
+        interval: Optional[Union[int, str]] = None,
+        ranges: Optional[List[Range]] = None,
+        min_interval_population: Optional[int] = None,
+        max_num_intervals: Optional[int] = None,
+        precision_threshold: Optional[int] = None,
+        nested_facets: Optional[Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]]] = None
+    ):
+        """Initialize Facet object for use in a faceted query.
+
+        Args:
+            name (str): Specifies the name of the aggregation.
+            aggregation_type (AggregationType): Specifies the type of the aggregation. Can be "terms", "histogram", "date_histogram", "range", "date_range", or "cardinality".
+            attribute (str): Specifies the full attribute name to aggregate on.
+            interval (Optional[Union[int, str]], optional): Size of the intervals into which a given set of values is divided. Required only for use with
+            "histogram" and "date_histogram" aggregation types (defaults to None if not included).
+            ranges (Optional[List[Range]], optional): A set of ranges, each representing a bucket. Note that this aggregation includes the 'from' value and
+            excludes the 'to' value for each range. Should be a list of Range objects (leave the "include_lower" and "include_upper" fields empty). Required
+            only for use with "range" and "date_range" aggregation types (defaults to None if not included).
+            min_interval_population (Optional[int], optional): Minimum number of items (>= 0) in the bin required for the bin to be returned. Only for use with
+            "terms", "histogram", and "date_histogram" facets (defaults to 1 for these aggregation types, otherwise defaults to None).
+            max_num_intervals (Optional[int], optional): Maximum number of intervals (<= 65336) to return for a given facet. Only for use with "terms"
+            aggregation type (defaults to 65336 for this aggregation type, otherwise defaults to None).
+            precision_threshold (Optional[int], optional): Allows to trade memory for accuracy, and defines a unique count (<= 40000) below which counts are
+            expected to be close to accurate. Only for use with "cardinality" aggregation type (defaults to 40000 for this aggregation type, otherwise defaults to None).
+            nested_facets (Optional[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;, List[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;]]]], optional): Enables
+            multi-dimensional aggregations. Should contain a List of Facets or FilterFacets. Can be used with any aggregation type. Defaults to None.
+        """
+        self.name = name
+        self.aggregation_type = aggregation_type
+        self.attribute = attribute
+        self.interval = interval
+        self.ranges = ranges
+        self.min_interval_population = min_interval_population
+        self.max_num_intervals = max_num_intervals
+        self.precision_threshold = precision_threshold
+        self.nested_facets = nested_facets if isinstance(nested_facets, list) or nested_facets is None else [nested_facets]
+
+        if self.aggregation_type == "terms":
+            if self.min_interval_population is None:
+                self.min_interval_population = 1
+            if self.max_num_intervals is None:
+                self.max_num_intervals = 65536
+        elif self.aggregation_type == "histogram":
+            if self.min_interval_population is None:
+                self.min_interval_population = 1
+        elif self.aggregation_type == "date_histogram":
+            if self.min_interval_population is None:
+                self.min_interval_population = 1
+        elif self.aggregation_type == "cardinality":
+            if self.precision_threshold is None:
+                self.precision_threshold = 40000
+
+    def to_dict(self) -> dict:
+        facet_dict = dict(name=self.name, aggregation_type=self.aggregation_type, attribute=self.attribute)
+        if self.interval is not None:
+            facet_dict["interval"] = self.interval
+        if self.ranges is not None:
+            facet_dict["ranges"] = [r.to_dict() for r in self.ranges]
+        if self.min_interval_population is not None:
+            facet_dict["min_interval_population"] = self.min_interval_population
+        if self.max_num_intervals is not None:
+            facet_dict["max_num_intervals"] = self.max_num_intervals
+        if self.precision_threshold is not None:
+            facet_dict["precision_threshold"] = self.precision_threshold
+        if self.nested_facets is not None:
+            facet_dict["facets"] = [f.to_dict() for f in self.nested_facets if f is not None]
+        return facet_dict
+
+
+class TerminalFilter:
+    """
+    Terminal filter class for use with FilterFacet queries
+    """
+
+    def __init__(
+        self,
+        attribute: str,
+        operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"],
+        value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None,
+        negation: bool = False,
+        case_sensitive: bool = False
+    ):
+        self.attribute = attribute
+        self.operator = operator
+        self.value = value
+        self.negation = negation
+        self.case_sensitive = case_sensitive
+
+    def to_dict(self):
+        tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
+        if self.value is not None:
+            tf_dict["parameters"]["value"] = self.value
+        return tf_dict
+
+
+class GroupFilter:
+    """
+    Group filter class for use with FilterFacet queries
+    """
+
+    def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
+        self.logical_operator = logical_operator,
+        self.nodes = nodes
+
+    def to_dict(self):
+        return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
+
+
+class FilterFacet:  
+    """Facet queries using Filters"""
+
+    def __init__(
+        self,
+        filters: Union[TerminalFilter, GroupFilter],
+        facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
+    ):
+        self.filter = filters
+        self.facets = facets if isinstance(facets, list) else [facets]
+
+    def to_dict(self):
+        return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
 
 class Session(Iterable[str]):
