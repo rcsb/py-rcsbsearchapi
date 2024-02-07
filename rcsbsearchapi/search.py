@@ -172,19 +172,27 @@ class Query(ABC):
         """Symmetric difference: `a ^ b`"""
         return (self & ~other) | (~self & other)
 
-    def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
-    # def exec(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
+    def exec(
+        self, 
+        return_type: ReturnType = "entry", 
+        rows: int = 10000, 
+        return_content_type: List[ReturnContentType] = ["experimental"], 
+        results_verbosity: VerbosityLevel = "compact"
+    ) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
         return Session(self, return_type, rows, return_content_type, results_verbosity)
-        # return Session(self, return_type, rows, return_content_type)
 
-    def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact") -> "Session":
-    # def __call__(self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"]) -> "Session":
+    def __call__(
+        self, 
+        return_type: ReturnType = "entry", 
+        rows: int = 10000, 
+        return_content_type: List[ReturnContentType] = ["experimental"], 
+        results_verbosity: VerbosityLevel = "compact"
+    ) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
         return self.exec(return_type, rows, return_content_type, results_verbosity)
-        # return self.exec(return_type, rows, return_content_type)
 
     def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
         # pylint: disable=dangerous-default-value
@@ -1452,7 +1460,6 @@ class Session(Iterable[str]):
             request_info=dict(query_id=self.query_id, src="ui"),  # "TODO" src deprecated?
             # v1 -> v2: pager parameter is renamed to paginate and results_content_type parameter added (which has a list as its value)
             request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type, results_verbosity=self.results_verbosity),
-            # request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type),
         )
         if self.facets is not None:
             if type(self.facets) is list:
@@ -1485,15 +1492,10 @@ class Session(Iterable[str]):
         response = self._single_query(start=start)
         if response is None:
             return  # be explicit for mypy
-        # identifiers = self._extract_identifiers(response)
         result_set = response["result_set"] if response else []
         start += self.rows
-        # logging.debug("Got %s ids", len(identifiers))
         logging.debug("Got %s ids", len(result_set))
 
-        # if len(identifiers) == 0:
-        #     return
-        # yield from identifiers
         if len(result_set) == 0:
             return
         yield from result_set
@@ -1501,19 +1503,15 @@ class Session(Iterable[str]):
         total = response["total_count"]
 
         while start < total:
-            # assert len(identifiers) == self.rows
             assert len(result_set) == self.rows
             req_count += 1
             if req_count == REQUESTS_PER_SECOND:
                 time.sleep(1.2)  # This prevents the user from bottlenecking the server with requests.
                 req_count = 0
             response = self._single_query(start=start)
-            # identifiers = self._extract_identifiers(response)
-            # logging.debug("Got %s ids", len(identifiers))
             result_set = response["result_set"] if response else []
             logging.debug("Got %s ids", len(result_set))
             start += self.rows
-            # yield from identifiers
             yield from result_set
 
     def iquery(self, limit: Optional[int] = None) -> List[str]:
@@ -1527,9 +1525,6 @@ class Session(Iterable[str]):
         if response is None:
             return []
         total = response["total_count"]
-        # identifiers = self._extract_identifiers(response)
-        # if limit is not None and len(identifiers) >= limit:
-        #     return identifiers[:limit]
         result_set = response["result_set"] if response else []
         if limit is not None and len(result_set) >= limit:
             return result_set[:limit]
@@ -1540,10 +1535,7 @@ class Session(Iterable[str]):
             response = self._single_query(page * self.rows)
             next_results = response["result_set"] if response else []
             result_set.extend(next_results)
-            # ids = self._extract_identifiers(response)
-            # identifiers.extend(ids)
 
-        # return identifiers[:limit]
         return result_set[:limit]
 
     def rcsb_query_editor_url(self) -> str:
