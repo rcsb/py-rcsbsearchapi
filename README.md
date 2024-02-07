@@ -151,6 +151,16 @@ q1 = TextQuery("hemoglobin")
 # N.B., Just as shown above for `query()`, `return_type` and `return_content_type` can also be specified as parameters to `count()`
 q1.count()
 ```
+### Obtaining Scores for Results
+
+Results can be returned alongside additional metadata, including result scores. To return this metadata, set the `results_verbosity` parameter to "verbose" (all metadata), "minimal" (scores only), or "compact" (default, no metadata). If set to "verbose" or "minimal", results will be returned as a list of dictionaries. For example, here we get all experimental models associated with "hemoglobin", along with their scores.
+```python
+from rcsbsearchapi.search import TextQuery
+
+q1 = TextQuery("hemoglobin")
+for idscore in list(q1(results_verbosity="minimal")):
+    print(idscore)
+```
 ### Protein Sequence Search Example
 
 Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-3) page,

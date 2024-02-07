@@ -1052,10 +1052,23 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Counting results of queries combined with &: (%d), ok : (%r)", result, ok)
 
-    # def testResultsVerbosity(self):
-    #     """Test firing off a results count request"""
-    #     # Attribute query test
-    #     pass
+    def testResultsVerbosity(self):
+        """Test firing off queries with result verbosity set"""
+        q1 = AttributeQuery("rcsb_entry_info.polymer_entity_count_RNA", operator="equals", value=4)
+        result = q1(results_verbosity="compact")
+        ok = len(list(result)) == len(list(q1()))
+        self.assertTrue(ok)
+        logger.info("Query with compact results: (%d), ok : (%r)", result, ok)
+
+        result = q1(results_verbosity="minimal")
+        ok = len(list(result)) == len(list(q1()))
+        self.assertTrue(ok)
+        logger.info("Query with minimal results: (%d), ok : (%r)", result, ok)
+
+        result = q1(results_verbosity="verbose")
+        ok = len(list(result)) == len(list(q1()))
+        self.assertTrue(ok)
+        logger.info("Query with verbose results: (%d), ok : (%r)", result, ok)
 
     def testFacetQuery(self):
         """Test firing off Facets queries and Filter Facet queries"""
@@ -1177,7 +1190,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testStructMotifQuery"))
     suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
     suiteSelect.addTest(SearchTests("testResultsCount"))
-    # suiteSelect.addTest(SearchTests("testResultsVerbosity"))
+    suiteSelect.addTest(SearchTests("testResultsVerbosity"))
     suiteSelect.addTest(SearchTests("testFacetQuery"))
     return suiteSelect
 
