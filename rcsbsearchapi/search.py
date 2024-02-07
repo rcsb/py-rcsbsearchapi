@@ -173,10 +173,10 @@ class Query(ABC):
         return (self & ~other) | (~self & other)
 
     def exec(
-        self, 
-        return_type: ReturnType = "entry", 
-        rows: int = 10000, 
-        return_content_type: List[ReturnContentType] = ["experimental"], 
+        self,
+        return_type: ReturnType = "entry",
+        rows: int = 10000,
+        return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact"
     ) -> "Session":
         # pylint: disable=dangerous-default-value
@@ -184,10 +184,10 @@ class Query(ABC):
         return Session(self, return_type, rows, return_content_type, results_verbosity)
 
     def __call__(
-        self, 
-        return_type: ReturnType = "entry", 
-        rows: int = 10000, 
-        return_content_type: List[ReturnContentType] = ["experimental"], 
+        self,
+        return_type: ReturnType = "entry",
+        rows: int = 10000,
+        return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact"
     ) -> "Session":
         # pylint: disable=dangerous-default-value
