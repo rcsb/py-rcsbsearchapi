@@ -1,9 +1,9 @@
 # Changelog
 
-## v1.4.3 (2024-02-07)
+## v1.5.0 (2024-02-07)
 
 - Added support for faceted queries
-- Added support for results verbosity
+- Added support for retrieving the scores of results (via `results_verbosity`)
 
 ## v1.4.2 (2023-10-17)
 
