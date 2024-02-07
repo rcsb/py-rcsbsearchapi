@@ -617,9 +617,7 @@
             }, {
               "text" : "Count (Branched Instance Feature Summary)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 952.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "coverage" : {
             "type" : "number",
@@ -632,9 +630,7 @@
             }, {
               "text" : "Coverage (Branched Instance Feature Summary)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 0.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "maximum_length" : {
             "type" : "integer",
@@ -646,9 +642,7 @@
             }, {
               "text" : "Maximum Length (Branched Instance Feature Summary)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 0.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "maximum_value" : {
             "type" : "number",
@@ -669,9 +663,7 @@
             }, {
               "text" : "Minimum Length (Branched Instance Feature Summary)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 0.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "minimum_value" : {
             "type" : "number",
@@ -1010,7 +1002,7 @@
               "text" : "Ligand Neighbor Distance",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 5.0,
+            "rcsb_current_maximum_value" : 69.934,
             "rcsb_current_minimum_value" : 0.015
           },
           "ligand_alt_id" : {
@@ -1960,9 +1952,7 @@
             }, {
               "text" : "Count (Branched Entity Feature Summary)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 0.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "coverage" : {
             "type" : "number",
@@ -1975,9 +1965,7 @@
             }, {
               "text" : "Coverage (Branched Entity Feature Summary)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 0.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "maximum_length" : {
             "type" : "integer",
@@ -2677,7 +2665,7 @@
               "group_name" : "Publications All",
               "priority_order" : 20
             } ],
-            "rcsb_current_maximum_value" : 2023.0,
+            "rcsb_current_maximum_value" : 2024.0,
             "rcsb_current_minimum_value" : 1947.0
           }
         },
@@ -2867,7 +2855,7 @@
               "text" : "Collection Date (Diffrn Detector)",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 1.69128E12,
+            "rcsb_current_maximum_value" : 1.6970688E12,
             "rcsb_current_minimum_value" : -2.7080352E13
           },
           "pdbx_frequency" : {
@@ -3770,7 +3758,7 @@
               "text" : "Num Particles (Em 3d Reconstruction)",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 1.729506E7,
+            "rcsb_current_maximum_value" : 1.937076E7,
             "rcsb_current_minimum_value" : 1.0
           },
           "refinement_type" : {
@@ -4488,7 +4476,7 @@
               "text" : "Axial Rise Per Subunit (Em Helical Entity)",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 179.3,
+            "rcsb_current_maximum_value" : 430.0,
             "rcsb_current_minimum_value" : 0.01
           },
           "axial_symmetry" : {
@@ -4878,7 +4866,7 @@
           },
           "microscope_model" : {
             "type" : "string",
-            "enum" : [ "FEI MORGAGNI", "FEI POLARA 300", "FEI TALOS ARCTICA", "FEI TECNAI 10", "FEI TECNAI 12", "FEI TECNAI 20", "FEI TECNAI ARCTICA", "FEI TECNAI F20", "FEI TECNAI F30", "FEI TECNAI SPHERA", "FEI TECNAI SPIRIT", "FEI TITAN", "FEI TITAN KRIOS", "FEI/PHILIPS CM10", "FEI/PHILIPS CM12", "FEI/PHILIPS CM120T", "FEI/PHILIPS CM200FEG", "FEI/PHILIPS CM200FEG/SOPHIE", "FEI/PHILIPS CM200FEG/ST", "FEI/PHILIPS CM200FEG/UT", "FEI/PHILIPS CM200T", "FEI/PHILIPS CM300FEG/HE", "FEI/PHILIPS CM300FEG/ST", "FEI/PHILIPS CM300FEG/T", "FEI/PHILIPS EM400", "FEI/PHILIPS EM420", "HITACHI EF2000", "HITACHI EF3000", "HITACHI H-9500SD", "HITACHI H3000 UHVEM", "HITACHI H7600", "HITACHI HF2000", "HITACHI HF3000", "JEOL 1000EES", "JEOL 100B", "JEOL 100CX", "JEOL 1010", "JEOL 1200", "JEOL 1200EX", "JEOL 1200EXII", "JEOL 1230", "JEOL 1400", "JEOL 2000EX", "JEOL 2000EXII", "JEOL 2010", "JEOL 2010F", "JEOL 2010HC", "JEOL 2010HT", "JEOL 2010UHR", "JEOL 2011", "JEOL 2100", "JEOL 2100F", "JEOL 2200FS", "JEOL 2200FSC", "JEOL 3000SFF", "JEOL 3100FEF", "JEOL 3100FFC", "JEOL 3200FS", "JEOL 3200FSC", "JEOL 4000", "JEOL 4000EX", "JEOL CRYO ARM 200", "JEOL CRYO ARM 300", "JEOL KYOTO-3000SFF", "SIEMENS SULEIKA", "TFS GLACIOS", "TFS KRIOS", "TFS TALOS", "TFS TALOS F200C", "TFS TALOS L120C", "TFS TUNDRA", "ZEISS LEO912", "ZEISS LIBRA120PLUS" ],
+            "enum" : [ "FEI MORGAGNI", "FEI POLARA 300", "FEI TALOS ARCTICA", "FEI TECNAI 10", "FEI TECNAI 12", "FEI TECNAI 20", "FEI TECNAI ARCTICA", "FEI TECNAI F20", "FEI TECNAI F30", "FEI TECNAI SPHERA", "FEI TECNAI SPIRIT", "FEI TITAN", "FEI TITAN KRIOS", "FEI/PHILIPS CM10", "FEI/PHILIPS CM12", "FEI/PHILIPS CM120T", "FEI/PHILIPS CM200FEG", "FEI/PHILIPS CM200FEG/SOPHIE", "FEI/PHILIPS CM200FEG/ST", "FEI/PHILIPS CM200FEG/UT", "FEI/PHILIPS CM200T", "FEI/PHILIPS CM300FEG/HE", "FEI/PHILIPS CM300FEG/ST", "FEI/PHILIPS CM300FEG/T", "FEI/PHILIPS EM400", "FEI/PHILIPS EM420", "HITACHI EF2000", "HITACHI EF3000", "HITACHI H-9500SD", "HITACHI H3000 UHVEM", "HITACHI H7600", "HITACHI HF2000", "HITACHI HF3000", "JEOL 1000EES", "JEOL 100B", "JEOL 100CX", "JEOL 1010", "JEOL 1200", "JEOL 1200EX", "JEOL 1200EXII", "JEOL 1230", "JEOL 1400", "JEOL 1400/HR + YPS FEG", "JEOL 2000EX", "JEOL 2000EXII", "JEOL 2010", "JEOL 2010F", "JEOL 2010HC", "JEOL 2010HT", "JEOL 2010UHR", "JEOL 2011", "JEOL 2100", "JEOL 2100F", "JEOL 2200FS", "JEOL 2200FSC", "JEOL 3000SFF", "JEOL 3100FEF", "JEOL 3100FFC", "JEOL 3200FS", "JEOL 3200FSC", "JEOL 4000", "JEOL 4000EX", "JEOL CRYO ARM 200", "JEOL CRYO ARM 300", "JEOL KYOTO-3000SFF", "SIEMENS SULEIKA", "TFS GLACIOS", "TFS KRIOS", "TFS TALOS", "TFS TALOS F200C", "TFS TALOS L120C", "TFS TUNDRA", "ZEISS LEO912", "ZEISS LIBRA120PLUS" ],
             "description" : "The name of the model of microscope.",
             "rcsb_search_context" : [ "exact-match", "full-text" ],
             "rcsb_full_text_priority" : 10,
@@ -5200,7 +5188,7 @@
         "properties" : {
           "category" : {
             "type" : "string",
-            "enum" : [ "CLASSIFICATION", "CRYSTALLOGRAPHY MERGING", "CTF CORRECTION", "DIFFRACTION INDEXING", "FINAL EULER ASSIGNMENT", "IMAGE ACQUISITION", "INITIAL EULER ASSIGNMENT", "LATTICE DISTORTION CORRECTION", "LAYERLINE INDEXING", "MASKING", "MODEL FITTING", "MODEL REFINEMENT", "MOLECULAR REPLACEMENT", "OTHER", "PARTICLE SELECTION", "RECONSTRUCTION", "SERIES ALIGNMENT", "SYMMETRY DETERMINATION", "VOLUME SELECTION" ],
+            "enum" : [ "CLASSIFICATION", "CRYSTALLOGRAPHY MERGING", "CTF CORRECTION", "DIFFRACTION INDEXING", "EWALD SPHERE CORRECTION", "FINAL EULER ASSIGNMENT", "IMAGE ACQUISITION", "INITIAL EULER ASSIGNMENT", "LATTICE DISTORTION CORRECTION", "LAYERLINE INDEXING", "MASKING", "MODEL FITTING", "MODEL REFINEMENT", "MOLECULAR REPLACEMENT", "OTHER", "PARTICLE SELECTION", "RECONSTRUCTION", "SERIES ALIGNMENT", "SYMMETRY DETERMINATION", "VOLUME SELECTION" ],
             "description" : "The purpose of the software.",
             "rcsb_search_context" : [ "exact-match" ],
             "rcsb_full_text_priority" : 10,
@@ -5532,7 +5520,7 @@
           },
           "instrument" : {
             "type" : "string",
-            "enum" : [ "EMS-002 RAPID IMMERSION FREEZER", "FEI VITROBOT MARK I", "FEI VITROBOT MARK II", "FEI VITROBOT MARK III", "FEI VITROBOT MARK IV", "GATAN CRYOPLUNGE 3", "HOMEMADE PLUNGER", "LEICA EM CPC", "LEICA EM GP", "LEICA KF80", "LEICA PLUNGER", "REICHERT-JUNG PLUNGER", "SPOTITON", "ZEISS PLUNGE FREEZER CRYOBOX" ],
+            "enum" : [ "CRYOSOL VITROJET", "EMS-002 RAPID IMMERSION FREEZER", "FEI VITROBOT MARK I", "FEI VITROBOT MARK II", "FEI VITROBOT MARK III", "FEI VITROBOT MARK IV", "GATAN CRYOPLUNGE 3", "HOMEMADE PLUNGER", "LEICA EM CPC", "LEICA EM GP", "LEICA KF80", "LEICA PLUNGER", "REICHERT-JUNG PLUNGER", "SPOTITON", "ZEISS PLUNGE FREEZER CRYOBOX" ],
             "description" : "The type of instrument used in the vitrification process.",
             "rcsb_search_context" : [ "exact-match", "full-text" ],
             "rcsb_full_text_priority" : 10,
@@ -7049,7 +7037,7 @@
         "properties" : {
           "content_type" : {
             "type" : "string",
-            "enum" : [ "associated EM volume", "associated NMR restraints", "associated SAS data", "associated structure factors", "complete structure", "derivative structure", "ensemble", "minimized average structure", "native structure", "other", "other EM volume", "protein target sequence and/or protocol data", "re-refinement", "representative structure", "split", "unspecified" ],
+            "enum" : [ "associated EM volume", "associated NMR restraints", "associated SAS data", "associated structure factors", "complete structure", "consensus EM volume", "derivative structure", "ensemble", "focused EM volume", "minimized average structure", "native structure", "other", "other EM volume", "protein target sequence and/or protocol data", "re-refinement", "representative structure", "split", "unspecified" ],
             "examples" : [ "minimized average structure", "representative structure", "ensemble", "derivative structure", "native structure", "associated EM volume", "other EM volume", "associated NMR restraints", "associated structure factors", "associated SAS data", "protein target sequence and/or protocol data", "split", "re-refinement", "complete structure", "unspecified", "other" ],
             "description" : "The identifying content type of the related entry.",
             "rcsb_search_context" : [ "exact-match" ],
@@ -7538,7 +7526,7 @@
           },
           "source_name" : {
             "type" : "string",
-            "enum" : [ "AlphaFold", "ITasser", "ModelArchive", "Modeller", "Other", "PDB", "RoseTTAFold", "SwissModel" ],
+            "enum" : [ "AlphaFold", "ITasser", "ModelArchive", "Modeller", "Other", "PDB", "PDB-Dev", "RoseTTAFold", "SwissModel" ],
             "description" : "This item identifies the resource of initial model used for refinement",
             "rcsb_search_context" : [ "exact-match" ],
             "rcsb_full_text_priority" : 10,
@@ -9500,7 +9488,7 @@
             "group_name" : "Structure Details",
             "priority_order" : 20
           } ],
-          "rcsb_current_maximum_value" : 1.6939584E12,
+          "rcsb_current_maximum_value" : 1.701216E12,
           "rcsb_current_minimum_value" : 8.23392E10
         },
         "has_released_experimental_data" : {
@@ -9539,7 +9527,7 @@
             "group_name" : "Structure Details",
             "priority_order" : 25
           } ],
-          "rcsb_current_maximum_value" : 1.6945632E12,
+          "rcsb_current_maximum_value" : 1.7018208E12,
           "rcsb_current_minimum_value" : 2.01312E11
         },
         "major_revision" : {
@@ -9575,7 +9563,7 @@
             "group_name" : "Structure Details",
             "priority_order" : 30
           } ],
-          "rcsb_current_maximum_value" : 1.6945632E12,
+          "rcsb_current_maximum_value" : 1.7018208E12,
           "rcsb_current_minimum_value" : 9.736416E11
         },
         "status_code" : {
@@ -10056,7 +10044,7 @@
             "text" : "Deposited Unmodeled Polymer Monomer Count (Entry Info)",
             "context" : "brief"
           } ],
-          "rcsb_current_maximum_value" : 81166.0,
+          "rcsb_current_maximum_value" : 116316.0,
           "rcsb_current_minimum_value" : 0.0
         },
         "diffrn_radiation_wavelength_maximum" : {
@@ -11232,7 +11220,7 @@
             "group_name" : "Publications Primary",
             "priority_order" : 20
           } ],
-          "rcsb_current_maximum_value" : 2023.0,
+          "rcsb_current_maximum_value" : 2024.0,
           "rcsb_current_minimum_value" : 1969.0
         }
       },
@@ -14537,7 +14525,7 @@
               "context" : "brief"
             } ],
             "rcsb_current_maximum_value" : 18394.0,
-            "rcsb_current_minimum_value" : 0.0
+            "rcsb_current_minimum_value" : 1.0
           },
           "maximum_value" : {
             "type" : "number",
@@ -14560,7 +14548,7 @@
               "context" : "brief"
             } ],
             "rcsb_current_maximum_value" : 18394.0,
-            "rcsb_current_minimum_value" : 0.0
+            "rcsb_current_minimum_value" : 1.0
           },
           "minimum_value" : {
             "type" : "number",
@@ -14809,7 +14797,7 @@
           "attributes" : [ {
             "examples" : [ 1, 10 ],
             "path" : "rcsb_polymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 301.0
           } ]
         }, {
@@ -14817,12 +14805,12 @@
           "attributes" : [ {
             "examples" : [ 1, 10 ],
             "path" : "rcsb_polymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 374.0
           }, {
             "examples" : [ 0.15, 0.45 ],
             "path" : "rcsb_polymer_instance_feature_summary.coverage",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 5.0E-4,
             "rcsb_current_maximum_value" : 8.06316
           } ]
         }, {
@@ -14830,29 +14818,41 @@
           "attributes" : [ {
             "examples" : [ 1, 10 ],
             "path" : "rcsb_polymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 289.0
           }, {
             "examples" : [ 0.15, 0.45 ],
             "path" : "rcsb_polymer_instance_feature_summary.coverage",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 4.2E-4,
             "rcsb_current_maximum_value" : 19.54641
           } ]
         }, {
           "context_value" : "RSCC_OUTLIER",
           "attributes" : [ {
             "examples" : [ 1, 10 ],
-            "path" : "rcsb_polymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
-            "rcsb_current_maximum_value" : 2824.0
+            "path" : "rcsb_polymer_instance_feature_summary.count"
           } ]
         }, {
           "context_value" : "RSRZ_OUTLIER",
           "attributes" : [ {
             "examples" : [ 1, 10 ],
-            "path" : "rcsb_polymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
-            "rcsb_current_maximum_value" : 3388.0
+            "path" : "rcsb_polymer_instance_feature_summary.count"
+          } ]
+        }, {
+          "context_value" : "UNOBSERVED_RESIDUE_XYZ",
+          "attributes" : [ {
+            "examples" : [ 0.15, 0.45 ],
+            "path" : "rcsb_polymer_instance_feature_summary.coverage",
+            "rcsb_current_minimum_value" : 2.2E-4,
+            "rcsb_current_maximum_value" : 31.18757
+          } ]
+        }, {
+          "context_value" : "UNOBSERVED_ATOM_XYZ",
+          "attributes" : [ {
+            "examples" : [ 0.15, 0.45 ],
+            "path" : "rcsb_polymer_instance_feature_summary.coverage",
+            "rcsb_current_minimum_value" : 1.9E-4,
+            "rcsb_current_maximum_value" : 65.07042
           } ]
         } ]
       } ]
@@ -15686,7 +15686,7 @@
               "context" : "brief"
             } ],
             "rcsb_current_maximum_value" : 1.0,
-            "rcsb_current_minimum_value" : 0.0
+            "rcsb_current_minimum_value" : 1.0
           },
           "maximum_length" : {
             "type" : "integer",
@@ -15812,7 +15812,7 @@
             "group_name" : "ID(s) and Keywords",
             "priority_order" : 18
           } ],
-          "rcsb_current_maximum_value" : 3.7676257E7,
+          "rcsb_current_maximum_value" : 3.8029352E7,
           "rcsb_current_minimum_value" : 5.0
         }
       },
@@ -15925,7 +15925,7 @@
               "text" : "Cluster Identifier",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 1068301.0,
+            "rcsb_current_maximum_value" : 1069857.0,
             "rcsb_current_minimum_value" : 1.0
           },
           "identity" : {
@@ -18088,7 +18088,7 @@
                     "text" : "Lineage Depth",
                     "context" : "brief"
                   } ],
-                  "rcsb_current_maximum_value" : 5.0,
+                  "rcsb_current_maximum_value" : 4.0,
                   "rcsb_current_minimum_value" : 0.0
                 },
                 "id" : {
@@ -18501,7 +18501,7 @@
               }, {
                 "examples" : [ 0.25, 0.75 ],
                 "path" : "rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.entity_sequence_coverage",
-                "rcsb_current_minimum_value" : 0.002680965147453083,
+                "rcsb_current_minimum_value" : 0.001098901098901099,
                 "rcsb_current_maximum_value" : 1.0
               } ]
             }, {
@@ -18971,12 +18971,12 @@
           "attributes" : [ {
             "examples" : [ 1, 10 ],
             "path" : "rcsb_polymer_entity_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 22.0
           }, {
             "examples" : [ 0.02, 0.12 ],
             "path" : "rcsb_polymer_entity_feature_summary.coverage",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 3.0E-4,
             "rcsb_current_maximum_value" : 0.77839
           } ]
         }, {
@@ -18984,12 +18984,12 @@
           "attributes" : [ {
             "examples" : [ 2, 5 ],
             "path" : "rcsb_polymer_entity_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 4128.0
           }, {
             "examples" : [ 0.01, 0.05 ],
             "path" : "rcsb_polymer_entity_feature_summary.coverage",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 3.0E-4,
             "rcsb_current_maximum_value" : 1.0
           } ]
         } ]
@@ -20849,6 +20849,241 @@
       },
       "rcsb_nested_indexing" : true
     },
+    "rcsb_assembly_feature" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "assignment_version" : {
+            "type" : "string",
+            "description" : "Identifies the version of the feature assignment."
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A description for the feature."
+          },
+          "feature_id" : {
+            "type" : "string",
+            "description" : "An identifier for the feature."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "A name for the feature."
+          },
+          "provenance_source" : {
+            "type" : "string",
+            "examples" : [ "MCSA" ],
+            "description" : "Code identifying the individual, organization or program that\n assigned the feature."
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "MCSA" ],
+            "description" : "A type or category of the feature.",
+            "rcsb_enum_annotated" : [ {
+              "value" : "MCSA",
+              "detail" : "A set of catalytically active residues according to the M-CSA.",
+              "name" : "Mechanism and Catalytic Site Atlas"
+            } ]
+          },
+          "feature_positions" : {
+            "type" : "array",
+            "description" : "This container groups together chain-level identifiers of the assigned features.",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "beg_seq_id" : {
+                  "type" : "integer",
+                  "description" : "An identifier for the monomer at which this segment of the feature begins."
+                },
+                "end_seq_id" : {
+                  "type" : "integer",
+                  "description" : "An identifier for the monomer at which this segment of the feature ends."
+                },
+                "values" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "number",
+                    "examples" : [ 1.5, 0.25 ],
+                    "description" : "The value(s) of the feature over the monomer segment."
+                  },
+                  "uniqueItems" : false
+                },
+                "asym_id" : {
+                  "type" : "string",
+                  "examples" : [ "A", "B" ],
+                  "description" : "An identifier of polymer chain (label_asym_id) corresponding to the feature assignment."
+                },
+                "struct_oper_list" : {
+                  "type" : "array",
+                  "description" : "pdbx_struct_oper_list_ids of the chain instance.",
+                  "items" : {
+                    "type" : "string",
+                    "maxLength" : 2,
+                    "minLength" : 1,
+                    "examples" : [ [ "1" ], [ "P", "63" ] ],
+                    "description" : "Identifies the list of operations from the category pdbx_struct_oper_list. One item in array per operator applied. The order follows how operators are applied."
+                  }
+                }
+              },
+              "additionalProperties" : false,
+              "required" : [ "beg_seq_id", "asym_id", "struct_oper_list" ]
+            },
+            "uniqueItems" : false
+          },
+          "additional_properties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "enum" : [ "MCSA_MOTIF_COMPATIBILITY" ],
+                  "description" : "The additional property name.",
+                  "rcsb_enum_annotated" : [ {
+                    "value" : "MCSA_MOTIF_COMPATIBILITY",
+                    "detail" : "Internal enum that captures whether a M-CSA motif supports visualization and/or structure motif searching."
+                  } ]
+                },
+                "values" : {
+                  "type" : "array",
+                  "items" : {
+                    "anyOf" : [ {
+                      "type" : "string"
+                    }, {
+                      "type" : "integer"
+                    }, {
+                      "type" : "number"
+                    } ],
+                    "examples" : [ "SUPPORTED" ],
+                    "description" : "The value(s) of the additional property."
+                  },
+                  "uniqueItems" : false
+                }
+              },
+              "additionalProperties" : false
+            },
+            "uniqueItems" : false
+          }
+        },
+        "additionalProperties" : false
+      },
+      "minItems" : 1,
+      "uniqueItems" : true
+    },
+    "rcsb_assembly_annotation" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "annotation_id" : {
+            "type" : "string",
+            "description" : "An identifier for the annotation.",
+            "rcsb_search_context" : [ "exact-match" ],
+            "rcsb_full_text_priority" : 10,
+            "rcsb_search_group" : [ {
+              "group_name" : "Assembly Features",
+              "priority_order" : 100
+            } ],
+            "rcsb_description" : [ {
+              "text" : "Annotation Id (Assembly Annotation)",
+              "context" : "brief"
+            } ]
+          },
+          "assignment_version" : {
+            "type" : "string",
+            "description" : "Identifies the version of the annotation assignment."
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "A description for the annotation."
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "A name for the annotation.",
+            "rcsb_search_context" : [ "exact-match", "full-text" ],
+            "rcsb_full_text_priority" : 10,
+            "rcsb_search_group" : [ {
+              "group_name" : "Assembly Features",
+              "priority_order" : 105
+            } ],
+            "rcsb_description" : [ {
+              "text" : "Name (Assembly Annotation)",
+              "context" : "brief"
+            } ]
+          },
+          "provenance_source" : {
+            "type" : "string",
+            "examples" : [ "MCSA" ],
+            "description" : "Code identifying the individual, organization or program that\n assigned the annotation."
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "MCSA" ],
+            "description" : "A type or category of the annotation.",
+            "rcsb_search_context" : [ "exact-match" ],
+            "rcsb_full_text_priority" : 10,
+            "rcsb_enum_annotated" : [ {
+              "value" : "MCSA",
+              "detail" : "A set of catalytically active residues according to the M-CSA.",
+              "name" : "Mechanism and Catalytic Site Atlas"
+            } ],
+            "rcsb_description" : [ {
+              "text" : "Type (Assembly Annotation)",
+              "context" : "brief"
+            } ]
+          },
+          "additional_properties" : {
+            "type" : "array",
+            "items" : {
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "enum" : [ "MCSA_MOTIF_COMPATIBILITY" ],
+                  "description" : "The additional property name.",
+                  "rcsb_enum_annotated" : [ {
+                    "value" : "MCSA_MOTIF_COMPATIBILITY",
+                    "detail" : "Internal enum that captures whether a M-CSA motif supports visualization and/or structure motif searching."
+                  } ]
+                },
+                "values" : {
+                  "type" : "array",
+                  "items" : {
+                    "anyOf" : [ {
+                      "type" : "string"
+                    }, {
+                      "type" : "integer"
+                    }, {
+                      "type" : "number"
+                    } ],
+                    "examples" : [ "SUPPORTED" ],
+                    "description" : "The value(s) of the additional property."
+                  },
+                  "uniqueItems" : false
+                }
+              },
+              "additionalProperties" : false
+            },
+            "uniqueItems" : false
+          }
+        },
+        "additionalProperties" : false
+      },
+      "minItems" : 1,
+      "uniqueItems" : true,
+      "rcsb_nested_indexing" : true,
+      "rcsb_nested_indexing_context" : [ {
+        "category_name" : "annotation_type",
+        "category_path" : "rcsb_assembly_annotation.type",
+        "context_attributes" : [ {
+          "context_value" : "MCSA",
+          "attributes" : [ {
+            "examples" : [ "Glutamate racemase", "Leucyl aminopeptidase" ],
+            "path" : "rcsb_assembly_annotation.name"
+          } ]
+        } ]
+      } ]
+    },
     "rcsb_repository_holdings_current" : {
       "type" : "object",
       "properties" : {
@@ -21531,7 +21766,7 @@
           "attributes" : [ {
             "examples" : [ 1, 5 ],
             "path" : "rcsb_nonpolymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 102.0
           } ]
         }, {
@@ -21539,40 +21774,32 @@
           "attributes" : [ {
             "examples" : [ 1, 5 ],
             "path" : "rcsb_nonpolymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
+            "rcsb_current_minimum_value" : 1.0,
             "rcsb_current_maximum_value" : 166.0
           } ]
         }, {
           "context_value" : "MOGUL_ANGLE_OUTLIER",
           "attributes" : [ {
             "examples" : [ 1, 5 ],
-            "path" : "rcsb_nonpolymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
-            "rcsb_current_maximum_value" : 4500.0
+            "path" : "rcsb_nonpolymer_instance_feature_summary.count"
           } ]
         }, {
           "context_value" : "MOGUL_BOND_OUTLIER",
           "attributes" : [ {
             "examples" : [ 1, 5 ],
-            "path" : "rcsb_nonpolymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
-            "rcsb_current_maximum_value" : 3884.0
+            "path" : "rcsb_nonpolymer_instance_feature_summary.count"
           } ]
         }, {
           "context_value" : "RSCC_OUTLIER",
           "attributes" : [ {
             "examples" : [ 1, 5 ],
-            "path" : "rcsb_nonpolymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
-            "rcsb_current_maximum_value" : 77.0
+            "path" : "rcsb_nonpolymer_instance_feature_summary.count"
           } ]
         }, {
           "context_value" : "RSRZ_OUTLIER",
           "attributes" : [ {
             "examples" : [ 1, 5 ],
-            "path" : "rcsb_nonpolymer_instance_feature_summary.count",
-            "rcsb_current_minimum_value" : 0.0,
-            "rcsb_current_maximum_value" : 0.0
+            "path" : "rcsb_nonpolymer_instance_feature_summary.count"
           } ]
         } ]
       } ]
@@ -21593,9 +21820,7 @@
             }, {
               "text" : "Real Space Correlation Coefficient",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 1.0,
-            "rcsb_current_minimum_value" : -0.931
+            } ]
           },
           "RSR" : {
             "type" : "number",
@@ -21608,9 +21833,7 @@
             }, {
               "text" : "Real Space R-value (RSR)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 7.726,
-            "rcsb_current_minimum_value" : 0.003
+            } ]
           },
           "alt_id" : {
             "type" : "string",
@@ -21648,9 +21871,7 @@
             }, {
               "text" : "Number of Intermolecular Vlashes",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 95.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "is_best_instance" : {
             "type" : "string",
@@ -21723,9 +21944,7 @@
             }, {
               "text" : "Number of Bond Angle Outliers (|Z|>2)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 72.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "mogul_angles_RMSZ" : {
             "type" : "number",
@@ -21739,9 +21958,7 @@
             }, {
               "text" : "Root-Mean-Aquare Value of the Z-scores for Bond Angles",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 47.36,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "mogul_bond_outliers" : {
             "type" : "integer",
@@ -21753,9 +21970,7 @@
             }, {
               "text" : "Number of Bond Distance Outliers (|Z|>2)",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 75.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "mogul_bonds_RMSZ" : {
             "type" : "number",
@@ -21769,9 +21984,7 @@
             }, {
               "text" : "Root-Mean-Aquare Value of the Z-scores for Bond Distances",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 1108.53,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "ranking_model_fit" : {
             "type" : "number",
@@ -21784,9 +21997,7 @@
             }, {
               "text" : "Experimental Model Fit Ranking",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 1.0,
-            "rcsb_current_minimum_value" : -0.0
+            } ]
           },
           "ranking_model_geometry" : {
             "type" : "number",
@@ -21799,9 +22010,7 @@
             }, {
               "text" : "Model Geometry Ranking",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 1.0,
-            "rcsb_current_minimum_value" : -0.0
+            } ]
           },
           "score_model_fit" : {
             "type" : "number",
@@ -21831,9 +22040,7 @@
             }, {
               "text" : "Number of Chirality Errors",
               "context" : "brief"
-            } ],
-            "rcsb_current_maximum_value" : 34.0,
-            "rcsb_current_minimum_value" : 0.0
+            } ]
           },
           "type" : {
             "type" : "string",
@@ -22108,7 +22315,7 @@
               "text" : "Target Neighbor Distance",
               "context" : "brief"
             } ],
-            "rcsb_current_maximum_value" : 5.0,
+            "rcsb_current_maximum_value" : 69.934,
             "rcsb_current_minimum_value" : 0.015
           },
           "target_asym_id" : {
@@ -22843,8 +23050,11 @@
         "context_attributes" : [ {
           "context_value" : "disease",
           "attributes" : [ {
+            "examples" : [ "MONDO:0100118", "MONDO:0002051" ],
+            "path" : "rcsb_uniprot_annotation.annotation_lineage.id"
+          }, {
             "examples" : [ "hepatocellular carcinoma", "tuberculosis" ],
-            "path" : "rcsb_uniprot_annotation.name"
+            "path" : "rcsb_uniprot_annotation.annotation_lineage.name"
           } ]
         }, {
           "context_value" : "phenotype",
@@ -22991,5 +23201,5 @@
   "$schema" : "http://json-schema.org/draft-07/schema#",
   "title" : "Text Service Metadata",
   "description" : "",
-  "$comment" : "Schema version: 1.42.9"
+  "$comment" : "Schema version: 1.43.2"
 }
