@@ -56,7 +56,7 @@ from rcsbsearchapi.search import TextQuery, AttributeQuery, Attr
 # Start with a Attr or TextQuery, then add terms
 results = TextQuery("heat-shock transcription factor").and_(
     # Add attribute node as fully-formed AttributeQuery
-    AttributeQuery("rcsb_struct_symmetry.symbol", "exact_match", "C2") \
+    AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2") \
     # Add attribute node as Attr with chained operations
     .and_(Attr("rcsb_struct_symmetry.kind")).exact_match("Global Symmetry") \
     # Add attribute node by name (converted to Attr) with chained operations
