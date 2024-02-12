@@ -229,7 +229,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
 
         # Fluent syntax
-        query2 = TextQuery("heat-shock transcription factor").and_(AttributeQuery("rcsb_struct_symmetry.symbol", "exact_match", "C2")
+        query2 = TextQuery("heat-shock transcription factor").and_(AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2")
                                                                    .and_("rcsb_struct_symmetry.kind", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
                                                                    .exact_match("Global Symmetry")
                                                                    .and_("rcsb_entry_info.polymer_entity_count_DNA", STRUCTURE_ATTRIBUTE_SEARCH_SERVICE)
@@ -1039,7 +1039,7 @@ class SearchTests(unittest.TestCase):
         logger.info("Counting results of empty Text query failed successfully : (%r)", ok)
 
         q11 = TextQuery("heat-shock transcription factor")
-        q12 = AttributeQuery("rcsb_struct_symmetry.symbol", "exact_match", "C2")
+        q12 = AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2")
         q13 = q11 & q12
         result = q13.count()
         ok = result == len(list(q13()))
