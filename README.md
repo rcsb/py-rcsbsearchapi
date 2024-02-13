@@ -487,7 +487,7 @@ base_q.facets(facets=Facet(name="Journals", aggregation_type="terms", attribute=
 #### Histogram Facets
 Histogram facets build fixed-sized buckets (intervals) over numeric values. The size of the intervals must be specified in the parameter `interval`. We can also specify `min_interval_population` if desired.
 ```python
-base_q.facets(return_type="polymer_entity", facets=Facet(name="Formula Weight", aggregation_type="histogram", atttribute="rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
+base_q.facets(return_type="polymer_entity", facets=Facet(name="Formula Weight", aggregation_type="histogram", attribute="rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
 ```
 
 #### Date Histogram Facets
