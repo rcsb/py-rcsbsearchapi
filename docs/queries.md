@@ -467,6 +467,7 @@ q.facets(facets=Facet(name="Methods", aggregation_type="terms", attribute="exptl
 Terms faceting is a multi-bucket aggregation where buckets are dynamically built - one per unique value. We can specify the minimum count (`>= 0`) for a bucket to be returned using the parameter `min_interval_population` (default value `1`). We can also control the number of buckets returned (`<= 65336`) using the parameter `max_num_intervals` (default value `65336`).
 ```python
 # This is the default query, used by the RCSB Search API when no query is explicitly specified.
+# This default query will be used for most of the examples found below for faceted queries.
 base_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental") 
 
 base_q.facets(facets=Facet(name="Journals", aggregation_type="terms", attribute="rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
