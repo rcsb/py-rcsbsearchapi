@@ -1055,20 +1055,20 @@ class SearchTests(unittest.TestCase):
     def testResultsVerbosity(self):
         """Test firing off queries with result verbosity set"""
         q1 = AttributeQuery("rcsb_entry_info.polymer_entity_count_RNA", operator="equals", value=4)
-        result = q1(results_verbosity="compact")
-        ok = len(list(result)) == len(list(q1()))
+        result = list(q1(results_verbosity="compact"))
+        ok = len(result) == len(list(q1()))
         self.assertTrue(ok)
-        logger.info("Query with compact results: (%d), ok : (%r)", result, ok)
+        logger.info("Query with compact results: (%d), ok : (%r)", len(result), ok)
 
-        result = q1(results_verbosity="minimal")
-        ok = len(list(result)) == len(list(q1()))
+        result = list(q1(results_verbosity="minimal"))
+        ok = len(result) == len(list(q1()))
         self.assertTrue(ok)
-        logger.info("Query with minimal results: (%d), ok : (%r)", result, ok)
+        logger.info("Query with minimal results: (%d), ok : (%r)", len(result), ok)
 
-        result = q1(results_verbosity="verbose")
-        ok = len(list(result)) == len(list(q1()))
+        result = list(q1(results_verbosity="verbose"))
+        ok = len(result) == len(list(q1()))
         self.assertTrue(ok)
-        logger.info("Query with verbose results: (%d), ok : (%r)", result, ok)
+        logger.info("Query with verbose results: (%d), ok : (%r)", len(result), ok)
 
     def testFacetQuery(self):
         """Test firing off Facets queries and Filter Facet queries"""
