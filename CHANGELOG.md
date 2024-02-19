@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.1 (2024-02-19)
+
+- Updated documentation
+- Updated schema files
+
 ## v1.5.0 (2024-02-07)
 
 - Added support for faceted queries
