@@ -64,41 +64,41 @@ class AttrDesc:
     type: str
     description: str
 
-class SchemaGroup:
-    """A non-leaf node in the RCSB PDB schema. Leaves are Attr values."""
+# class SchemaGroup:
+#     """A non-leaf node in the RCSB PDB schema. Leaves are Attr values."""
 
-    def search(self, pattern: Union[str, re.Pattern], flags=0) -> Iterator[Attr]:
-        """Find all attributes in the schema matching a regular expression.
+#     def search(self, pattern: Union[str, re.Pattern], flags=0) -> Iterator[Attr]:
+#         """Find all attributes in the schema matching a regular expression.
 
-        Returns:
-            An iterator supplying Attr objects whose attribute matches.
-        """
-        matcher = re.compile(pattern, flags=flags)
-        return filter(lambda a: matcher.search(a.attribute), self)
+#         Returns:
+#             An iterator supplying Attr objects whose attribute matches.
+#         """
+#         matcher = re.compile(pattern, flags=flags)
+#         return filter(lambda a: matcher.search(a.attribute), self)
 
-    def __iter__(self) -> Iterator[Attr]:
-        """Iterate over all leaf nodes
+#     def __iter__(self) -> Iterator[Attr]:
+#         """Iterate over all leaf nodes
 
-        Example:
+#         Example:
 
-            >>> [a for a in attrs if "stoichiometry" in a.attribute]
-            [Attr(attribute='rcsb_struct_symmetry.stoichiometry')]
+#             >>> [a for a in attrs if "stoichiometry" in a.attribute]
+#             [Attr(attribute='rcsb_struct_symmetry.stoichiometry')]
 
-        """
+#         """
 
-        def leaves(self):
-            for k, v in self.__dict__.items():
-                if isinstance(v, Attr):
-                    yield v
-                elif isinstance(v, SchemaGroup):
-                    yield from iter(v)
-                else:
-                    # Shouldn't happen
-                    raise TypeError(f"Unrecognized member {k!r}: {v!r}")
-        return leaves(self)
+#         def leaves(self):
+#             for k, v in self.__dict__.items():
+#                 if isinstance(v, Attr):
+#                     yield v
+#                 elif isinstance(v, SchemaGroup):
+#                     yield from iter(v)
+#                 else:
+#                     # Shouldn't happen
+#                     raise TypeError(f"Unrecognized member {k!r}: {v!r}")
+#         return leaves(self)
 
-    def __str__(self):
-        return "\n".join((str(c) for c in self.__dict__.values()))
+#     def __str__(self):
+#         return "\n".join((str(c) for c in self.__dict__.values()))
 
 
 # def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
