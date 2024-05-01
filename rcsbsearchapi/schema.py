@@ -6,11 +6,12 @@ Provides access to all valid attributes for search queries.
 import json
 import logging
 import pkgutil
-import re
+# import re
 import requests
 from dataclasses import dataclass
-from typing import Any, Iterator, List, Union
-from .search import Attr
+from typing import Any, List, Union
+# from typing import Iterator
+# from .search import Attr
 from .const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE
 
 
@@ -39,7 +40,7 @@ def _load_json_schema():
         # with urllib.request.urlopen(STRUCTURE_ATTRIBUTE_SCHEMA_URL) as url:
         #     latest = url.read()
         latest = _download_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
-    except:
+    except Exception:
         logging.info("Loading structure schema from file")
         # latest = json.loads(pkgutil.get_data("rcsbsearchapi", "/resources/metadata_schema.json"))
         latest = json.loads(pkgutil.get_data(__package__, "/resources/metadata_schema.json"))
@@ -52,11 +53,12 @@ def _load_chem_schema():
         # with urllib.request.urlopen(CHEMICAL_ATTRIBUTE_SCHEMA_URL) as url:
         #     latest = url.read()
         latest = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
-    except:
+    except Exception:
         logging.info("Loading chemical schema from file")
         # latest = json.loads(pkgutil.get_data("rcsbsearchapi", "/resources/chemical_schema.json"))
         latest = json.loads(pkgutil.get_data(__package__, "/resources/chemical_schema.json"))
     return latest
+
 
 @dataclass(frozen=True)
 class AttrDesc:
@@ -193,13 +195,15 @@ def _make_group(fullname: str, nodeL: List) -> Union[dict, AttrDesc]:
             raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
     return group
 
+
 def _set_leaves(d: dict) -> dict:
     for leaf in d:
         if isinstance(d[leaf], AttrDesc):
             d[leaf] = d[leaf].__dict__
-        else: 
+        else:
             d[leaf] = _set_leaves(d[leaf])
     return d
+
 
 def _make_schema() -> dict:
     metadata_schema = _load_json_schema()
@@ -208,6 +212,7 @@ def _make_schema() -> dict:
     schema = _set_leaves(_make_group("", schemas))
     assert isinstance(schema, dict)
     return schema
+
 
 # Return attribute information given full or partial attribute name
 def get_attribute_details(attribute, schema):
@@ -229,7 +234,8 @@ def get_attribute_details(attribute, schema):
     else:
         # return '\n'.join(f'attribute={c["attribute"]}, type={c["type"]}, description={c["description"]}' for c in leaves(ptr))
         return {(c["attribute"], c["type"], c["description"]) for c in leaves(ptr)}
-    
+
+
 # Return attr type given full attribute name
 def get_attribute_type(attr, schema):
     split_attr = attr.split('.')
@@ -290,5 +296,5 @@ __all__ = [  # noqa: F822
     "SEARCH_SCHEMA_URL",
     "CHEMICAL_ATTRIBUTE_SCHEMA_URL",
     "rcsb_attributes",
-    "SchemaGroup",
+    # "SchemaGroup",
 ]
