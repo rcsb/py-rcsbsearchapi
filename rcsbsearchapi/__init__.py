@@ -1,5 +1,6 @@
 """RCSB PDB Search API"""
-from typing import TYPE_CHECKING, Any, List
+from typing import Any, List
+# from typing import TYPE_CHECKING
 
 from .search import Terminal  # noqa: F401
 from .search import Attr, Group, Query, Session, TextQuery, Value
