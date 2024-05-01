@@ -8,12 +8,13 @@ __version__ = "1.5.1"
 
 
 # loading rcsb_attributes can cause errors, so load it lazily
-if TYPE_CHECKING:
-    from .schema import SchemaGroup
+# if TYPE_CHECKING:
+#     # from .schema import SchemaGroup
+#     from .schema import AttrDesc
 
 
 # Set docstring at top level too. Keep synchronized with schema.rcsb_attributes
-rcsb_attributes: "SchemaGroup"
+rcsb_attributes: dict
 """Object with all known RCSB PDB attributes.
 
 This is provided to ease autocompletion as compared to creating Attr objects from
@@ -44,8 +45,10 @@ def __getattr__(name: str) -> Any:
     # delay instantiating rcsb_attributes until it is needed
     if name == "rcsb_attributes":
         if "rcsb_attributes" not in globals():
-            from .schema import rcsb_attributes as attrs
-            globals()["rcsb_attributes"] = attrs
+            # from .schema import rcsb_attributes as attrs
+            from .schema import _make_schema
+            # globals()["rcs_attributes"] = attrs
+            globals()["rcsb_attributes"] = _make_schema()
         return globals()["rcsb_attributes"]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 

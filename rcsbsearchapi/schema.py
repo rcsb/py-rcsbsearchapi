@@ -8,6 +8,7 @@ import logging
 import pkgutil
 import re
 import requests
+from dataclasses import dataclass
 from typing import Any, Iterator, List, Union
 from .search import Attr
 from .const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE
@@ -21,18 +22,47 @@ def _download_schema(url: str):
     response.raise_for_status()
     return response.json()
 
+# def _load_json_schema():
+#     logging.info("Loading structure schema from file")
+#     latest = pkgutil.get_data(__package__, "resources/metadata_schema.json")
+#     return json.loads(latest)
+
+
+# def _load_chem_schema():
+#     logging.info("Loading chemical schema from file")
+#     latest = pkgutil.get_data(__package__, "resources/chemical_schema.json")
+#     return json.loads(latest)
 
 def _load_json_schema():
-    logging.info("Loading structure schema from file")
-    latest = pkgutil.get_data(__package__, "resources/metadata_schema.json")
-    return json.loads(latest)
+    try:
+        logging.info("Loading structure schema from url")
+        # with urllib.request.urlopen(STRUCTURE_ATTRIBUTE_SCHEMA_URL) as url:
+        #     latest = url.read()
+        latest = _download_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
+    except:
+        logging.info("Loading structure schema from file")
+        # latest = json.loads(pkgutil.get_data("rcsbsearchapi", "/resources/metadata_schema.json"))
+        latest = json.loads(pkgutil.get_data(__package__, "/resources/metadata_schema.json"))
+    return latest
 
 
 def _load_chem_schema():
-    logging.info("Loading chemical schema from file")
-    latest = pkgutil.get_data(__package__, "resources/chemical_schema.json")
-    return json.loads(latest)
+    try:
+        logging.info("Loading chemical schema from url")
+        # with urllib.request.urlopen(CHEMICAL_ATTRIBUTE_SCHEMA_URL) as url:
+        #     latest = url.read()
+        latest = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
+    except:
+        logging.info("Loading chemical schema from file")
+        # latest = json.loads(pkgutil.get_data("rcsbsearchapi", "/resources/chemical_schema.json"))
+        latest = json.loads(pkgutil.get_data(__package__, "/resources/chemical_schema.json"))
+    return latest
 
+@dataclass(frozen=True)
+class AttrDesc:
+    attribute: str
+    type: str
+    description: str
 
 class SchemaGroup:
     """A non-leaf node in the RCSB PDB schema. Leaves are Attr values."""
@@ -71,57 +101,151 @@ class SchemaGroup:
         return "\n".join((str(c) for c in self.__dict__.values()))
 
 
-def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
+# def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
+#     """Represent this node of the schema as a python object
+
+#     Params:
+#     - name: full dot-separated attribute name
+
+#     Returns:
+#     An Attr (Leaf nodes) or SchemaGroup (object nodes)
+#     """
+#     group = SchemaGroup()
+#     for (node, attrtype) in nodeL:
+#         if "anyOf" in node:
+#             children = {_make_group(fullname, [(n, attrtype)]) for n in node["anyOf"]}
+#             # Currently only deal with anyOf in leaf nodes
+#             assert len(children) == 1, f"type of {fullname} couldn't be determined"
+#             return next(iter(children))
+#         if "oneOf" in node:
+#             children = {_make_group(fullname, [(n, attrtype)]) for n in node["oneOf"]}
+#             # Currently only deal with oneOf in leaf nodes
+#             assert len(children) == 1, f"type of {fullname} couldn't be determined"
+#             return next(iter(children))
+#         if "allOf" in node:
+#             children = {_make_group(fullname, [(n, attrtype)]) for n in node["allOf"]}
+#             # Currently only deal with allOf in leaf nodes
+#             assert len(children) == 1, f"type of {fullname} couldn't be determined"
+#             return next(iter(children))
+#         if node["type"] in ("string", "number", "integer", "date"):
+#             return Attr(fullname, attrtype)
+#         elif node["type"] == "array":
+#             # skip to items
+#             return _make_group(fullname, [(node["items"], attrtype)])
+#         elif node["type"] == "object":
+#             for childname, childnode in node["properties"].items():
+#                 fullchildname = f"{fullname}.{childname}" if fullname else childname
+#                 childgroup = _make_group(fullchildname, [(childnode, attrtype)])
+#                 setattr(group, childname, childgroup)
+#         else:
+#             raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
+#     return group
+
+
+# def _make_schema() -> SchemaGroup:
+#     json1 = _load_json_schema()
+#     json2 = _load_chem_schema()
+#     schemas = [(json1, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (json2, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
+#     schema = _make_group("", schemas)
+#     assert isinstance(schema, SchemaGroup)  # for type checking
+#     return schema
+
+
+def _make_group(fullname: str, nodeL: List) -> Union[dict, AttrDesc]:
     """Represent this node of the schema as a python object
 
     Params:
     - name: full dot-separated attribute name
 
     Returns:
-    An Attr (Leaf nodes) or SchemaGroup (object nodes)
+    An Attr (Leaf nodes) or dict (object nodes)
     """
-    group = SchemaGroup()
-    for (node, attrtype) in nodeL:
+    group = {}
+    for (node, attrtype, desc) in nodeL:
         if "anyOf" in node:
-            children = {_make_group(fullname, [(n, attrtype)]) for n in node["anyOf"]}
+            children = {_make_group(fullname, [(n, attrtype, n.get("description", node.get("description", desc)))]) for n in node["anyOf"]}
             # Currently only deal with anyOf in leaf nodes
             assert len(children) == 1, f"type of {fullname} couldn't be determined"
             return next(iter(children))
         if "oneOf" in node:
-            children = {_make_group(fullname, [(n, attrtype)]) for n in node["oneOf"]}
+            children = {_make_group(fullname, [(n, attrtype, n.get("description", desc))]) for n in node["oneOf"]}
             # Currently only deal with oneOf in leaf nodes
             assert len(children) == 1, f"type of {fullname} couldn't be determined"
             return next(iter(children))
         if "allOf" in node:
-            children = {_make_group(fullname, [(n, attrtype)]) for n in node["allOf"]}
+            children = {_make_group(fullname, [(n, attrtype, n.get("description", desc))]) for n in node["allOf"]}
             # Currently only deal with allOf in leaf nodes
             assert len(children) == 1, f"type of {fullname} couldn't be determined"
             return next(iter(children))
         if node["type"] in ("string", "number", "integer", "date"):
-            return Attr(fullname, attrtype)
+            return AttrDesc(fullname, attrtype, node.get("description", desc))
+            # return AttrDesc(fullname, attrtype, node.get("description", ""))
         elif node["type"] == "array":
             # skip to items
-            return _make_group(fullname, [(node["items"], attrtype)])
+            return _make_group(fullname, [(node["items"], attrtype, node.get("description", desc))])
         elif node["type"] == "object":
             for childname, childnode in node["properties"].items():
                 fullchildname = f"{fullname}.{childname}" if fullname else childname
-                childgroup = _make_group(fullchildname, [(childnode, attrtype)])
-                setattr(group, childname, childgroup)
+                childgroup = _make_group(fullchildname, [(childnode, attrtype, childnode.get("description", desc))])
+                # setattr(group, childname, childgroup)
+                group[childname] = childgroup
         else:
             raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
     return group
 
+def _set_leaves(d: dict) -> dict:
+    for leaf in d:
+        if isinstance(d[leaf], AttrDesc):
+            d[leaf] = d[leaf].__dict__
+        else: 
+            d[leaf] = _set_leaves(d[leaf])
+    return d
 
-def _make_schema() -> SchemaGroup:
-    json1 = _load_json_schema()
-    json2 = _load_chem_schema()
-    schemas = [(json1, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (json2, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
-    schema = _make_group("", schemas)
-    assert isinstance(schema, SchemaGroup)  # for type checking
+def _make_schema() -> dict:
+    metadata_schema = _load_json_schema()
+    chem_schema = _load_chem_schema()
+    schemas = [(metadata_schema, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, "No description (structure)"), (chem_schema, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, "No description (chem)")]
+    schema = _set_leaves(_make_group("", schemas))
+    assert isinstance(schema, dict)
     return schema
 
+# Return attribute information given full or partial attribute name
+def get_attribute_details(attribute, schema):
+    def leaves(d):
+        for v in d.values():
+            if "attribute" in v:
+                yield v
+            else:
+                yield from leaves(v)
+    split_attr = attribute.split('.')
+    ptr = schema
+    for layer in split_attr:
+        if layer in ptr:
+            ptr = ptr[layer]
+        else:
+            return "Attribute not found"
+    if "attribute" in ptr and ptr["attribute"] == attribute:
+        return ptr["type"], ptr["description"]
+    else:
+        # return '\n'.join(f'attribute={c["attribute"]}, type={c["type"]}, description={c["description"]}' for c in leaves(ptr))
+        return {(c["attribute"], c["type"], c["description"]) for c in leaves(ptr)}
+    
+# Return attr type given full attribute name
+def get_attribute_type(attr, schema):
+    split_attr = attr.split('.')
+    ptr = schema
+    for layer in split_attr:
+        if layer in ptr:
+            ptr = ptr[layer]
+        else:
+            return "Attribute not found"
+    if "attribute" in ptr and ptr["attribute"] == attr:
+        return ptr["type"]
+    else:
+        return "incomplete attribute name"
 
-rcsb_attributes: SchemaGroup
+
+rcsb_attributes: dict
 """Object with all known RCSB PDB attributes.
 
 This is provided to ease autocompletion as compared to creating Attr objects from
