@@ -1202,6 +1202,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testFacetQuery"))
     return suiteSelect
 
+
 if __name__ == "__main__":
     mySuite = buildSearch()
     unittest.TextTestRunner(verbosity=2).run(mySuite)
