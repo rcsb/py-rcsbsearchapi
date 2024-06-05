@@ -12,6 +12,7 @@ from typing import Any, Iterator, List, Union
 from .search import Attr
 from .const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE
 
+
 def _fetch_schema(url: str):
     "Request the current schema from the web"
     logging.info("Requesting %s", url)
@@ -112,11 +113,11 @@ def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
     return group
 
 
-def _make_schema(structureSchemaURL: str, chemicalSchemaURL: str) -> SchemaGroup:
-    json1 = _fetch_schema(structureSchemaURL)
+def _make_schema(structure_schema_url: str, chemical_schema_url: str) -> SchemaGroup:
+    json1 = _fetch_schema(structure_schema_url)
     if json1 == None:
         json1 = _load_json_schema()
-    json2 = _fetch_schema(chemicalSchemaURL)
+    json2 = _fetch_schema(chemical_schema_url)
     if json2 == None:
         json2 = _load_chem_schema()
     schemas = [(json1, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (json2, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
