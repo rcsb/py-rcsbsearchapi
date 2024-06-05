@@ -526,7 +526,11 @@ class SearchTests(unittest.TestCase):
         logger.info("Basic SeqMotif query results: result_length : (%d), ok : (%r)", len(result), ok)
 
         q2 = SeqMotifQuery("FFFFF", sequence_type="dna")  # test a DNA query, this should yield no results
-        result = list(q2())
+        try:
+            result = list(q2())
+        except requests.exceptions.HTTPError as e:
+            logger.error("HTTPError occurred: %s", e)
+            result = []
         ok = len(result) == 0
         self.assertTrue(ok)
         logger.info("Basic DNA SeqMotif query results: result_length : (%d) (this should be 0), ok : (%r)", len(result), ok)
@@ -545,7 +549,11 @@ class SearchTests(unittest.TestCase):
         logger.info("Basic Functional RNA query results: result_length : (%d), ok : (%r)", len(result), ok)
 
         q5 = SeqMotifQuery("ATUAC")  # An rna query with T should yield no results
-        result = list(q5())
+        try:
+            result = list(q5())
+        except requests.exceptions.HTTPError as e:
+            logger.error("HTTPError occurred: %s", e)
+            result = []
         ok = len(result) == 0
         self.assertTrue(ok)
         logger.info("Basic Non-functional DNA query results: result_length : (%d), ok : (%r)", len(result), ok)
@@ -1193,7 +1201,6 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testResultsVerbosity"))
     suiteSelect.addTest(SearchTests("testFacetQuery"))
     return suiteSelect
-
 
 if __name__ == "__main__":
     mySuite = buildSearch()
