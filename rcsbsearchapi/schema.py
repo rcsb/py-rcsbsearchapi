@@ -12,15 +12,15 @@ from typing import Any, Iterator, List, Union
 from .search import Attr
 from .const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, SEARCH_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE
 
-
-def _download_schema(url: str):
-    "Get the current schema from the web"
-
-    logging.info("Downloading %s", url)
+def _fetch_schema(url: str):
+    "Request the current schema from the web"
+    logging.info("Requesting %s", url)
     response = requests.get(url, timeout=None)
-    response.raise_for_status()
-    return response.json()
-
+    if response.status_code == 200:
+        return response.json()
+    else:
+        logging.debug("HTTP response status code %r", response.status_code)
+        return None
 
 def _load_json_schema():
     logging.info("Loading structure schema from file")
@@ -112,9 +112,13 @@ def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
     return group
 
 
-def _make_schema() -> SchemaGroup:
-    json1 = _load_json_schema()
-    json2 = _load_chem_schema()
+def _make_schema(structureSchemaURL: str, chemicalSchemaURL: str) -> SchemaGroup:
+    json1 = _fetch_schema(structureSchemaURL)
+    if json1 == None:
+        json1 = _load_json_schema()
+    json2 = _fetch_schema(chemicalSchemaURL)
+    if json2 == None:
+        json2 = _load_chem_schema()
     schemas = [(json1, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (json2, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
     schema = _make_group("", schemas)
     assert isinstance(schema, SchemaGroup)  # for type checking
@@ -152,7 +156,7 @@ def __getattr__(name: str) -> Any:
     # delay instantiating rcsb_attributes until it is needed
     if name == "rcsb_attributes":
         if "rcsb_attributes" not in globals():
-            globals()["rcsb_attributes"] = _make_schema()
+            globals()["rcsb_attributes"] = _make_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL)
         return globals()["rcsb_attributes"]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
