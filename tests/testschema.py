@@ -24,7 +24,7 @@ import time
 import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.schema import _load_json_schema, _load_chem_schema, _fetch_schema, _make_schema
+from rcsbsearchapi.schema import _load_json_schema, _load_chem_schema, _fetch_schema
 from rcsbsearchapi.const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL
 
 
