@@ -57,7 +57,7 @@ class SchemaTests(unittest.TestCase):
         webSchema = _fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_json_schema()
         webVer = webSchema.get("$comment").split()[-1]
-        localVer = localSchema.get("$comment").split()[-1]  
+        localVer = localSchema.get("$comment").split()[-1]
         ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
         self.assertTrue(ok)
         logger.info("ok is %r", ok)
@@ -83,20 +83,21 @@ class SchemaTests(unittest.TestCase):
         logger.info("Chemical schema tests results: local version (%r) and web version (%s)", localVer, webVer)
 
     def testFetchSchema(self):
-        #check fetching of structure attribute schema
+        # check fetching of structure attribute schema
         fetchSchema = _fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
-        ok = fetchSchema != None
+        ok = fetchSchema is not None
         logger.info("ok is %r", ok)
-        self.assertTrue(ok)        
+        self.assertTrue(ok)
         fetchSchema = _fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
-        ok = fetchSchema != None
+        ok = fetchSchema is not None
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
         errorURL = "https://httpbin.org/status/404"
         fetchSchema = _fetch_schema(errorURL)
-        ok = fetchSchema == None
+        ok = fetchSchema is None
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
+
 
 def buildSchema():
     suiteSelect = unittest.TestSuite()

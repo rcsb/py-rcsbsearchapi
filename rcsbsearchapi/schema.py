@@ -23,6 +23,7 @@ def _fetch_schema(url: str):
         logging.debug("HTTP response status code %r", response.status_code)
         return None
 
+
 def _load_json_schema():
     logging.info("Loading structure schema from file")
     latest = pkgutil.get_data(__package__, "resources/metadata_schema.json")
@@ -115,10 +116,10 @@ def _make_group(fullname: str, nodeL: List) -> Union[SchemaGroup, Attr]:
 
 def _make_schema(structure_schema_url: str, chemical_schema_url: str) -> SchemaGroup:
     json1 = _fetch_schema(structure_schema_url)
-    if json1 == None:
+    if not json1:
         json1 = _load_json_schema()
     json2 = _fetch_schema(chemical_schema_url)
-    if json2 == None:
+    if not json2:
         json2 = _load_chem_schema()
     schemas = [(json1, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (json2, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
     schema = _make_group("", schemas)
