@@ -1474,8 +1474,8 @@ class Session(Iterable[str]):
         logging.debug(
             "Querying %s for results %s-%s", self.url, start, start + self.rows - 1
         )
-        response = requests.post(
-            self.url, data=params, timeout=None
+        response = requests.get(
+            self.url, {"json": json.dumps(params, separators=(",", ":"))}, timeout=None
         )
         response.raise_for_status()
         if response.status_code == requests.codes.ok:
