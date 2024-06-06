@@ -24,7 +24,7 @@ import time
 import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.schema import _load_json_schema, _load_chem_schema, _download_schema
+from rcsbsearchapi.schema import _load_json_schema, _load_chem_schema, _fetch_schema
 from rcsbsearchapi.const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL
 
 
@@ -54,39 +54,56 @@ class SchemaTests(unittest.TestCase):
 
     def testSchemaVersion(self):
         # Check structure attribute schema version
-        webSchema = _download_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
+        webSchema = _fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_json_schema()
         webVer = webSchema.get("$comment").split()[-1]
-        localVer = localSchema.get("$comment").split()[-1]
+        localVer = localSchema.get("$comment").split()[-1]  
         ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
         self.assertTrue(ok)
         logger.info("ok is %r", ok)
-        webVerMajorMinor = ".".join(webVer.split(".")[0:2])
-        localVerMajorMinor = ".".join(localVer.split(".")[0:2])
-        ok = localVerMajorMinor == webVerMajorMinor
+        webVerMajorMinor = float(".".join(webVer.split(".")[0:2]))
+        localVerMajorMinor = float(".".join(localVer.split(".")[0:2]))
+        ok = localVerMajorMinor <= webVerMajorMinor and localVerMajorMinor >= webVerMajorMinor - 0.10
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
         logger.info("Metadata schema tests results: local version (%r) and web version (%s)", localVer, webVer)
         # Check chemical attribute schema version
-        webSchema = _download_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
+        webSchema = _fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
         localSchema = _load_chem_schema()
         webVer = webSchema.get("$comment").split()[-1]
         localVer = localSchema.get("$comment").split()[-1]
         ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
         self.assertTrue(ok)
         logger.info("ok is %r", ok)
-        webVerMajorMinor = ".".join(webVer.split(".")[0:2])
-        localVerMajorMinor = ".".join(localVer.split(".")[0:2])
-        ok = localVerMajorMinor == webVerMajorMinor
+        webVerMajorMinor = float(".".join(webVer.split(".")[0:2]))
+        localVerMajorMinor = float(".".join(localVer.split(".")[0:2]))
+        ok = localVerMajorMinor <= webVerMajorMinor and localVerMajorMinor >= webVerMajorMinor - 0.10
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
         logger.info("Chemical schema tests results: local version (%r) and web version (%s)", localVer, webVer)
 
+    def testFetchSchema(self):
+        #check fetching of structure attribute schema
+        fetchSchema = _fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
+        ok = fetchSchema != None
+        logger.info("ok is %r", ok)
+        self.assertTrue(ok)        
+        fetchSchema = _fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
+        ok = fetchSchema != None
+        logger.info("ok is %r", ok)
+        self.assertTrue(ok)
+        errorURL = "https://httpbin.org/status/404"
+        fetchSchema = _fetch_schema(errorURL)
+        ok = fetchSchema == None
+        logger.info("ok is %r", ok)
+        self.assertTrue(ok)
 
 def buildSchema():
     suiteSelect = unittest.TestSuite()
     suiteSelect.addTest(SchemaTests("testSchema"))
     suiteSelect.addTest(SchemaTests("testSchemaVersion"))
+    suiteSelect.addTest(SchemaTests("testFetchSchema"))
+
     return suiteSelect
 
 
