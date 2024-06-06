@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.0 (2024-06-06)
+
+- Automatic fetching of latest schema files
+- Updated local schema files (used as fallback if offline)
+- Fix expected search behavior for sequence motif search
+
 ## v1.5.1 (2024-02-19)
 
 - Updated documentation
