@@ -13,7 +13,7 @@ jobs:
   timeoutInMinutes: 0
   pool:
     ${{ if eq(parameters.os, 'macos') }}:
-      vmImage: 'macOS-11'
+      vmImage: 'macOS-12'
     ${{ if eq(parameters.os, 'linux') }}:
       vmImage: 'ubuntu-20.04'
 
@@ -36,7 +36,7 @@ jobs:
       - bash: |
           set -e
           ls -la /Applications/Xcode*
-          sudo xcode-select --switch /Applications/Xcode_12.5.1.app/Contents/Developer
+          sudo xcode-select --switch /Applications/Xcode_14.2.app/Contents/Developer
           which g++
           c++ --version
         displayName: "setup Xcode"
