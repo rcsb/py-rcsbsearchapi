@@ -12,7 +12,7 @@ jobs:
 - job: ${{ format('publish_{0}_{1}', parameters.tox, parameters.os) }}
   pool:
     ${{ if eq(parameters.os, 'macos') }}:
-      vmImage: 'macOS-11'
+      vmImage: 'macOS-12'
     ${{ if eq(parameters.os, 'linux') }}:
       vmImage: 'ubuntu-20.04'
   dependsOn:
