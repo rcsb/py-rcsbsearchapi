@@ -274,7 +274,7 @@ class SearchTests(unittest.TestCase):
 
     def testAttribute(self):
         """Test the attributes - make sure that they are assigned correctly, etc. """
-        attr = Attr("attr")
+        attr = Attr("attr", "text")
 
         term = attr == "value"
         ok = isinstance(term, Terminal)
@@ -977,6 +977,7 @@ class SearchTests(unittest.TestCase):
             CHEMICAL_ATTRIBUTE_SEARCH_SERVICE  # this constant specifies "text_chem" service
         )
         result = q3.count()
+        print("Q3 COUNT", result)
         ok = result == len(list(q3()))
         self.assertTrue(ok)
         logger.info("Counting results of chemical Attribute query: (%d), ok : (%r)", result, ok)

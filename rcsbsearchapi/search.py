@@ -31,11 +31,16 @@ import requests
 from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL_TEXT_SEARCH_SERVICE, SEQUENCE_SEARCH_SERVICE, SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES
 from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE
 from .const import STRUCTMOTIF_SEARCH_SERVICE, STRUCT_MOTIF_MIN_RESIDUES, STRUCT_MOTIF_MAX_RESIDUES, CHEM_SIM_SEARCH_SERVICE
+from .schema import Schema
+
+# from .schema_dict import SchemaDict
+# from rcsbsearchapi import SCHEMA_DICT
 
 if sys.version_info > (3, 8):
     from typing import Literal
 else:
     from typing_extensions import Literal
+
 # tqdm is optional
 # Allowed return types for searches. https://search.rcsb.org/#return-type
 ReturnType = Literal[
@@ -83,6 +88,24 @@ TValue = Union[
 ]
 # Types valid for numeric operators
 TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]"]
+
+
+@dataclass(frozen=True)
+class AttrLeaf:
+    attribute: str
+    type: str
+    description: str
+
+    def __contains__(self, key):
+        return key in self.__dict__
+
+    def __getitem__(self, key):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        raise KeyError(f"'{key}' not found in object")
+
+
+SCHEMA_DICT = Schema(AttrLeaf, "dict")
 
 
 def fileUpload(filepath: str, fmt: str = "cif") -> str:
@@ -312,7 +335,6 @@ class AttributeQuery(Terminal):
 
     Examples:
         >>> AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
-        >>> AttributeQuery(value="tubulin")
         >>> AttributeQuery("rcsb_entry_container_identifiers.entry_id", operator="in", value=["4HHB", "2GS2"])
 
     A full list of attributes is available in the
@@ -321,13 +343,14 @@ class AttributeQuery(Terminal):
 
     The :py:class:`Attr` class provides a more pythonic way of constructing AttributeQueries.
     """
-
-    def __init__(self, attribute: Optional[str] = None,
-                 operator: Optional[str] = None,
-                 value: Optional[TValue] = None,
-                 service: str = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE,
-                 negation: Optional[bool] = False
-                 ):
+    def __init__(
+        self,
+        attribute: str = None,
+        operator: str = None,
+        value: Optional[TValue] = None,
+        service: Optional[str] = None,
+        negation: Optional[bool] = False,
+    ):
         """Search for the string value given possible attribute or operator
         Also can specify service and negation
 
@@ -338,15 +361,14 @@ class AttributeQuery(Terminal):
             service: specify what search service (i.e "text", "text_chem")
             negation: logical not
         """
+        paramsD = {"attribute": attribute, "operator": operator, "negation": negation}
+        #
         if value is not None:
-            super().__init__(params={"attribute": attribute,
-                                     "operator": operator,
-                                     "negation": negation,
-                                     "value": value}, service=service)
-        else:
-            super().__init__(params={"attribute": attribute,
-                                     "operator": operator,
-                                     "negation": negation}, service=service)
+            paramsD.update({"value": value})
+        if not service:
+            service = SCHEMA_DICT.get_attribute_type(attribute)
+        #
+        super().__init__(params=paramsD, service=service)
 
 
 class TextQuery(Terminal):
@@ -697,7 +719,7 @@ class Attr:
     """
 
     attribute: str
-    type: Optional[str] = STRUCTURE_ATTRIBUTE_SEARCH_SERVICE  # this will be changed later, this is to allow the program to still run. Will not be optional.
+    type: str  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
         """Exact match with the value"""

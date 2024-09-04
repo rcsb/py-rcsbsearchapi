@@ -1,0 +1,20 @@
+{
+    "@context": "https://w3id.org/codemeta/3.0",
+    "type": "SoftwareSourceCode",
+    "codeRepository": "https://github.com/rcsb/py-rcsbsearchapi",
+    "dateCreated": "2023-06-08",
+    "datePublished": "2023-06-08",
+    "description": "Python interface for RCSB PDB Search API service at RCSB.org.",
+    "license": "https://spdx.org/licenses/BSD-3-Clause",
+    "name": "rcsbsearchapi",
+    "operatingSystem": [
+        "Linux",
+        "Windows",
+        "macOS"
+    ],
+    "programmingLanguage": "Python 3",
+    "relatedLink": [
+        "https://pypi.org/project/rcsbsearchapi/",
+        "https://rcsbsearchapi.readthedocs.io/en/latest/"
+    ]
+}
