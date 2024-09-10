@@ -10,12 +10,19 @@ import re
 import warnings
 from typing import List, Union
 import requests
-from .const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, \
-    STRUCTURE_ATTRIBUTE_SCHEMA_FILE, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, CHEMICAL_ATTRIBUTE_SCHEMA_FILE
-from rich import print as rprint
+from .const import (
+    STRUCTURE_ATTRIBUTE_SCHEMA_URL,
+    CHEMICAL_ATTRIBUTE_SCHEMA_URL,
+    STRUCTURE_ATTRIBUTE_SEARCH_SERVICE,
+    STRUCTURE_ATTRIBUTE_SCHEMA_FILE,
+    CHEMICAL_ATTRIBUTE_SEARCH_SERVICE,
+    CHEMICAL_ATTRIBUTE_SCHEMA_FILE,
+)
+
 
 class SchemaGroup:
     """A non-leaf node in the RCSB PDB schema. Leaves are Attr values."""
+
     def __init__(self, attr_type):
         self.Attr = attr_type  # Attr or AttrLeaf
 
@@ -35,6 +42,7 @@ class SchemaGroup:
             >>> [a for a in attrs if "stoichiometry" in a.attribute]
             [Attr(attribute='rcsb_struct_symmetry.stoichiometry')]
         """
+
         def leaves(self, attr_type):
             for k, v in self.__dict__.items():
                 if isinstance(v, attr_type):
@@ -44,6 +52,7 @@ class SchemaGroup:
                 else:
                     # Shouldn't happen
                     raise TypeError(f"Unrecognized member {k!r}: {v!r}")
+
         return leaves(self, self.Attr)
 
     def __str__(self):
@@ -144,7 +153,7 @@ class Schema:
         An Attr (Leaf nodes) or SchemaGroup (object nodes)
         """
         group = SchemaGroup(self.Attr)
-        for (node, attrtype) in nodeL:
+        for node, attrtype in nodeL:
             if "anyOf" in node:
                 children = {self._make_group(fullname, [(n, attrtype)]) for n in node["anyOf"]}
                 # Currently only deal with anyOf in leaf nodes
@@ -184,7 +193,7 @@ class Schema:
         An Attr (Leaf nodes) or dict (object nodes)
         """
         group = {}
-        for (node, attrtype, desc) in nodeL:
+        for node, attrtype, desc in nodeL:
             if "anyOf" in node:
                 children = {self._make_group_dict(fullname, [(n, attrtype, n.get("description", node.get("description", desc)))]) for n in node["anyOf"]}
                 # Currently only deal with anyOf in leaf nodes
@@ -201,6 +210,11 @@ class Schema:
                 assert len(children) == 1, f"type of {fullname} couldn't be determined"
                 return next(iter(children))
             if node["type"] in ("string", "number", "integer", "date"):
+                # For nodes that occur in both schemas, list of both descriptions will be passed in through desc arg
+                if isinstance(desc, list):
+                    return self.Attr(fullname, attrtype, desc)
+
+                # For non-redundant nodes
                 return self.Attr(fullname, attrtype, node.get("description", desc))
                 # return {"attribute": fullname, "type": attrtype, "description": node.get("description", desc)}
                 # return AttrLeaf(fullname, attrtype, node.get("description", ""))
@@ -210,8 +224,21 @@ class Schema:
             elif node["type"] == "object":
                 for childname, childnode in node["properties"].items():
                     fullchildname = f"{fullname}.{childname}" if fullname else childname
-                    childgroup = self._make_group_dict(fullchildname, [(childnode, attrtype, childnode.get("description", desc))])
                     # setattr(group, childname, childgroup)
+                    if childname in group:
+                        assert not isinstance(group[childname], dict)  # redundant name must not have nested attributes
+
+                        # Create attrtype and description lists with existing and current value.
+                        # List type triggers error if user doesn't specify service for redundant attribute.
+                        currentattr = group[childname]["type"]
+                        attrlist = [currentattr, attrtype]
+
+                        currentdescript = group[childname]["description"]
+                        descriptlist = [currentdescript, childnode.get("description", desc)]
+
+                        childgroup = self._make_group_dict(fullchildname, [(childnode, attrlist, descriptlist)])
+                    else:
+                        childgroup = self._make_group_dict(fullchildname, [(childnode, attrtype, childnode.get("description", desc))])
                     group[childname] = childgroup
             else:
                 raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
@@ -228,12 +255,14 @@ class Schema:
 
     def get_attribute_details(self, attribute):
         """Return attribute information given full or partial attribute name"""
+
         def leaves(d):
             for v in d.values():
                 if "attribute" in v:
                     yield v
                 else:
                     yield from leaves(v)
+
         split_attr = attribute.split(".")
         ptr = self.rcsb_attributes_dict
         for level in split_attr:
