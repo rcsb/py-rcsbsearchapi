@@ -130,6 +130,12 @@ class AttrLeaf:
     type: Union[str, List]
     description: Union[str, List]
 
+    def get_type(self) -> Union[str, List]:
+        return self.type
+
+    def get_description(self) -> str:
+        return self.description
+
     def __contains__(self, key):
         return key in self.__dict__
 
@@ -139,7 +145,7 @@ class AttrLeaf:
         raise KeyError(f"'{key}' not found in object")
 
 
-SCHEMA_DICT = Schema(AttrLeaf, "dict")
+SCHEMA_DICT = Schema(AttrLeaf, "SchemaGroup")
 
 
 def fileUpload(filepath: str, fmt: str = "cif") -> str:
@@ -307,7 +313,7 @@ class Terminal(Query):
         >>> Terminal("text", {"attribute": "rcsb_id", "operator": "in", "negation": False, "value": ["5T89, "1TIM"]})
     """
 
-    service: str
+    service: Union[List, str]
     params: Dict[str, Any]
     node_id: int = 0
 
@@ -383,11 +389,13 @@ class AttributeQuery(Terminal):
         if value is not None:
             paramsD.update({"value": value})
         if not service:
-            service = SCHEMA_DICT.get_attribute_type(attribute)
+            service = SCHEMA_DICT.rcsb_attributes.get_attribute_type(attribute)
 
-            if isinstance(service, list):
-                raise ValueError(f'{attribute} is in both structure and chemical attributes. Run again using one of the following in the "service" argument: {service}')
-        #
+            # TODO: AttributeQuery() specific error msg
+
+        if isinstance(service, list):
+            raise ValueError(f'{attribute} is in both structure and chemical attributes. Run again using one of the following in the "service" argument: {service}')
+
         super().__init__(params=paramsD, service=service)
 
 
@@ -732,7 +740,14 @@ class Attr:
     """
 
     attribute: str
-    type: str  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    type: Union[List, str]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    description: str
+
+    def get_type(self) -> Union[str, List]:
+        return self.type
+
+    def get_description(self) -> str:
+        return self.description
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
         """Exact match with the value"""

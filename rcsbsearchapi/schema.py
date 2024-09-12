@@ -25,8 +25,9 @@ class SchemaGroup:
 
     def __init__(self, attr_type):
         self.Attr = attr_type  # Attr or AttrLeaf
+        self._members = {}  # Dictionary to store members
 
-    def search(self, pattern: Union[str, re.Pattern], flags=0):
+    def search(self, pattern: Union[str, re.Pattern], flags=0):  # TODO: check that this still works
         """Find all attributes in the schema matching a regular expression.
 
         Returns:
@@ -34,6 +35,8 @@ class SchemaGroup:
         """
         matcher = re.compile(pattern, flags=flags)
         return filter(lambda a: matcher.search(a.attribute), self)
+
+    # TODO: search attributes by substring
 
     def __iter__(self):
         """Iterate over all leaf nodes
@@ -44,19 +47,115 @@ class SchemaGroup:
         """
 
         def leaves(self, attr_type):
-            for k, v in self.__dict__.items():
+            for k, v in self._members.items():
                 if isinstance(v, attr_type):
                     yield v
                 elif isinstance(v, SchemaGroup):
                     yield from iter(v)
+                # skips ["Attr"] key in __dict__
+                elif v is attr_type:
+                    continue
                 else:
                     # Shouldn't happen
                     raise TypeError(f"Unrecognized member {k!r}: {v!r}")
 
         return leaves(self, self.Attr)
 
+    def get_attribute_details(self, attribute: str) -> str:
+        """Return attribute information given full or partial attribute name
+
+        Args:
+            attribute (str): Full attribute name
+                ex: "rcsb_id", "rcsb_entity_source_organism.scientific_name"
+
+        Returns:
+            str: Return corresponding attribute description if there's a match
+        """
+
+        def leaves(d):
+            for v in d.values():
+                if "attribute" in v:
+                    yield v
+                else:
+                    yield from leaves(v)
+
+        split_attr = attribute.split(".")
+        ptr = self  # dictionary of attributes
+        for level in split_attr:
+            if level not in ptr:
+                warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
+                return None
+            ptr = ptr[level]
+        if "attribute" in ptr and ptr["attribute"] == attribute:
+            return ptr
+        else:
+            return {c for c in leaves(ptr)}
+
+    def get_attribute_type(self, attribute: str) -> Union[str, None]:
+        """Return attribute type given full attribute name
+
+        Args:
+            attribute (str): Full attribute name
+                ex: "rcsb_id", "rcsb_entity_source_organism.scientific_name"
+
+        Returns:
+            Union[str, None]: Return search service if there's a match.
+                structure search: "text"
+                chemical search: "chem_text"
+                both: ["text", "chem_text"] (raises error later)
+        """
+        split_attr = attribute.split(".")
+        ptr = self  # dictionary of attributes
+        for level in split_attr:
+            if level not in ptr:
+                warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
+                return None
+            ptr = ptr[level]
+        if "attribute" in ptr and ptr["attribute"] == attribute:
+            return ptr["type"]
+        warnings.warn(f"Incomplete attribute path '{attribute}' - must specify fully-qualified path to leaf attribute node.", UserWarning)
+        return None
+
+    # Below methods are for making SchemaGroup behave as a Dict (be able to access through keys, etc).
+    # This is used for automatically determining search service based on attribute name.
+    # While at the same time maintaining auto-completion
+
+    def __getitem__(self, key):
+        """Allow dictionary-like access to members by key."""
+        return self._members[key]
+
+    def __setitem__(self, key, value):
+        """Set a member in the schema like a dictionary."""
+        self._members[key] = value
+
+    def __delitem__(self, key):
+        """Delete a member from the schema like a dictionary."""
+        del self._members[key]
+
+    def __contains__(self, key):
+        """Check if a member exists in the schema."""
+        return key in self._members
+
+    def keys(self):
+        return self._members.keys()
+
+    def values(self):
+        return self._members.values()
+
+    def items(self):
+        return self._members.items()
+
+    def __dir__(self):
+        """Override the __dir__ method to maintain tab completion."""
+        # Get default attributes + dynamic dictionary keys
+        return super().__dir__() + list(self._members.keys())
+
     def __str__(self):
-        return "\n".join((str(c) for c in self.__dict__.values()))
+        return "\n".join(f"{key}: {value}" for key, value in self._members.items())
+
+    def __hash__(self):
+        """Make the object hashable using the hash of its members."""
+        return hash(frozenset(self._members.items()))
 
 
 class Schema:
@@ -99,11 +198,11 @@ class Schema:
         if reload:
             self.struct_schema = self._reload_schema(struct_attr_schema_url, struct_attr_schema_file, refetch, use_fallback)
             self.chem_schema = self._reload_schema(chem_attr_schema_url, chem_attr_schema_file, refetch, use_fallback)
-            #
-            if schema_group_type == "dict":
-                self.rcsb_attributes_dict = self._make_schema_dict()
 
-            elif schema_group_type == "SchemaGroup":
+            # if schema_group_type == "dict":
+            #     self.rcsb_attributes_dict = self._make_schema_dict()
+
+            if schema_group_type == "SchemaGroup":
                 self.rcsb_attributes = self._make_schema_group()
 
     def _reload_schema(self, schema_url: str, schema_file: str, refetch=True, use_fallback=True):
@@ -115,18 +214,10 @@ class Schema:
         return sD
 
     def _make_schema_group(self) -> SchemaGroup:
-        schemas = [(self.struct_schema, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE), (self.chem_schema, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE)]
+        schemas = [(self.struct_schema, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, ""), (self.chem_schema, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, "")]
         schema = self._make_group("", schemas)
-        # schema = self._set_leaves(self._make_group("", schemas))
         assert isinstance(schema, SchemaGroup)  # for type checking
         return schema
-
-    def _make_schema_dict(self) -> dict:
-        schemas = [(self.struct_schema, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, ""), (self.chem_schema, CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, "")]
-        schema_dict = self._make_group_dict("", schemas)
-        # schema_dict = self._set_leaves(self._make_group_dict("", schemas))
-        assert isinstance(schema_dict, dict)  # for type checking
-        return schema_dict
 
     def _fetch_schema(self, url: str):
         "Request the current schema from the web"
@@ -153,59 +244,19 @@ class Schema:
         An Attr (Leaf nodes) or SchemaGroup (object nodes)
         """
         group = SchemaGroup(self.Attr)
-        for node, attrtype in nodeL:
-            if "anyOf" in node:
-                children = {self._make_group(fullname, [(n, attrtype)]) for n in node["anyOf"]}
-                # Currently only deal with anyOf in leaf nodes
-                assert len(children) == 1, f"type of {fullname} couldn't be determined"
-                return next(iter(children))
-            if "oneOf" in node:
-                children = {self._make_group(fullname, [(n, attrtype)]) for n in node["oneOf"]}
-                # Currently only deal with oneOf in leaf nodes
-                assert len(children) == 1, f"type of {fullname} couldn't be determined"
-                return next(iter(children))
-            if "allOf" in node:
-                children = {self._make_group(fullname, [(n, attrtype)]) for n in node["allOf"]}
-                # Currently only deal with allOf in leaf nodes
-                assert len(children) == 1, f"type of {fullname} couldn't be determined"
-                return next(iter(children))
-            if node["type"] in ("string", "number", "integer", "date"):
-                return self.Attr(fullname, attrtype)
-            elif node["type"] == "array":
-                # skip to items
-                return self._make_group(fullname, [(node["items"], attrtype)])
-            elif node["type"] == "object":
-                for childname, childnode in node["properties"].items():
-                    fullchildname = f"{fullname}.{childname}" if fullname else childname
-                    childgroup = self._make_group(fullchildname, [(childnode, attrtype)])
-                    setattr(group, childname, childgroup)
-            else:
-                raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
-        return group
-
-    def _make_group_dict(self, fullname: str, nodeL: List):
-        """Represent this node of the schema as a python object
-
-        Params:
-        - name: full dot-separated attribute name
-
-        Returns:
-        An Attr (Leaf nodes) or dict (object nodes)
-        """
-        group = {}
         for node, attrtype, desc in nodeL:
             if "anyOf" in node:
-                children = {self._make_group_dict(fullname, [(n, attrtype, n.get("description", node.get("description", desc)))]) for n in node["anyOf"]}
+                children = {self._make_group(fullname, [(n, attrtype, n.get("description", node.get("description", desc)))]) for n in node["anyOf"]}
                 # Currently only deal with anyOf in leaf nodes
                 assert len(children) == 1, f"type of {fullname} couldn't be determined"
                 return next(iter(children))
             if "oneOf" in node:
-                children = {self._make_group_dict(fullname, [(n, attrtype, n.get("description", desc))]) for n in node["oneOf"]}
+                children = {self._make_group(fullname, [(n, attrtype, n.get("description", desc))]) for n in node["oneOf"]}
                 # Currently only deal with oneOf in leaf nodes
                 assert len(children) == 1, f"type of {fullname} couldn't be determined"
                 return next(iter(children))
             if "allOf" in node:
-                children = {self._make_group_dict(fullname, [(n, attrtype, n.get("description", desc))]) for n in node["allOf"]}
+                children = {self._make_group(fullname, [(n, attrtype, n.get("description", desc))]) for n in node["allOf"]}
                 # Currently only deal with allOf in leaf nodes
                 assert len(children) == 1, f"type of {fullname} couldn't be determined"
                 return next(iter(children))
@@ -213,14 +264,13 @@ class Schema:
                 # For nodes that occur in both schemas, list of both descriptions will be passed in through desc arg
                 if isinstance(desc, list):
                     return self.Attr(fullname, attrtype, desc)
-
                 # For non-redundant nodes
                 return self.Attr(fullname, attrtype, node.get("description", desc))
                 # return {"attribute": fullname, "type": attrtype, "description": node.get("description", desc)}
                 # return AttrLeaf(fullname, attrtype, node.get("description", ""))
             elif node["type"] == "array":
                 # skip to items
-                return self._make_group_dict(fullname, [(node["items"], attrtype, node.get("description", desc))])
+                return self._make_group(fullname, [(node["items"], attrtype, node.get("description", desc))])
             elif node["type"] == "object":
                 for childname, childnode in node["properties"].items():
                     fullchildname = f"{fullname}.{childname}" if fullname else childname
@@ -230,15 +280,15 @@ class Schema:
 
                         # Create attrtype and description lists with existing and current value.
                         # List type triggers error if user doesn't specify service for redundant attribute.
-                        currentattr = group[childname]["type"]
+                        currentattr = group[childname].get_type()
                         attrlist = [currentattr, attrtype]
 
-                        currentdescript = group[childname]["description"]
+                        currentdescript = group[childname].get_description()
                         descriptlist = [currentdescript, childnode.get("description", desc)]
 
-                        childgroup = self._make_group_dict(fullchildname, [(childnode, attrlist, descriptlist)])
+                        childgroup = self._make_group(fullchildname, [(childnode, attrlist, descriptlist)])
                     else:
-                        childgroup = self._make_group_dict(fullchildname, [(childnode, attrtype, childnode.get("description", desc))])
+                        childgroup = self._make_group(fullchildname, [(childnode, attrtype, childnode.get("description", desc))])
                     group[childname] = childgroup
             else:
                 raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
@@ -252,40 +302,3 @@ class Schema:
             else:
                 d[leaf] = self._set_leaves(d[leaf])
         return d
-
-    def get_attribute_details(self, attribute):
-        """Return attribute information given full or partial attribute name"""
-
-        def leaves(d):
-            for v in d.values():
-                if "attribute" in v:
-                    yield v
-                else:
-                    yield from leaves(v)
-
-        split_attr = attribute.split(".")
-        ptr = self.rcsb_attributes_dict
-        for level in split_attr:
-            if level not in ptr:
-                warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
-                return None
-            ptr = ptr[level]
-        if "attribute" in ptr and ptr["attribute"] == attribute:
-            return ptr
-        else:
-            # return {(c.attribute, c.type, c.description) for c in leaves(ptr)}
-            return {c for c in leaves(ptr)}
-
-    def get_attribute_type(self, attribute):
-        """Return attribute type given full attribute name"""
-        split_attr = attribute.split(".")
-        ptr = self.rcsb_attributes_dict
-        for level in split_attr:
-            if level not in ptr:
-                warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
-                return None
-            ptr = ptr[level]
-        if "attribute" in ptr and ptr["attribute"] == attribute:
-            return ptr["type"]
-        warnings.warn(f"Incomplete attribute path '{attribute}' - must specify fully-qualified path to leaf attribute node.", UserWarning)
-        return None

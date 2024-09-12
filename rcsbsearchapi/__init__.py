@@ -1,6 +1,6 @@
 """RCSB PDB Search API"""
 
-# from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, List
 
 from .schema import Schema
 from .search import Terminal  # noqa: F401
@@ -21,8 +21,9 @@ rcsb_attributes = SCHEMA.rcsb_attributes
 # if "rcsb_attributes" not in globals():
 #     globals()["rcsb_attributes"] = s.rcsb_attrs
 
+
 # def __dir__() -> List[str]:
-#     print("IN DIR")
 #     return sorted(__all__)
 
-__all__ = ["Query", "Group", "Attr", "Terminal", "TextQuery", "rcsb_attributes"]
+
+__all__ = ["Query", "Group", "Attr", "Terminal", "TextQuery", "AttributeQuery", "rcsb_attributes"]
