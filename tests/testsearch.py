@@ -200,7 +200,7 @@ class SearchTests(unittest.TestCase):
         """Attempt to make an invalid, malformed query. Upon finding an error,
         catch the error and pass, continuing tests. An exception is only thrown
         if the query somehow completes successfully. """
-        q1 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR")
+        q1 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR", service="text")
         session = Session(q1)
         try:
             set(session)
@@ -274,7 +274,7 @@ class SearchTests(unittest.TestCase):
 
     def testAttribute(self):
         """Test the attributes - make sure that they are assigned correctly, etc. """
-        attr = Attr("attr", "text")
+        attr = Attr(attribute="attr", type="type")
 
         term = attr == "value"
         ok = isinstance(term, Terminal)
@@ -305,7 +305,7 @@ class SearchTests(unittest.TestCase):
 
     def testPartialQuery(self):
         """Test the ability to perform partial queries. """
-        query = Attr("a").equals("aval").and_("b")
+        query = Attr(attribute="a", type="text").equals("aval").and_("b")  # TODO: check this is ok
 
         ok = isinstance(query, PartialQuery)
         self.assertTrue(ok)
@@ -330,7 +330,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = query.nodes[1].params.get("value") == "bval"
 
-        query = query.and_(Attr("c") < 5)
+        query = query.and_(Attr("c", "text") < 5)
         ok = len(query.nodes) == 3
         self.assertTrue(ok)
         ok = query.nodes[2].params.get("attribute") == "c"
@@ -344,7 +344,7 @@ class SearchTests(unittest.TestCase):
 
         ok = isinstance(query, PartialQuery)
         self.assertTrue(ok)
-        ok = query.attr == Attr("d")
+        ok = query.attr == Attr("d", "text")
         self.assertTrue(ok)
         ok = query.operator == "or"
         self.assertTrue(ok)
@@ -369,7 +369,7 @@ class SearchTests(unittest.TestCase):
 
     def testOperators(self):
         """Test operators such as contain and in. """
-        q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])  # test in
+        q1 = attrs.rcsb_entry_container_identifiers.rcsb_id.in_(["4HHB", "2GS2"])  # test in
         results = list(q1())
         ok = len(results) == 2
         logger.info("In search results length: (%d) ok: (%r)", len(results), ok)
@@ -1033,7 +1033,7 @@ class SearchTests(unittest.TestCase):
         logger.info("Counting results of Chemical similarity query: (%d), ok : (%r)", result, ok)
 
         ok = False
-        q9 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR")
+        q9 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR", service="textx")
         try:
             _ = q9.count()
         except requests.HTTPError:

@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING, Any, List
 
 from .schema import Schema
-from .search import Terminal  # noqa: F401
+from .search import Terminal, SCHEMA  # noqa: F401
 from .search import Attr, AttrLeaf, AttributeQuery, Group, Query, Session, TextQuery, Value
 from typing import TYPE_CHECKING
 
@@ -13,7 +13,6 @@ __version__ = "1.6.0"
 if TYPE_CHECKING:
     from .schema import SchemaGroup
 
-SCHEMA = Schema(Attr, "SchemaGroup")
 rcsb_attributes = SCHEMA.rcsb_attributes
 # SCHEMA_DICT = Schema(AttrLeaf, "dict")
 # rcsb_attributes_dict = SCHEMA_DICT.rcsb_attributes_dict
@@ -22,8 +21,16 @@ rcsb_attributes = SCHEMA.rcsb_attributes
 #     globals()["rcsb_attributes"] = s.rcsb_attrs
 
 
-# def __dir__() -> List[str]:
-#     return sorted(__all__)
+def __dir__() -> List[str]:
+    return sorted(__all__)
 
 
-__all__ = ["Query", "Group", "Attr", "Terminal", "TextQuery", "AttributeQuery", "rcsb_attributes"]
+__all__ = [
+    "Query",
+    "Group",
+    "Attr",
+    "Terminal",
+    "TextQuery",
+    "AttributeQuery",
+    "rcsb_attributes"
+]

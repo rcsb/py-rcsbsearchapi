@@ -1,6 +1,7 @@
 """Interact with the [RCSB PDB Search API](https://search.rcsb.org/#search-api).
 """
 
+from __future__ import annotations
 import functools
 import json
 import logging
@@ -32,9 +33,6 @@ from .const import STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, REQUESTS_PER_SECOND, FULL
 from .const import RCSB_SEARCH_API_QUERY_URL, SEQMOTIF_SEARCH_SERVICE, SEQMOTIF_SEARCH_MIN_CHARACTERS, UPLOAD_URL, RETURN_UP_URL, STRUCT_SIM_SEARCH_SERVICE
 from .const import STRUCTMOTIF_SEARCH_SERVICE, STRUCT_MOTIF_MIN_RESIDUES, STRUCT_MOTIF_MAX_RESIDUES, CHEM_SIM_SEARCH_SERVICE
 from .schema import Schema
-
-# from .schema_dict import SchemaDict
-# from rcsbsearchapi import SCHEMA_DICT
 
 if sys.version_info > (3, 8):
     from typing import Literal
@@ -122,30 +120,6 @@ TValue = Union[
 ]
 # Types valid for numeric operators
 TNumberLike = Union[int, float, date, "Value[int]", "Value[float]", "Value[date]"]
-
-
-@dataclass(frozen=True)
-class AttrLeaf:
-    attribute: str
-    type: Union[str, List]
-    description: Union[str, List]
-
-    def get_type(self) -> Union[str, List]:
-        return self.type
-
-    def get_description(self) -> str:
-        return self.description
-
-    def __contains__(self, key):
-        return key in self.__dict__
-
-    def __getitem__(self, key):
-        if key in self.__dict__:
-            return self.__dict__[key]
-        raise KeyError(f"'{key}' not found in object")
-
-
-SCHEMA_DICT = Schema(AttrLeaf, "SchemaGroup")
 
 
 def fileUpload(filepath: str, fmt: str = "cif") -> str:
@@ -350,6 +324,292 @@ class Terminal(Query):
     #     return f"Terminal(service={self.service!r}, params={self.params!r})"
 
 
+@dataclass(frozen=True)
+class Attr:
+    """A search attribute, e.g. "rcsb_entry_container_identifiers.entry_id"
+
+    Terminals can be constructed from Attr objects using either a functional syntax,
+    which mirrors the API operators, or with python operators.
+
+    +--------------------+---------------------+
+    | Fluent Function    | Operator            |
+    +====================+=====================+
+    | exact_match        | attr == str         |
+    +--------------------+---------------------+
+    | contains_words     |                     |
+    +--------------------+---------------------+
+    | contains_phrase    |                     |
+    +--------------------+---------------------+
+    | greater            | attr > date,number  |
+    +--------------------+---------------------+
+    | less               | attr < date,number  |
+    +--------------------+---------------------+
+    | greater_or_equal   | attr >= date,number |
+    +--------------------+---------------------+
+    | less_or_equal      | attr <= date,number |
+    +--------------------+---------------------+
+    | equals             | attr == date,number |
+    +--------------------+---------------------+
+    | range              | dict (keys below)*  |
+    +--------------------+---------------------+
+    | exists             | bool(attr)          |
+    +--------------------+---------------------+
+    | in\\_              |                     |
+    +--------------------+---------------------+
+
+    Rather than their normal bool return values, operators return Terminals.
+
+    Pre-instantiated attributes are available from the
+    :py:data:`rcsbsearchapi.rcsb_attributes` object. These are generally easier to use
+    than constructing Attr objects by hand. A complete list of valid attributes is
+    available in the `schema <https://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
+
+    * The `range` dictionary requires the following keys:
+     * "from" -> int
+     * "to" -> int
+     * "include_lower" -> bool
+     * "include_upper" -> bool
+    """
+
+    attribute: str
+    type: Union[List, str]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    description: Optional[Union[str, List[str]]] = None
+
+    def exact_match(self, value: Union[str, "Value[str]"]) -> "AttributeQuery":
+        """Exact match with the value"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "exact_match", value, self.type)
+
+    def contains_words(self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]) -> "AttributeQuery":
+        """Match any word within the string.
+
+        Words are split at whitespace. All results which match any word are returned,
+        with results matching more words sorted first.
+        """
+        if isinstance(value, Value):
+            value = value.value
+        if isinstance(value, list):
+            value = " ".join(value)
+        return AttributeQuery(self.attribute, "contains_words", value, self.type)
+
+    def contains_phrase(self, value: Union[str, "Value[str]"]) -> "AttributeQuery":
+        """Match an exact phrase"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "contains_phrase", value, self.type)
+
+    def greater(self, value: TNumberLike) -> "AttributeQuery":
+        """Attribute > `value`"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "greater", value, self.type)
+
+    def less(self, value: TNumberLike) -> "AttributeQuery":
+        """Attribute < `value`"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "less", value, self.type)
+
+    def greater_or_equal(self, value: TNumberLike) -> "AttributeQuery":
+        """Attribute >= `value`"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "greater_or_equal", value, self.type)
+
+    def less_or_equal(self, value: TNumberLike) -> "AttributeQuery":
+        """Attribute <= `value`"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "less_or_equal", value, self.type)
+
+    def equals(self, value: TNumberLike) -> "AttributeQuery":
+        """Attribute == `value`"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "equals", value, self.type)
+
+    def range(self, value: Dict[str, Any]) -> "AttributeQuery":
+        """Attribute is within the specified half-open range
+
+        Args:
+            value: lower and upper bounds `[a, b)`
+        """
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, "range", value, self.type)
+
+    def exists(self) -> AttributeQuery:
+        """Attribute is defined for the structure"""
+        return AttributeQuery(self.attribute, operator="exists")
+
+    def in_(
+        self,
+        value: Union[
+            List[str],
+            List[int],
+            List[float],
+            List[date],
+            Tuple[str, ...],
+            Tuple[int, ...],
+            Tuple[float, ...],
+            Tuple[date, ...],
+            "Value[List[str]]",
+            "Value[List[int]]",
+            "Value[List[float]]",
+            "Value[List[date]]",
+            "Value[Tuple[str, ...]]",
+            "Value[Tuple[int, ...]]",
+            "Value[Tuple[float, ...]]",
+            "Value[Tuple[date, ...]]",
+        ],
+    ) -> "AttributeQuery":
+        """Attribute is contained in the list of values"""
+        if isinstance(value, Value):
+            value = value.value
+        return AttributeQuery(self.attribute, operator="in", value=value)
+
+    # Need ignore[override] because typeshed restricts __eq__ return value
+    # https://github.com/python/mypy/issues/2783
+    @overload  # type: ignore[override]
+    def __eq__(self, value: "Attr") -> bool: ...
+
+    @overload  # type: ignore[override]
+    def __eq__(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Terminal: ...
+
+    def __eq__(
+        self,
+        value: Union[
+            "Attr",
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Union[Terminal, bool]:  # type: ignore[override]
+        if isinstance(value, Attr):
+            return self.attribute == value.attribute
+        if isinstance(value, Value):
+            value = value.value
+        if isinstance(value, str):
+            return self.exact_match(value)
+        elif isinstance(value, date) or isinstance(value, float) or isinstance(value, int):
+            return self.equals(value)
+        else:
+            return NotImplemented
+
+    @overload  # type: ignore[override]
+    def __ne__(self, value: "Attr") -> bool: ...
+
+    @overload  # type: ignore[override]
+    def __ne__(
+        self,
+        value: Union[
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Terminal: ...
+
+    def __ne__(
+        self,
+        value: Union[
+            "Attr",
+            str,
+            int,
+            float,
+            date,
+            "Value[str]",
+            "Value[int]",
+            "Value[float]",
+            "Value[date]",
+        ],
+    ) -> Union[Terminal, bool]:  # type: ignore[override]
+        if isinstance(value, Attr):
+            return self.attribute != value.attribute
+        if isinstance(value, Value):
+            value = value.value
+        return ~(self == value)
+
+    def __lt__(self, value: TNumberLike) -> Terminal:
+        if isinstance(value, Value):
+            value = value.value
+        return self.less(value)
+
+    def __le__(self, value: TNumberLike) -> Terminal:
+        if isinstance(value, Value):
+            value = value.value
+        return self.less_or_equal(value)
+
+    def __gt__(self, value: TNumberLike) -> Terminal:
+        if isinstance(value, Value):
+            value = value.value
+        return self.greater(value)
+
+    def __ge__(self, value: TNumberLike) -> Terminal:
+        if isinstance(value, Value):
+            value = value.value
+        return self.greater_or_equal(value)
+
+    def __bool__(self) -> Terminal:  # pylint: disable=invalid-bool-returned
+        return self.exists()
+
+    def __contains__(self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]) -> Terminal:
+        """Maps to contains_words or contains_phrase depending on the value passed.
+
+        * `"value" in attr` maps to `attr.contains_phrase("value")` for simple values.
+        * `["value"] in attr` maps to `attr.contains_words(["value"])` for lists and
+          tuples.
+        """
+        if isinstance(value, Value):
+            value = value.value
+        if isinstance(value, list):
+            if len(value) == 0 or isinstance(value[0], str):
+                return self.contains_words(value)
+            else:
+                return NotImplemented
+        else:
+            return self.contains_phrase(value)
+
+@dataclass(frozen=True)
+class AttrLeaf:
+    attribute: str
+    type: Union[str, List]
+    description: Union[str, List]
+
+    def __contains__(self, key):
+        return key in self.__dict__
+
+    def __getitem__(self, key):
+        if key in self.__dict__:
+            return self.__dict__[key]
+        raise KeyError(f"'{key}' not found in object")
+
+
+SCHEMA = Schema(Attr, "SchemaGroup")
+
+
 class AttributeQuery(Terminal):
     """Special case of a Terminal for Structure and Chemical Attribute Searches
 
@@ -389,13 +649,17 @@ class AttributeQuery(Terminal):
         if value is not None:
             paramsD.update({"value": value})
         if not service:
-            service = SCHEMA_DICT.rcsb_attributes.get_attribute_type(attribute)
-
-            # TODO: AttributeQuery() specific error msg
+            service = SCHEMA.rcsb_attributes.get_attribute_type(attribute)
 
         if isinstance(service, list):
-            raise ValueError(f'{attribute} is in both structure and chemical attributes. Run again using one of the following in the "service" argument: {service}')
-
+            error_msg = ""
+            for serv in service:
+                error_msg += f'  AttributeQuery(attribute="{attribute}", operator="{operator}", value="{value}", service="{serv}")\n'
+            raise ValueError(
+                f'"{attribute}" is in both structure and chemical attributes. Construct an AttributeQuery and specify search service.\n' +
+                f"{error_msg}"
+            )
+        assert isinstance(service, str)
         super().__init__(params=paramsD, service=service)
 
 
@@ -692,281 +956,6 @@ class Group(Query):
             raise ValueError("Illegal Operator")
 
 
-@dataclass(frozen=True)
-class Attr:
-    """A search attribute, e.g. "rcsb_entry_container_identifiers.entry_id"
-
-    Terminals can be constructed from Attr objects using either a functional syntax,
-    which mirrors the API operators, or with python operators.
-
-    +--------------------+---------------------+
-    | Fluent Function    | Operator            |
-    +====================+=====================+
-    | exact_match        | attr == str         |
-    +--------------------+---------------------+
-    | contains_words     |                     |
-    +--------------------+---------------------+
-    | contains_phrase    |                     |
-    +--------------------+---------------------+
-    | greater            | attr > date,number  |
-    +--------------------+---------------------+
-    | less               | attr < date,number  |
-    +--------------------+---------------------+
-    | greater_or_equal   | attr >= date,number |
-    +--------------------+---------------------+
-    | less_or_equal      | attr <= date,number |
-    +--------------------+---------------------+
-    | equals             | attr == date,number |
-    +--------------------+---------------------+
-    | range              | dict (keys below)*  |
-    +--------------------+---------------------+
-    | exists             | bool(attr)          |
-    +--------------------+---------------------+
-    | in\\_              |                     |
-    +--------------------+---------------------+
-
-    Rather than their normal bool return values, operators return Terminals.
-
-    Pre-instantiated attributes are available from the
-    :py:data:`rcsbsearchapi.rcsb_attributes` object. These are generally easier to use
-    than constructing Attr objects by hand. A complete list of valid attributes is
-    available in the `schema <https://search.rcsb.org/rcsbsearch/v2/metadata/schema>`_.
-
-    * The `range` dictionary requires the following keys:
-     * "from" -> int
-     * "to" -> int
-     * "include_lower" -> bool
-     * "include_upper" -> bool
-    """
-
-    attribute: str
-    type: Union[List, str]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
-    description: str
-
-    def get_type(self) -> Union[str, List]:
-        return self.type
-
-    def get_description(self) -> str:
-        return self.description
-
-    def exact_match(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
-        """Exact match with the value"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "exact_match", value, self.type)
-
-    def contains_words(self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]) -> AttributeQuery:
-        """Match any word within the string.
-
-        Words are split at whitespace. All results which match any word are returned,
-        with results matching more words sorted first.
-        """
-        if isinstance(value, Value):
-            value = value.value
-        if isinstance(value, list):
-            value = " ".join(value)
-        return AttributeQuery(self.attribute, "contains_words", value, self.type)
-
-    def contains_phrase(self, value: Union[str, "Value[str]"]) -> AttributeQuery:
-        """Match an exact phrase"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "contains_phrase", value, self.type)
-
-    def greater(self, value: TNumberLike) -> AttributeQuery:
-        """Attribute > `value`"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "greater", value, self.type)
-
-    def less(self, value: TNumberLike) -> AttributeQuery:
-        """Attribute < `value`"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "less", value, self.type)
-
-    def greater_or_equal(self, value: TNumberLike) -> AttributeQuery:
-        """Attribute >= `value`"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "greater_or_equal", value, self.type)
-
-    def less_or_equal(self, value: TNumberLike) -> AttributeQuery:
-        """Attribute <= `value`"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "less_or_equal", value, self.type)
-
-    def equals(self, value: TNumberLike) -> AttributeQuery:
-        """Attribute == `value`"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "equals", value, self.type)
-
-    def range(self, value: Dict[str, Any]) -> AttributeQuery:
-        """Attribute is within the specified half-open range
-
-        Args:
-            value: lower and upper bounds `[a, b)`
-        """
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, "range", value, self.type)
-
-    def exists(self) -> AttributeQuery:
-        """Attribute is defined for the structure"""
-        return AttributeQuery(self.attribute, operator="exists")
-
-    def in_(
-        self,
-        value: Union[
-            List[str],
-            List[int],
-            List[float],
-            List[date],
-            Tuple[str, ...],
-            Tuple[int, ...],
-            Tuple[float, ...],
-            Tuple[date, ...],
-            "Value[List[str]]",
-            "Value[List[int]]",
-            "Value[List[float]]",
-            "Value[List[date]]",
-            "Value[Tuple[str, ...]]",
-            "Value[Tuple[int, ...]]",
-            "Value[Tuple[float, ...]]",
-            "Value[Tuple[date, ...]]",
-        ],
-    ) -> AttributeQuery:
-        """Attribute is contained in the list of values"""
-        if isinstance(value, Value):
-            value = value.value
-        return AttributeQuery(self.attribute, operator="in", value=value)
-
-    # Need ignore[override] because typeshed restricts __eq__ return value
-    # https://github.com/python/mypy/issues/2783
-    @overload  # type: ignore[override]
-    def __eq__(self, value: "Attr") -> bool: ...
-
-    @overload  # type: ignore[override]
-    def __eq__(
-        self,
-        value: Union[
-            str,
-            int,
-            float,
-            date,
-            "Value[str]",
-            "Value[int]",
-            "Value[float]",
-            "Value[date]",
-        ],
-    ) -> Terminal: ...
-
-    def __eq__(
-        self,
-        value: Union[
-            "Attr",
-            str,
-            int,
-            float,
-            date,
-            "Value[str]",
-            "Value[int]",
-            "Value[float]",
-            "Value[date]",
-        ],
-    ) -> Union[Terminal, bool]:  # type: ignore[override]
-        if isinstance(value, Attr):
-            return self.attribute == value.attribute
-        if isinstance(value, Value):
-            value = value.value
-        if isinstance(value, str):
-            return self.exact_match(value)
-        elif isinstance(value, date) or isinstance(value, float) or isinstance(value, int):
-            return self.equals(value)
-        else:
-            return NotImplemented
-
-    @overload  # type: ignore[override]
-    def __ne__(self, value: "Attr") -> bool: ...
-
-    @overload  # type: ignore[override]
-    def __ne__(
-        self,
-        value: Union[
-            str,
-            int,
-            float,
-            date,
-            "Value[str]",
-            "Value[int]",
-            "Value[float]",
-            "Value[date]",
-        ],
-    ) -> Terminal: ...
-
-    def __ne__(
-        self,
-        value: Union[
-            "Attr",
-            str,
-            int,
-            float,
-            date,
-            "Value[str]",
-            "Value[int]",
-            "Value[float]",
-            "Value[date]",
-        ],
-    ) -> Union[Terminal, bool]:  # type: ignore[override]
-        if isinstance(value, Attr):
-            return self.attribute != value.attribute
-        if isinstance(value, Value):
-            value = value.value
-        return ~(self == value)
-
-    def __lt__(self, value: TNumberLike) -> Terminal:
-        if isinstance(value, Value):
-            value = value.value
-        return self.less(value)
-
-    def __le__(self, value: TNumberLike) -> Terminal:
-        if isinstance(value, Value):
-            value = value.value
-        return self.less_or_equal(value)
-
-    def __gt__(self, value: TNumberLike) -> Terminal:
-        if isinstance(value, Value):
-            value = value.value
-        return self.greater(value)
-
-    def __ge__(self, value: TNumberLike) -> Terminal:
-        if isinstance(value, Value):
-            value = value.value
-        return self.greater_or_equal(value)
-
-    def __bool__(self) -> Terminal:  # pylint: disable=invalid-bool-returned
-        return self.exists()
-
-    def __contains__(self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]) -> Terminal:
-        """Maps to contains_words or contains_phrase depending on the value passed.
-
-        * `"value" in attr` maps to `attr.contains_phrase("value")` for simple values.
-        * `["value"] in attr` maps to `attr.contains_words(["value"])` for lists and
-          tuples.
-        """
-        if isinstance(value, Value):
-            value = value.value
-        if isinstance(value, list):
-            if len(value) == 0 or isinstance(value[0], str):
-                return self.contains_words(value)
-            else:
-                return NotImplemented
-        else:
-            return self.contains_phrase(value)
-
-
 # Type for functions returning Terminal
 FTerminal = TypeVar("FTerminal", bound=Callable[..., Terminal])
 # Type for functions returning Query
@@ -999,7 +988,6 @@ def _attr_delegate(attr_func: FTerminal) -> Callable[[FQuery], FQuery]:
         return wrap
 
     return decorator
-
 
 class PartialQuery:
     """A PartialQuery extends a growing query with an Attr. It is constructed

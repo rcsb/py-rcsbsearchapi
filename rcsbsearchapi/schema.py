@@ -36,8 +36,15 @@ class SchemaGroup:
         matcher = re.compile(pattern, flags=flags)
         return filter(lambda a: matcher.search(a.attribute), self)
 
-    # TODO: search attributes by substring
-
+    def list(self):
+        """Get a list of full names for all structure and chemical attributes"""
+        all_list = []
+        for attr in self:
+            attr_dict = vars(attr)
+            name = attr_dict["attribute"]
+            all_list.append(name)
+        return all_list
+    
     def __iter__(self):
         """Iterate over all leaf nodes
 
@@ -85,8 +92,8 @@ class SchemaGroup:
             if level not in ptr:
                 warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
                 return None
-            ptr = ptr[level]
-        if "attribute" in ptr and ptr["attribute"] == attribute:
+            ptr = ptr[level] 
+        if "attribute" in ptr.__dict__ and getattr(ptr, "attribute") == attribute:  # must be .__dict__ so both SchemaGroup and Attr are compared as dictionaries
             return ptr
         else:
             return {c for c in leaves(ptr)}
@@ -111,14 +118,13 @@ class SchemaGroup:
                 warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
                 return None
             ptr = ptr[level]
-        if "attribute" in ptr and ptr["attribute"] == attribute:
-            return ptr["type"]
+        if "attribute" in ptr.__dict__ and getattr(ptr, "attribute") == attribute:  # must be .__dict__ so both SchemaGroup and Attr are compared as dictionaries
+            return getattr(ptr, "type")
         warnings.warn(f"Incomplete attribute path '{attribute}' - must specify fully-qualified path to leaf attribute node.", UserWarning)
         return None
 
     # Below methods are for making SchemaGroup behave as a Dict (be able to access through keys, etc).
     # This is used for automatically determining search service based on attribute name.
-    # While at the same time maintaining auto-completion
 
     def __getitem__(self, key):
         """Allow dictionary-like access to members by key."""
@@ -144,11 +150,6 @@ class SchemaGroup:
 
     def items(self):
         return self._members.items()
-
-    def __dir__(self):
-        """Override the __dir__ method to maintain tab completion."""
-        # Get default attributes + dynamic dictionary keys
-        return super().__dir__() + list(self._members.keys())
 
     def __str__(self):
         return "\n".join(f"{key}: {value}" for key, value in self._members.items())
@@ -280,16 +281,20 @@ class Schema:
 
                         # Create attrtype and description lists with existing and current value.
                         # List type triggers error if user doesn't specify service for redundant attribute.
-                        currentattr = group[childname].get_type()
+                        currentattr = getattr(group[childname], "type")
                         attrlist = [currentattr, attrtype]
 
-                        currentdescript = group[childname].get_description()
+                        currentdescript = getattr(group[childname], "description")
                         descriptlist = [currentdescript, childnode.get("description", desc)]
 
                         childgroup = self._make_group(fullchildname, [(childnode, attrlist, descriptlist)])
                     else:
                         childgroup = self._make_group(fullchildname, [(childnode, attrtype, childnode.get("description", desc))])
+                    # adding to SchemaGroup as a dict allows for determining search service by attribute name with O(1) lookup
                     group[childname] = childgroup
+
+                    # adding to SchemaGroup as an attribute allows for tab-completion for rcsb_attributes/attrs
+                    setattr(group, childname, childgroup)
             else:
                 raise TypeError(f"Unrecognized node type {node['type']!r} of {fullname}")
         return group
