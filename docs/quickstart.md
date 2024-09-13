@@ -9,6 +9,7 @@ Get it from PyPI:
 Or, download from [GitHub](https://github.com/rcsb/py-rcsbsearchapi)
 
 ## Getting Started
+### Making full-text queries
 
 To perform a general search for structures associated with the phrase "Hemoglobin", you can create a TextQuery. This does a "full-text" search, which is a general search on text associated with PDB structures or molecular definitions. Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
 ```python
@@ -25,24 +26,28 @@ for id in results:
     print(id)
 ```
 
+### Making attribute queries
+
 Besides general text searches, you can also search for specific structure or chemical attributes. 
 
+To search an attribute, you can make an `AttributeQuery`.
 Using different operators such as `contains_phrase` or `exact_match`, attributes can be compared to a value.
 You can also check whether an attribute exists for a given structure by using the `exists` operator. 
 
 Refer to the [Search Attributes](https://search.rcsb.org/structure-search-attributes.html) and [Chemical Attributes](https://search.rcsb.org/chemical-search-attributes.html) documentation for a full list of attributes and applicable operators.
 
-To search an attribute, you can make an AttributeQuery.
 ```python
 from rcsbsearchapi import AttributeQuery
 
-# Construct the query
+# Construct a query searching for structures from humans
 query = AttributeQuery(
     attribute="rcsb_entity_source_organism.scientific_name",
-    operator="exact_match",  # other operators include "contains phrase" and "exists"
+    operator="exact_match",  # Other operators include "contains_phrase" and "exists"
     value="Homo sapiens"
 )
-results = list(query())  # construct a list from query results
+
+# Run query and construct a list from results
+results = list(query())
 print(results)
 ```
 
@@ -55,9 +60,12 @@ from rcsbsearchapi import rcsb_attributes as attrs
 
 # Search for structures from humans
 query = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
-results = list(query())  # construct a list from query results
+
+# Run query and construct a list from results
+results = list(query())
 print(results)
 ```
+### Combining queries using operators
 
 You can combine multiple queries using Python bitwise operators. 
 
@@ -66,20 +74,23 @@ You can combine multiple queries using Python bitwise operators.
 |&       |AND                     |
 |\|      |OR                      |
 |~       |NOT                     |
+|^       |XOR/symmetric difference|
 |-       |set difference          |
-|^       |symmetric difference/XOR|
 
 ```python
 from rcsbsearchapi import rcsb_attributes as attrs
 
-# Query for human epidermal growth factor receptor (EGFR) structures with investigational or experimental drugs
+# Query for human epidermal growth factor receptor (EGFR) structures
+# With investigational or experimental drugs bound
 # EGFR is involved in cell division and often overexpressed or mutated in some cancers
 q1 = attrs.rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession == "P00533"
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
 q4 = attrs.drugbank_info.drug_groups == "experimental"
 
-# Structures matching UniProt id P00533 AND from humans AND (investigational or experimental drug group)
+# Structures matching UniProt id P00533 AND
+# from humans AND
+# investigational OR experimental drug group
 query = q1 & q2 & (q3 | q4)
 
 # Execute query and print first 10 ids

@@ -9,6 +9,7 @@ maxdepth: 2
 ---
 quickstart.md
 queries.md
+attributes.md
 additional_examples.md
 api.rst
 ```

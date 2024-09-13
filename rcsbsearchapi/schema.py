@@ -27,7 +27,7 @@ class SchemaGroup:
         self.Attr = attr_type  # Attr or AttrLeaf
         self._members = {}  # Dictionary to store members
 
-    def search(self, pattern: Union[str, re.Pattern], flags=0):  # TODO: check that this still works
+    def search(self, pattern: Union[str, re.Pattern], flags=0):
         """Find all attributes in the schema matching a regular expression.
 
         Returns:
