@@ -44,21 +44,23 @@ You can also check whether an attribute exists for a given structure by using th
 
 Refer to the [Search Attributes](https://search.rcsb.org/structure-search-attributes.html) and [Chemical Attributes](https://search.rcsb.org/chemical-search-attributes.html) documentation for a full list of attributes and applicable operators.
 
-To search an attribute, you can make an AttributeQuery.
+To search an attribute, you can make an `AttributeQuery`.
 ```python
 from rcsbsearchapi import AttributeQuery
 
 # Construct the query
 query = AttributeQuery(
     attribute="rcsb_entity_source_organism.scientific_name",
-    operator="exact_match",  # other operators include "contains phrase" and "exists"
+    operator="exact_match",  # other operators include "contains_phrase" and "exists"
     value="Homo sapiens"
 )
 results = list(query())  # construct a list from query results
 print(results)
 ```
 
-When using certain operators such as `exact_match`, `greater`, or `less`, you can also use `rcsb_attributes` (imported below as `attrs`).
+You can also use `rcsb_attributes` (imported below as `attrs`) to create `AttributeQuery`s.
+
+When using certain operators such as `exact_match`, `greater`, or `less`, you can use Python operators like `==`, `>`, or `<`.
 
 Using this syntax, attribute names can be tab-completed. 
 
@@ -78,8 +80,8 @@ You can combine multiple queries using Python bitwise operators.
 |&       |AND                     |
 |\|      |OR                      |
 |~       |NOT                     |
+|^       |XOR/symmetric difference|
 |-       |set difference          |
-|^       |symmetric difference/XOR|
 
 ```python
 from rcsbsearchapi import rcsb_attributes as attrs

@@ -29,7 +29,8 @@ Attributes are available from the rcsb_attributes object and can be tab-complete
 They can additionally be constructed from strings using the `Attr(attribute)`
 constructor. 
 
-For a full list of attributes, please refer to the [RCSB PDB schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema). 
+For methods to search and find details on attributes within this package, go to the [attributes page](attributes.md)
+For a full list of attributes, please refer to the [RCSB PDB schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
 
 `Terminal`s are combined into `Group`s using python's bitwise operators. This is
 analogous to how bitwise operators act on python `set` objects. The operators are
