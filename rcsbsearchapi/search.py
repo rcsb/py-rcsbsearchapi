@@ -998,7 +998,6 @@ def _attr_delegate(attr_func: FTerminal) -> Callable[[FQuery], FQuery]:
 
     return decorator
 
-
 class PartialQuery:
     """A PartialQuery extends a growing query with an Attr. It is constructed
     using the fluent syntax with the `and_` and `or_` methods. It is not usually
