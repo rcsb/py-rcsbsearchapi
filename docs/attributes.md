@@ -29,7 +29,7 @@ from rcsbsearchapi import rcsb_attributes as attrs
 print(attrs.get_attribute_details("rcsb_entity_source_organism.scientific_name"))
 
 # Use a partial name to get the details of all attributes associated with that name
-# The below code prints out details for ".common_name", ".ncbi_parent_scientific_name", etc in addition to ".scientific_name"
+# Below code gets details for ".common_name", ".source_type", etc in addition to ".scientific_name"
 print(attrs.get_attribute_details("rcsb_entity_source_organism"))
 ```
 

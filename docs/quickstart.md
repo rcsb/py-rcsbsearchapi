@@ -11,7 +11,9 @@ Or, download from [GitHub](https://github.com/rcsb/py-rcsbsearchapi)
 ## Getting Started
 ### Making full-text queries
 
-To perform a general search for structures associated with the phrase "Hemoglobin", you can create a TextQuery. This does a "full-text" search, which is a general search on text associated with PDB structures or molecular definitions. Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
+To perform a general search for structures associated with the phrase "Hemoglobin", you can create a TextQuery. This does a "full-text" search, which is a general search on text associated with PDB structures or molecular definitions. 
+
+Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
 ```python
 from rcsbsearchapi import TextQuery
 
@@ -46,11 +48,7 @@ query = AttributeQuery(
     value="Homo sapiens"
 )
 
-<<<<<<< HEAD
 # Execute query and construct a list from results
-=======
-# Run query and construct a list from results
->>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 results = list(query())
 print(results)
 ```
@@ -65,11 +63,7 @@ from rcsbsearchapi import rcsb_attributes as attrs
 # Search for structures from humans
 query = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 
-<<<<<<< HEAD
-# Execute query and construct a list from results
-=======
 # Run query and construct a list from results
->>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 results = list(query())
 print(results)
 ```
@@ -89,23 +83,14 @@ You can combine multiple queries using Python bitwise operators.
 from rcsbsearchapi import rcsb_attributes as attrs
 
 # Query for human epidermal growth factor receptor (EGFR) structures
-<<<<<<< HEAD
-# with investigational or experimental drugs bound.
-# EGFR is involved in cell division and often overexpressed or mutated in cancers
-=======
 # With investigational or experimental drugs bound
 # EGFR is involved in cell division and often overexpressed or mutated in some cancers
->>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 q1 = attrs.rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession == "P00533"
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
 q4 = attrs.drugbank_info.drug_groups == "experimental"
 
-<<<<<<< HEAD
 # Structures matching UniProt id P00533 (EGFR) AND
-=======
-# Structures matching UniProt id P00533 AND
->>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 # from humans AND
 # investigational OR experimental drug group
 query = q1 & q2 & (q3 | q4)
