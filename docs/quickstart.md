@@ -46,7 +46,11 @@ query = AttributeQuery(
     value="Homo sapiens"
 )
 
+<<<<<<< HEAD
+# Execute query and construct a list from results
+=======
 # Run query and construct a list from results
+>>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 results = list(query())
 print(results)
 ```
@@ -61,7 +65,11 @@ from rcsbsearchapi import rcsb_attributes as attrs
 # Search for structures from humans
 query = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 
+<<<<<<< HEAD
+# Execute query and construct a list from results
+=======
 # Run query and construct a list from results
+>>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 results = list(query())
 print(results)
 ```
@@ -81,14 +89,23 @@ You can combine multiple queries using Python bitwise operators.
 from rcsbsearchapi import rcsb_attributes as attrs
 
 # Query for human epidermal growth factor receptor (EGFR) structures
+<<<<<<< HEAD
+# with investigational or experimental drugs bound.
+# EGFR is involved in cell division and often overexpressed or mutated in cancers
+=======
 # With investigational or experimental drugs bound
 # EGFR is involved in cell division and often overexpressed or mutated in some cancers
+>>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 q1 = attrs.rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession == "P00533"
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
 q4 = attrs.drugbank_info.drug_groups == "experimental"
 
+<<<<<<< HEAD
+# Structures matching UniProt id P00533 (EGFR) AND
+=======
 # Structures matching UniProt id P00533 AND
+>>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
 # from humans AND
 # investigational OR experimental drug group
 query = q1 & q2 & (q3 | q4)
@@ -98,11 +115,11 @@ results = list(query())
 print(results[:10])
 ```
 
-These examples are in `operator syntax`. You can also make queries in `fluent syntax`. Learn more about both syntaxes and implementation details in [Queries](queries.md#constructing-and-executing-queries).
+These examples are in `operator syntax`. You can also make queries in `fluent syntax`. Learn more about both syntaxes and implementation details in [readthedocs: Queries](queries.md#constructing-and-executing-queries).
 
 ## Jupyter Notebooks
-A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using Google Colab:
+A runnable jupyter notebook is available in [notebooks/quickstart.ipynb](https://github.com/rcsb/py-rcsbsearchapi/blob/master/notebooks/quickstart.ipynb), or can be run online using Google Colab:
 <a href="https://colab.research.google.com/github/rcsb/py-rcsbsearchapi/blob/master/notebooks/quickstart.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
+An additional Covid-19 related example is in [notebooks/covid.ipynb](https://github.com/rcsb/py-rcsbsearchapi/blob/master/notebooks/covid.ipynb):
 <a href="https://colab.research.google.com/github//rcsb/py-rcsbsearchapi/blob/master/notebooks/covid.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>

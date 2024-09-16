@@ -142,7 +142,9 @@ list(q2())
 ```
 
 ### Computed Structure Models
-The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type) page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below. This query returns IDs for experimental and computed structure models associated with "hemoglobin". Queries for *only* computed models or *only* experimental models can also be made (default).
+The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type) page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below.
+
+This query returns IDs for experimental and computed structure models associated with "hemoglobin". Queries for *only* computed models or *only* experimental models can also be made (default).
 ```python
 from rcsbsearchapi.search import TextQuery
 
@@ -156,8 +158,10 @@ list(q2)
 
 ### Return Types and Attribute Search
 A search query can return different result types when a return type is specified. 
-Below are examples on specifying return types Polymer Entities,
-Non-polymer Entities, Polymer Instances, and Molecular Definitions, using a Structure Attribute query. 
+Below are Structure Attribute query examples specifying return types Polymer Entities,
+Non-polymer Entities, Polymer Instances, and Molecular Definitions. 
+
+
 More information on return types can be found in the 
 [RCSB PDB Search API](https://search.rcsb.org/#building-search-request) page.
 ```python
@@ -186,6 +190,7 @@ for polyInst in q1(return_type="polymer_instance"):
 for mol in q1(return_type="mol_definition"):
     print(mol)
 ```
+
 ## Counting Results
 If only the number of results is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
 ```python
@@ -198,7 +203,10 @@ q1.count()
 ```
 
 ## Result Verbosity
-Results can be returned alongside additional metadata, including result scores. To return this metadata, set the `results_verbosity` parameter to "verbose" (all metadata), "minimal" (scores only), or "compact" (default, no metadata). If set to "verbose" or "minimal", results will be returned as a list of dictionaries. For example, here we get all experimental models associated with "hemoglobin", along with their scores.
+Results can be returned alongside additional metadata, including result scores. To return this metadata, set the `results_verbosity` parameter to "verbose" (all metadata), "minimal" (scores only), or "compact" (default, no metadata). If set to "verbose" or "minimal", results will be returned as a list of dictionaries. 
+
+For example, here we get all experimental models associated with "hemoglobin", along with their scores.
+
 ```python
 from rcsbsearchapi.search import TextQuery
 
