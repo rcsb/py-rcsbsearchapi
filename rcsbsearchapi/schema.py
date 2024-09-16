@@ -44,7 +44,7 @@ class SchemaGroup:
             name = attr_dict["attribute"]
             all_list.append(name)
         return all_list
-    
+
     def __iter__(self):
         """Iterate over all leaf nodes
 
@@ -92,7 +92,7 @@ class SchemaGroup:
             if level not in ptr:
                 warnings.warn(f"Attribute path segment '{level}' (for input '{attribute}') not found in schema.", UserWarning)
                 return None
-            ptr = ptr[level] 
+            ptr = ptr[level]
         if "attribute" in ptr.__dict__ and getattr(ptr, "attribute") == attribute:  # must be .__dict__ so both SchemaGroup and Attr are compared as dictionaries
             return ptr
         else:
