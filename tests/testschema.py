@@ -25,8 +25,6 @@ import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi import SCHEMA
-from rcsbsearchapi.schema import Schema, SchemaGroup
-from rcsbsearchapi.search import Attr, AttrLeaf
 from rcsbsearchapi.const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SCHEMA_FILE, CHEMICAL_ATTRIBUTE_SCHEMA_FILE
 
 
@@ -106,7 +104,7 @@ class SchemaTests(unittest.TestCase):
                 attr_dict = vars(attr)
                 desc = attr_dict["description"]
                 self.assertIsNotNone(desc)
-        
+
         with self.subTest(msg="2. Check searching for attribute details"):
             attr_details = attrs.get_attribute_details("drugbank_info.drug_groups")
             for obj_attr in ["attribute", "type", "description"]:

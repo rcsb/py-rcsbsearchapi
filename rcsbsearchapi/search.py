@@ -237,10 +237,12 @@ class Query(ABC):
         return response["facets"] if response else []
 
     @overload
-    def and_(self, other: "Query") -> "Query": ...
+    def and_(self, other: "Query") -> "Query":
+        ...
 
     @overload
-    def and_(self, other: Union[str, "Attr"]) -> "PartialQuery": ...
+    def and_(self, other: Union[str, "Attr"]) -> "PartialQuery":
+        ...
 
     def and_(self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an AND"""
@@ -254,10 +256,12 @@ class Query(ABC):
             raise TypeError(f"Expected Query or Attr, got {type(other)}")
 
     @overload
-    def or_(self, other: "Query") -> "Query": ...
+    def or_(self, other: "Query") -> "Query":
+        ...
 
     @overload
-    def or_(self, other: Union[str, "Attr"]) -> "PartialQuery": ...
+    def or_(self, other: Union[str, "Attr"]) -> "PartialQuery":
+        ...
 
     def or_(self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an OR"""
@@ -472,7 +476,8 @@ class Attr:
     # Need ignore[override] because typeshed restricts __eq__ return value
     # https://github.com/python/mypy/issues/2783
     @overload  # type: ignore[override]
-    def __eq__(self, value: "Attr") -> bool: ...
+    def __eq__(self, value: "Attr") -> bool:
+        ...
 
     @overload  # type: ignore[override]
     def __eq__(
@@ -487,7 +492,8 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Terminal: ...
+    ) -> Terminal:
+        ...
 
     def __eq__(
         self,
@@ -515,7 +521,8 @@ class Attr:
             return NotImplemented
 
     @overload  # type: ignore[override]
-    def __ne__(self, value: "Attr") -> bool: ...
+    def __ne__(self, value: "Attr") -> bool:
+        ...
 
     @overload  # type: ignore[override]
     def __ne__(
@@ -530,7 +537,8 @@ class Attr:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Terminal: ...
+    ) -> Terminal:
+        ...
 
     def __ne__(
         self,
@@ -592,6 +600,7 @@ class Attr:
         else:
             return self.contains_phrase(value)
 
+
 @dataclass(frozen=True)
 class AttrLeaf:
     attribute: str
@@ -645,7 +654,7 @@ class AttributeQuery(Terminal):
             negation: logical not
         """
         paramsD = {"attribute": attribute, "operator": operator, "negation": negation}
-        #
+        
         if value is not None:
             paramsD.update({"value": value})
         if not service:
@@ -656,8 +665,8 @@ class AttributeQuery(Terminal):
             for serv in service:
                 error_msg += f'  AttributeQuery(attribute="{attribute}", operator="{operator}", value="{value}", service="{serv}")\n'
             raise ValueError(
-                f'"{attribute}" is in both structure and chemical attributes. Construct an AttributeQuery and specify search service.\n' +
-                f"{error_msg}"
+                f'"{attribute}" is in both structure and chemical attributes. Construct an AttributeQuery and specify search service.\n'
+                + f"{error_msg}"
             )
         assert isinstance(service, str)
         super().__init__(params=paramsD, service=service)
@@ -989,6 +998,7 @@ def _attr_delegate(attr_func: FTerminal) -> Callable[[FQuery], FQuery]:
 
     return decorator
 
+
 class PartialQuery:
     """A PartialQuery extends a growing query with an Attr. It is constructed
     using the fluent syntax with the `and_` and `or_` methods. It is not usually
@@ -1007,34 +1017,44 @@ class PartialQuery:
         self.attr = attr
 
     @_attr_delegate(Attr.exact_match)
-    def exact_match(self, value: Union[str, "Value[str]"]) -> Query: ...
+    def exact_match(self, value: Union[str, "Value[str]"]) -> Query:
+        ...
 
     @_attr_delegate(Attr.contains_words)
-    def contains_words(self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]) -> Query: ...
+    def contains_words(self, value: Union[str, "Value[str]", List[str], "Value[List[str]]"]) -> Query:
+        ...
 
     @_attr_delegate(Attr.contains_phrase)
-    def contains_phrase(self, value: Union[str, "Value[str]"]) -> Query: ...
+    def contains_phrase(self, value: Union[str, "Value[str]"]) -> Query:
+        ...
 
     @_attr_delegate(Attr.greater)
-    def greater(self, value: TNumberLike) -> Query: ...
+    def greater(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.less)
-    def less(self, value: TNumberLike) -> Query: ...
+    def less(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.greater_or_equal)
-    def greater_or_equal(self, value: TNumberLike) -> Query: ...
+    def greater_or_equal(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.less_or_equal)
-    def less_or_equal(self, value: TNumberLike) -> Query: ...
+    def less_or_equal(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.equals)
-    def equals(self, value: TNumberLike) -> Query: ...
+    def equals(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.range)
-    def range(self, value: Dict[str, Any]) -> Query: ...
+    def range(self, value: Dict[str, Any]) -> Query:
+        ...
 
     @_attr_delegate(Attr.exists)
-    def exists(self) -> Query: ...
+    def exists(self) -> Query:
+        ...
 
     @_attr_delegate(Attr.in_)
     def in_(
@@ -1049,10 +1069,12 @@ class PartialQuery:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Query: ...
+    ) -> Query:
+        ...
 
     @overload  # type: ignore[override]
-    def __eq__(self, value: "PartialQuery") -> bool: ...
+    def __eq__(self, value: "PartialQuery") -> bool:
+        ...
 
     @overload  # type: ignore[override]
     def __eq__(
@@ -1094,7 +1116,8 @@ class PartialQuery:
             raise ValueError(f"Unknown operator: {self.operator}")
 
     @overload  # type: ignore[override]
-    def __ne__(self, value: "PartialQuery") -> bool: ...
+    def __ne__(self, value: "PartialQuery") -> bool:
+        ...
 
     @overload  # type: ignore[override]
     def __ne__(
@@ -1109,7 +1132,8 @@ class PartialQuery:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Query: ...
+    ) -> Query:
+        ...
 
     def __ne__(
         self,
@@ -1130,22 +1154,28 @@ class PartialQuery:
         return ~(self == value)
 
     @_attr_delegate(Attr.__lt__)
-    def __lt__(self, value: TNumberLike) -> Query: ...
+    def __lt__(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.__le__)
-    def __le__(self, value: TNumberLike) -> Query: ...
+    def __le__(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.__gt__)
-    def __gt__(self, value: TNumberLike) -> Query: ...
+    def __gt__(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.__ge__)
-    def __ge__(self, value: TNumberLike) -> Query: ...
+    def __ge__(self, value: TNumberLike) -> Query:
+        ...
 
     @_attr_delegate(Attr.__bool__)
-    def __bool__(self) -> Query: ...
+    def __bool__(self) -> Query:
+        ...
 
     @_attr_delegate(Attr.__contains__)
-    def __contains__(self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]) -> Query: ...
+    def __contains__(self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]) -> Query:
+        ...
 
 
 T = TypeVar("T", bound="TValue")
@@ -1166,10 +1196,12 @@ class Value(Generic[T]):
     value: T
 
     @overload  # type: ignore[override]
-    def __eq__(self, attr: "Value") -> bool: ...
+    def __eq__(self, attr: "Value") -> bool:
+        ...
 
     @overload  # type: ignore[override]
-    def __eq__(self, attr: Attr) -> Terminal: ...
+    def __eq__(self, attr: Attr) -> Terminal:
+        ...
 
     def __eq__(self, attr: Union["Value", Attr]) -> Union[bool, Terminal]:
         # type: ignore[override]
@@ -1180,10 +1212,12 @@ class Value(Generic[T]):
         return attr == self
 
     @overload  # type: ignore[override]
-    def __ne__(self, attr: "Value") -> bool: ...
+    def __ne__(self, attr: "Value") -> bool:
+        ...
 
     @overload  # type: ignore[override]
-    def __ne__(self, attr: Attr) -> Terminal: ...
+    def __ne__(self, attr: Attr) -> Terminal:
+        ...
 
     def __ne__(self, attr: Union["Value", Attr]) -> Union[bool, Terminal]:
         # type: ignore[override]

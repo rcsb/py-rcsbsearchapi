@@ -305,7 +305,7 @@ class SearchTests(unittest.TestCase):
 
     def testPartialQuery(self):
         """Test the ability to perform partial queries. """
-        query = Attr(attribute="a", type="text").equals("aval").and_("b")  # TODO: check this is ok
+        query = Attr(attribute="a", type="text").equals("aval").and_("b")
 
         ok = isinstance(query, PartialQuery)
         self.assertTrue(ok)
