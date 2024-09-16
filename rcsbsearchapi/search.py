@@ -654,7 +654,7 @@ class AttributeQuery(Terminal):
             negation: logical not
         """
         paramsD = {"attribute": attribute, "operator": operator, "negation": negation}
-        
+
         if value is not None:
             paramsD.update({"value": value})
         if not service:
@@ -1089,7 +1089,8 @@ class PartialQuery:
             "Value[float]",
             "Value[date]",
         ],
-    ) -> Query: ...
+    ) -> Query:
+        ...
 
     def __eq__(
         self,

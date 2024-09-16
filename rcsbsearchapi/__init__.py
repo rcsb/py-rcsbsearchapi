@@ -1,17 +1,8 @@
 """RCSB PDB Search API"""
 
-<<<<<<< HEAD
 from typing import List
 from .search import Terminal, SCHEMA  # noqa: F401
-from .search import Attr, AttributeQuery, Group, Query, Session, TextQuery, Value
-=======
-from typing import TYPE_CHECKING, Any, List
-
-from .schema import Schema
-from .search import Terminal, SCHEMA  # noqa: F401
-from .search import Attr, AttrLeaf, AttributeQuery, Group, Query, Session, TextQuery, Value
-from typing import TYPE_CHECKING
->>>>>>> 5a493e6 (documentation edits and adding page for attribute methods)
+from .search import Attr, AttributeQuery, Group, Query, TextQuery
 
 __version__ = "1.6.0"
 
