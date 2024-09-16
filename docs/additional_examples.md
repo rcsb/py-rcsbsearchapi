@@ -272,7 +272,8 @@ list(atom())
 # specifying motif pruning strategy, default = "KRUSKAL"
 # ENUM: "NONE", "KRUSKAL"
 # this is typechecked by a literal in the package. 
-# Specifies how many query motifs are "pruned". KRUSKAL leads to less stringent queries, and faster results.
+# Specifies how many query motifs are "pruned".
+# KRUSKAL leads to less stringent queries, and faster results.
 pruning = StructMotifQuery(
     entry_id="2MNR",
     motif_pruning_strategy="NONE",
