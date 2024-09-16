@@ -26,9 +26,10 @@ import os
 from itertools import islice
 import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
-from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
+from rcsbsearchapi import Attr, Group, TextQuery
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload, StructureMotifResidue, StructMotifQuery
+from rcsbsearchapi.search import Session, Value
 from rcsbsearchapi.search import ChemSimilarityQuery
 from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
 
