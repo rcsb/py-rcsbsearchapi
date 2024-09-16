@@ -39,13 +39,15 @@ Refer to the [Search Attributes](https://search.rcsb.org/structure-search-attrib
 ```python
 from rcsbsearchapi import AttributeQuery
 
-# Construct the query
+# Construct a query searching for structures from humans
 query = AttributeQuery(
     attribute="rcsb_entity_source_organism.scientific_name",
-    operator="exact_match",  # other operators include "contains_phrase" and "exists"
+    operator="exact_match",  # Other operators include "contains_phrase" and "exists"
     value="Homo sapiens"
 )
-results = list(query())  # construct a list from query results
+
+# Run query and construct a list from results
+results = list(query())
 print(results)
 ```
 
@@ -58,7 +60,9 @@ from rcsbsearchapi import rcsb_attributes as attrs
 
 # Search for structures from humans
 query = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
-results = list(query())  # construct a list from query results
+
+# Run query and construct a list from results
+results = list(query())
 print(results)
 ```
 ### Combining queries using operators
@@ -76,14 +80,17 @@ You can combine multiple queries using Python bitwise operators.
 ```python
 from rcsbsearchapi import rcsb_attributes as attrs
 
-# Query for human epidermal growth factor receptor (EGFR) structures with investigational or experimental drugs
+# Query for human epidermal growth factor receptor (EGFR) structures
+# With investigational or experimental drugs bound
 # EGFR is involved in cell division and often overexpressed or mutated in some cancers
 q1 = attrs.rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession == "P00533"
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
 q4 = attrs.drugbank_info.drug_groups == "experimental"
 
-# Structures matching UniProt id P00533 AND from humans AND (investigational or experimental drug group)
+# Structures matching UniProt id P00533 AND
+# from humans AND
+# investigational OR experimental drug group
 query = q1 & q2 & (q3 | q4)
 
 # Execute query and print first 10 ids

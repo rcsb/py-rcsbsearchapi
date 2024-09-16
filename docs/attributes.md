@@ -1,16 +1,15 @@
-# Attributes
+# Exploring Schema Attributes
 
-Attributes are pieces of information associated with a PDB structure that can be searched for or compared to a value using an [`AttributeQuery`](quickstart.md#getting-started)
-There are structure attributes and chemical attributes, which are both stored in `rcsb_attributes`. This can be imported as shown below:
+Attributes are pieces of information associated with a PDB structure that can be searched for or compared to a value using an [`AttributeQuery`](quickstart.md#getting-started). There are [structure attributes](https://search.rcsb.org/structure-search-attributes.html) and [chemical attributes](https://search.rcsb.org/chemical-search-attributes.html), which are both stored in `rcsb_attributes`. This can be imported as shown below:
 
 ```python
-# you can import rcsb_attributes as attrs for a shorter name
+# import rcsb_attributes as attrs for a shorter name
 from rcsbsearchapi import rcsb_attributes as attrs
 ```
 
-There are several helpful methods for searching for attributes and information related to them.
+There are several helpful methods to search for attribute names or explore other information related to attributes.
 
-###search()
+### search()
 Given a string, this method will return an iterable of `Attr` objects with names that contain the given string. You can also use [regular expression (regex)](https://en.wikipedia.org/wiki/Regular_expression) strings.
 
 ```python
@@ -20,8 +19,8 @@ for attr in matching_attrs:
     print(attr)
 ```
 
-###get_attribute_details()
-Given a full or partial attribute name, return a set of an attribute or associated attributes with attribute names, search service types, and descriptions.
+### get_attribute_details()
+Given a full or partial attribute name, return a set of an `Attr` or associated `Attr`s with attribute names, search service types, and descriptions.
 
 ```python
 from rcsbsearchapi import rcsb_attributes as attrs
@@ -29,12 +28,12 @@ from rcsbsearchapi import rcsb_attributes as attrs
 # Use a full name to get details for a specific attribute
 print(attrs.get_attribute_details("rcsb_entity_source_organism.scientific_name"))
 
-# Use a partial name to get details of all attributes associate with that partial name
+# Use a partial name to get the details of all attributes associated with that name
 # The below code prints out details for ".common_name", ".ncbi_parent_scientific_name", etc in addition to ".scientific_name"
 print(attrs.get_attribute_details("rcsb_entity_source_organism"))
 ```
 
-###get_attribute_type()
+### get_attribute_type()
 Given a full attribute name, return the search service type ("text" for structure attributes and "text_chem" for chemical attributes).
 
 ```python
