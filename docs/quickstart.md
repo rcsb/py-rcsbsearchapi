@@ -69,13 +69,14 @@ You can combine multiple queries using Python bitwise operators.
 from rcsbsearchapi import rcsb_attributes as attrs
 
 # Query for human epidermal growth factor receptor (EGFR) structures (UniProt ID P00533)
-# with investigational or experimental drugs bound
+#  with investigational or experimental drugs bound
 q1 = attrs.rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession == "P00533"
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
 q4 = attrs.drugbank_info.drug_groups == "experimental"
 
-# Structures matching UniProt ID P00533 AND from humans AND (investigational OR experimental drug group)
+# Structures matching UniProt ID P00533 AND from humans
+#  AND (investigational OR experimental drug group)
 query = q1 & q2 & (q3 | q4)
 
 # Execute query and print first 10 ids
@@ -83,8 +84,7 @@ results = list(query())
 print(results[:10])
 ```
 
-These examples are in `operator syntax`. You can also make queries in `fluent syntax`. Learn more about both syntaxes and implementation details in [Constructing and Executing Queries](query_construction.md#constructing-and-executing-queries).
-
+These examples are in `operator` syntax. You can also make queries in `fluent` syntax. Learn more about both syntaxes and implementation details in [Constructing and Executing Queries](query_construction.md#constructing-and-executing-queries).
 
 ### Supported Search Services
 The list of supported search service types are listed in the table below. For more details on their usage, see [Search Service Types](query_construction.md#search-service-types).
@@ -99,9 +99,7 @@ The list of supported search service types are listed in the table below. For mo
 |Structure motif                   |`StructMotifQuery()`      |
 |Chemical similarity               |`ChemSimilarityQuery()`   |
 
-
 Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
-
 
 ## Jupyter Notebooks
 A runnable jupyter notebook is available in [notebooks/quickstart.ipynb](https://github.com/rcsb/py-rcsbsearchapi/blob/master/notebooks/quickstart.ipynb), or can be run online using Google Colab:

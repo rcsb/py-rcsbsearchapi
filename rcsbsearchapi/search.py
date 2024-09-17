@@ -376,7 +376,7 @@ class Attr:
     """
 
     attribute: str
-    type: Union[List, str]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    type: Optional[Union[List, str]] = None
     description: Optional[Union[str, List[str]]] = None
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> "AttributeQuery":

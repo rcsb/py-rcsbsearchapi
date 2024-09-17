@@ -34,7 +34,8 @@ class SchemaGroup:
             An iterator supplying Attr objects whose attribute matches.
         """
         matcher = re.compile(pattern, flags=flags)
-        return filter(lambda a: matcher.search(a.attribute), self)
+        filter_match = filter(lambda a: matcher.search(a.attribute), self)
+        return list(filter_match)
 
     def list(self):
         """Get a list of full names for all structure and chemical attributes"""
