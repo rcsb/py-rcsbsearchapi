@@ -266,7 +266,7 @@ class Query(ABC):
     def or_(self, other: Union[str, "Query", "Attr"], qtype=STRUCTURE_ATTRIBUTE_SEARCH_SERVICE) -> Union["Query", "PartialQuery"]:
         """Extend this query with an additional attribute via an OR"""
         if isinstance(other, Query):
-            return self & other
+            return self | other
         elif isinstance(other, Attr):
             return PartialQuery(self, "or", other)
         elif isinstance(other, str):
@@ -1583,5 +1583,7 @@ class Session(Iterable[str]):
         """URL to view this query on the RCSB PDB website query builder"""
         params = self._make_params()
         params["request_options"]["paginate"]["rows"] = 25
+        if "results_verbosity" in params["request_options"]:
+            _ = params["request_options"].pop("results_verbosity")
         data = json.dumps(params, separators=(",", ":"))
         return f"https://www.rcsb.org/search?request={urllib.parse.quote(data)}"
