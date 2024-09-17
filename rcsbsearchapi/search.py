@@ -230,11 +230,18 @@ class Query(ABC):
         response = s._single_query()
         return response["total_count"] if response else 0
 
-    def facets(self, return_type: ReturnType = "entry", facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]] = None) -> List:
+    def facets(self, facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]] = None, return_type: ReturnType = "entry") -> List:
         """Perform a facets query and return the buckets"""
         s = Session(self, return_type=return_type, rows=0, facets=facets)
         response = s._single_query()
         return response["facets"] if response else []
+    
+    def group_by(self, aggregation_method: str = None, ranking_criteria_type: Optional[RankingCriteriaType] = None, return_type: ReturnType = "entry") -> Dict:
+        """Perform a group_by query"""
+        s = Session(self, return_type=return_type, rows=0, aggregation_method=aggregation_method, ranking_criteria_type=ranking_criteria_type)
+        response = s._single_query()
+        assert isinstance(response, Dict)  # for type-checking
+        return response
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -1409,6 +1416,22 @@ class FilterFacet:
         return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
 
+class RankingCriteriaType:
+    """Request option controlling the order that results are returned"""
+
+    def __init__(self, sort_by: str, filter: Optional[GroupFilter] = None, direction: Optional[str] = None):
+        self.sort_by = sort_by
+        self.filter = filter
+        self.direction = direction
+
+    def to_dict(self):
+        rank_dict = dict(sort_by=self.sort_by)
+        if self.filter is not None:
+            rank_dict["filter"] = self.filter.to_dict()
+        if self.direction is not None:
+            rank_dict["direction"] = self.direction
+        return rank_dict
+        
 class Session(Iterable[str]):
     """A single query session.
 
@@ -1424,6 +1447,8 @@ class Session(Iterable[str]):
     return_content_type: List[ReturnContentType]
     results_verbosity: VerbosityLevel
     facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]]
+    aggregation_method: Optional[str]
+    ranking_criteria_type: Optional[RankingCriteriaType]
 
     def __init__(
         # parameter added below for computed model inclusion
@@ -1433,8 +1458,10 @@ class Session(Iterable[str]):
         rows: int = 10000,
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
-        facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None,
         # pylint: disable=dangerous-default-value
+        facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None,
+        aggregation_method: Optional[str] = None,
+        ranking_criteria_type: Optional[RankingCriteriaType] = None
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
@@ -1444,6 +1471,8 @@ class Session(Iterable[str]):
         self.return_content_type = return_content_type
         self.results_verbosity = results_verbosity
         self.facets = facets
+        self.aggregation_method = aggregation_method
+        self.ranking_criteria_type = ranking_criteria_type
 
     @staticmethod
     def make_uuid() -> str:
@@ -1475,6 +1504,11 @@ class Session(Iterable[str]):
                 query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.facets]
             else:
                 query_dict["request_options"]["facets"] = [self.facets.to_dict()]
+        if self.aggregation_method is not None:
+            query_dict["request_options"]["group_by"] = {}
+            query_dict["request_options"]["group_by"]["aggregation_method"] = self.aggregation_method
+            if self.ranking_criteria_type is not None:
+                query_dict["request_options"]["group_by"]["ranking_criteria_type"] = self.ranking_criteria_type.to_dict()
         return query_dict
 
     def _single_query(self, start=0) -> Optional[Dict]:
@@ -1553,4 +1587,5 @@ class Session(Iterable[str]):
         params = self._make_params()
         params["request_options"]["paginate"]["rows"] = 25
         data = json.dumps(params, separators=(",", ":"))
+        print(f"query_builder_link data: {data} \n\n {urllib.parse.quote(data)}")
         return f"https://www.rcsb.org/search?request={urllib.parse.quote(data)}"

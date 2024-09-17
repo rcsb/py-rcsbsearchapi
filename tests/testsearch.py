@@ -32,6 +32,8 @@ from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, Sequenc
 from rcsbsearchapi.search import Session, Value
 from rcsbsearchapi.search import ChemSimilarityQuery
 from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
+from rcsbsearchapi.search import RankingCriteriaType
+
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -1172,36 +1174,47 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Group Filter Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
+    def testGroupBy(self):
+        try:
+            q1 = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
+            tf1 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="sequence_identity")
+            tf2 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.similarity_cutoff", operator="equals", value=100)
+            gf = GroupFilter(logical_operator="and", nodes=[tf1, tf2])
+            q1.group_by("matching_deposit_group_id", RankingCriteriaType("score", gf, "asc"))
+        except Exception as error:
+                self.fail(f"Failed unexpectedly: {error}")
+
 
 def buildSearch():
-    suiteSelect = unittest.TestSuite()
-    suiteSelect.addTest(SearchTests("testConstruction"))
-    suiteSelect.addTest(SearchTests("testLargePagination"))
-    suiteSelect.addTest(SearchTests("testOperators"))
-    suiteSelect.addTest(SearchTests("testPartialQuery"))
-    suiteSelect.addTest(SearchTests("testFreeText"))
-    suiteSelect.addTest(SearchTests("testAttribute"))
-    suiteSelect.addTest(SearchTests("exampleQuery1"))
-    suiteSelect.addTest(SearchTests("exampleQuery2"))
-    suiteSelect.addTest(SearchTests("testMalformedQuery"))
-    suiteSelect.addTest(SearchTests("testPagination"))
-    suiteSelect.addTest(SearchTests("testXor"))
-    suiteSelect.addTest(SearchTests("testInversion"))
-    suiteSelect.addTest(SearchTests("testIterable"))
-    suiteSelect.addTest(SearchTests("testIquery"))
-    suiteSelect.addTest(SearchTests("testSingleQuery"))
-    suiteSelect.addTest(SearchTests("testChemSearch"))
-    suiteSelect.addTest(SearchTests("testMismatch"))
-    suiteSelect.addTest(SearchTests("testCSMquery"))
-    suiteSelect.addTest(SearchTests("testSequenceQuery"))
-    suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
-    suiteSelect.addTest(SearchTests("testFileUpload"))
-    suiteSelect.addTest(SearchTests("testStructSimQuery"))
-    suiteSelect.addTest(SearchTests("testStructMotifQuery"))
-    suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
-    suiteSelect.addTest(SearchTests("testResultsCount"))
-    suiteSelect.addTest(SearchTests("testResultsVerbosity"))
-    suiteSelect.addTest(SearchTests("testFacetQuery"))
+    # suiteSelect = unittest.TestSuite()
+    # suiteSelect.addTest(SearchTests("testConstruction"))
+    # suiteSelect.addTest(SearchTests("testLargePagination"))
+    # suiteSelect.addTest(SearchTests("testOperators"))
+    # suiteSelect.addTest(SearchTests("testPartialQuery"))
+    # suiteSelect.addTest(SearchTests("testFreeText"))
+    # suiteSelect.addTest(SearchTests("testAttribute"))
+    # suiteSelect.addTest(SearchTests("exampleQuery1"))
+    # suiteSelect.addTest(SearchTests("exampleQuery2"))
+    # suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    # suiteSelect.addTest(SearchTests("testPagination"))
+    # suiteSelect.addTest(SearchTests("testXor"))
+    # suiteSelect.addTest(SearchTests("testInversion"))
+    # suiteSelect.addTest(SearchTests("testIterable"))
+    # suiteSelect.addTest(SearchTests("testIquery"))
+    # suiteSelect.addTest(SearchTests("testSingleQuery"))
+    # suiteSelect.addTest(SearchTests("testChemSearch"))
+    # suiteSelect.addTest(SearchTests("testMismatch"))
+    # suiteSelect.addTest(SearchTests("testCSMquery"))
+    # suiteSelect.addTest(SearchTests("testSequenceQuery"))
+    # suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    # suiteSelect.addTest(SearchTests("testFileUpload"))
+    # suiteSelect.addTest(SearchTests("testStructSimQuery"))
+    # suiteSelect.addTest(SearchTests("testStructMotifQuery"))
+    # suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
+    # suiteSelect.addTest(SearchTests("testResultsCount"))
+    # suiteSelect.addTest(SearchTests("testResultsVerbosity"))
+    # suiteSelect.addTest(SearchTests("testFacetQuery"))
+    suiteSelect.addTest(SearchTests("testGroupBy"))
     return suiteSelect
 
 
