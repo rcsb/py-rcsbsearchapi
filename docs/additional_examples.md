@@ -1,6 +1,6 @@
 # Additional Examples
 
-## Protein Sequence Search Example
+## Sequence Search Examples
 
 Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-3) page, 
 using the sequence search function.
@@ -19,7 +19,7 @@ results = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET" +
 for polyid in results("polymer_entity"):
     print(polyid)
 ```
-## Sequence Motif Search Example
+## Sequence Motif Search Examples
 
 Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-6) page,
 using the sequence motif search function. 
@@ -84,7 +84,7 @@ print("RNA results:")
 for polyid in rna("polymer_entity"):
     print(polyid)
 ```
-## Structure Similarity Query Example
+## Structure Similarity Search Examples
 
 The PDB archive can be queried using the 3D shape of a protein structure. To perform this query, 3D protein structure data must be provided as an input or parameter, A chain ID or assembly ID must be specified, whether the input structure data should be compared to Assemblies or Polymer Entity Instance (Chains) is required, and defining the search type as either strict or relaxed is required. More information on how Structure Similarity Queries work can be found on the [RCSB PDB Structure Similarity Search](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-similarity-search) page.
 ```python
@@ -103,8 +103,8 @@ q1 = StructSimilarityQuery(structure_search_type="entry_id",
                            operator="strict_shape_match",
                            target_search_space="assembly"
                            )
-for id in q1("assembly"):
-    print(id)
+for rid in q1("assembly"):
+    print(rid)
 ```
 Below is a more complex example that utilizes chain ID, relaxed search operator, and polymer entity instance or target search space. Specifying whether the input structure
 type is chain id or assembly id is very important. For example, specifying chain ID as the input structure type but inputting an assembly ID can lead to
@@ -138,7 +138,7 @@ q4 = StructSimilarityQuery(structure_search_type="file_upload",
 list(q4())
 ```
 
-## Structure Motif Query Examples
+## Structure Motif Search Examples
 
 The PDB Archive can also be queried by using a "motif" found in these 3D structures. To perform this type of query, an entry_id or a file URL/path must be provided, along with residues (which are parts of 3D structures.) This is the bare minimum needed to make a search, but there are lots of other parameters that can be added to a Structure Motif Query (see [full search schema](https://search.rcsb.org/redoc/index.html)).
 
@@ -313,7 +313,7 @@ query = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
 
 list(query())
 ```
-## Chemical Similarity Query
+## Chemical Similarity Search Examples
 
 When you have unique chemical information (e.g., a chemical formula or descriptor) you can use this information to find chemical components (e.g., drugs, inhibitors, modified residues, or building blocks such as amino acids, nucleotides, or sugars), so that it is similar to the formula or descriptor used in the query (perhaps one or two atoms/groups are different), is part of a larger molecule (i.e., the specified formula/descriptor is a substructure), or is exactly or very closely matches the formula or descriptor used in the query. 
 
@@ -371,7 +371,7 @@ q = AttributeQuery(
 q.facets(facets=Facet(name="Methods", aggregation_type="terms", attribute="exptl.method"))
 ```
 
-### Term Facets
+### Terms Facets
 Terms faceting is a multi-bucket aggregation where buckets are dynamically built - one per unique value. We can specify the minimum count (`>= 0`) for a bucket to be returned using the parameter `min_interval_population` (default value `1`). We can also control the number of buckets returned (`<= 65336`) using the parameter `max_num_intervals` (default value `65336`).
 ```python
 from rcsbsearchapi.search import AttributeQuery, Facet, Range
