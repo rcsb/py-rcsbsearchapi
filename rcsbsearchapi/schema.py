@@ -31,7 +31,7 @@ class SchemaGroup:
         """Find all attributes in the schema matching a regular expression.
 
         Returns:
-            An iterator supplying Attr objects whose attribute matches.
+            A list of Attr objects whose attribute matches.
         """
         matcher = re.compile(pattern, flags=flags)
         filter_match = filter(lambda a: matcher.search(a.attribute), self)
