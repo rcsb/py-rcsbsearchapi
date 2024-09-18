@@ -24,7 +24,7 @@ q3 = attrs.rcsb_struct_symmetry.kind == "Global Symmetry"
 q4 = attrs.rcsb_entry_info.polymer_entity_count_DNA >= 1
 ```
 Attributes are available from the `rcsb_attributes` object and can be tab-completed. 
-They can additionally be constructed from strings using the `Attr(attribute)` constructor. 
+They can additionally be constructed from strings using the `Attr` (attribute) constructor. 
 
 List of supported comparative operators:
 
@@ -80,7 +80,8 @@ query other types of results (see [return-types](http://search.rcsb.org/#return-
 for options):
 
 ```python
-results = query(return_type="assembly")  # set return_type to "assembly"
+# Set return_type to "assembly" when executing
+results = query(return_type="assembly")
 
 for assembly_id in results:
     print(assembly_id)
@@ -151,6 +152,27 @@ Paging is handled transparently by the session, with additional API requests mad
 lazily as needed. The page size can be controlled with the `rows` parameter.
 ```python
 first = next(iter(query(rows=1)))
+```
+#### Query Editor Link
+`Session.rcsb_query_editor_url()` will print a link to the [Search API query editor](https://search.rcsb.org/query-editor.html) populated with the query.
+
+```python
+from rcsbsearchapi import AttributeQuery
+
+query = AttributeQuery("exptl.method", operator="exact_match", value="electron microscopy")
+session = query()
+session.rcsb_query_editor_url()
+```
+
+#### Advanced Search Query Builder Link
+`Session.rcsb_query_builder_url()` will print a link to the [Advanced Search Query Builder](https://www.rcsb.org/search/advanced) populated with the query.
+
+```python
+from rcsbsearchapi import AttributeQuery
+
+query = AttributeQuery("exptl.method", operator="exact_match", value="electron microscopy")
+session = query()
+session.rcsb_query_builder_url()
 ```
 
 #### Progress Bar
@@ -239,6 +261,7 @@ Learn more about available search services on the [RCSB PDB Search API docs](htt
 
 
 ### Full-Text Search
+
 To perform a general search for structures associated with the phrase "Hemoglobin", you can create a TextQuery. This does a "full-text" search, which is a general search on text associated with PDB structures or molecular definitions.
 
 ```python
@@ -273,7 +296,8 @@ print(results)
 
 As Structure Attributes and Chemical Attributes are almost all unique, the package is usually able to automatically determine the search `service` required. However, for attributes that are both Structure and Chemical Attributes (e.g., `rcsb_id`), specifying a search service is required (Structure Attribute service: `text`, Chemical Attribute service: `text_chem`).
 ```python
-# "rcsb_id" is a Structure Attribute and Chemical Attribute, so search `service` must be specified
+# "rcsb_id" is both a Structure Attribute and Chemical Attribute
+#  so search `service` must be specified
 
 q1 = AttributeQuery(
     attribute="rcsb_id",
@@ -291,6 +315,15 @@ q2 = AttributeQuery(
 )
 list(q2())
 ```
+
+|Arguments  |Required| Description                                 |Default               |
+|-----------|--------|---------------------------------------------|----------------------|
+|attribute  |yes     |Full attribute name                          |                      |
+|operator   |yes     |Operation for query                          |                      |
+|value      |no      |Search term(s)                               |                      |
+|service    |no      |Specify structure or chemical search service |                      |
+|negation   |no      |Indicates if the operator is negated         |False                 |
+
 
 The `operator` can be one of a number of options, depending on the attribute type being queried. For example, `contains_phrase` or `exact_match` can be used to compare the attribute to a value, or the `exists` operator may be used to check if the attribute exists for a given structure. Refer to the [Search Attributes](https://search.rcsb.org/structure-search-attributes.html) and [Chemical Attributes](https://search.rcsb.org/chemical-search-attributes.html) documentation for a full list of attributes and applicable operators.
 
@@ -315,12 +348,13 @@ The full list of supported comparative operators:
 |>=      |greater than or equal to|
 |<       |less than               |
 |<=      |less than or equal to   |
-|bool()  |exists                  |
 |in      |contains phrase or contains words|
 
 
 ### Sequence Similarity Search
 Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-3) page, using the sequence search function. This query finds macromolecular PDB entities that share 90% sequence identity with GTPase HRas protein from *Gallus gallus* (*Chicken*).
+
+
 ```python
 from rcsbsearchapi.search import SequenceQuery
 
@@ -340,8 +374,18 @@ for polyid in query("polymer_entity"):
     print(polyid)
 ```
 
+|Arguments      |Required| Description                                         |Default               |
+|---------------|--------|-----------------------------------------------------|----------------------|
+|value          |yes     |Protein or nucleotide sequence                       |                      |
+|evalue_cutoff  |no      |upper cutoff for E-value (lower is more significant) |0.1                   |
+|identity_cutoff|no      |lower cutoff for sequence identity (0-1)             |0                     |
+|sequence_type  |no      |type of biological sequence ("protein", "dna", "rna")|"protein"             |
+
 ### Sequence Motif Search
 Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-6) page, using the sequence motif search function. This query retrives occurences of the His2/Cys2 Zinc Finger DNA-binding domain as represented by its PROSITE signature.
+
+
+
 ```python
 from rcsbsearchapi.search import SeqMotifQuery
 
@@ -357,15 +401,23 @@ for polyid in query("polymer_entity"):
     print(polyid)
 ```
 
+|Arguments      |Required| Description                                         |Default               |
+|---------------|--------|-----------------------------------------------------|----------------------|
+|value          |yes     |Motif to search                                      |                      |
+|pattern_type   |no      |Motif syntax ("simple", "prosite", "regex")          |"simple"              |
+|sequence_type  |no      |Type of biological sequence ("protein", "dna", "rna")|"protein"             |
+
 See [Sequence Motif Search Examples](additional_examples.md#Sequence-Motif-Search-Examples) for more use cases.
 
 ### Structure Similarity Search
 The PDB archive can be queried using the 3D shape of a protein structure. To perform this query, 3D protein structure data must be provided as an input or parameter, A chain ID or assembly ID must be specified, whether the input structure data should be compared to Assemblies or Polymer Entity Instance (Chains) is required, and defining the search type as either strict or relaxed is required. More information on how Structure Similarity Queries work can be found on the [RCSB PDB Structure Similarity Search](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-similarity-search) page.
+
 ```python
 from rcsbsearchapi.search import StructSimilarityQuery
 
 # Basic query:
-# Querying using entry ID and default values assembly ID "1", operator "strict", target search space "Assemblies"
+# Querying using entry ID and default values:
+# assembly ID "1", operator "strict", target search space "Assemblies"
 q1 = StructSimilarityQuery(entry_id="4HHB")
 
 # Same query but with parameters explicitly specified
@@ -381,6 +433,23 @@ for rid in q1("assembly"):
     print(rid)
 ```
 
+|Arguments              | Description                                                                |Default      |
+|-----------------------|----------------------------------------------------------------------------|-------------|
+|structure_search_type  |How to find given structure ("entry_id", "file_url", "file_path")           |"entry_id"   |
+|entry_id               |If "entry_id" specified, PDB ID or CSM ID                                   |             |
+|file_url               |If "file_url" specified, url to file                                        |             |
+|file_path              |If "file_path" specified, path to file                                      |             |
+|file_format            |If "file_url" or "file_path" specified, type of file (ex: "cif")            |             |
+|structure_input_type   |Type of the given structure                                                 |"assembly_id"|
+|assembly_id            |If input_type is "assembly_id", the assembly id number                      |"1"          |
+|chain_id               |If input_type is "chain_id", the chain id letter                            |             |
+|operator               |Search mode ("strict_shape_match" or "relaxed_shape_match")                 |"strict_shape_match"|
+|target_search_space    |Target objects against which the query will be compared for shape similarity|"assembly"   |
+
+If you provide an entry_id, you must provide either an assembly_id or chain_id
+
+If you provide a file_url or file_path, you must also provide a file_format.
+
 See [Structure Similarity Search Examples](additional_examples.md#Structure-Similarity-Search-Examples) for more use cases.
 
 ### Structure Motif Search
@@ -394,8 +463,10 @@ Examples of how to instantiate Residues can be found below. These can then be pu
 ```python
 from rcsbsearchapi.search import StructureMotifResidue
 
-# Construct a Residue with a Chain ID of A, an operator of 1, residue number 192, and Exchanges of "LYS" and "HIS"
-# As for what is a valid "Exchange", the package provides these as a literal, and they should be type checked. 
+# Construct a Residue with:
+# Chain ID of A, an operator of 1, residue number 192, and Exchanges of "LYS" and "HIS".
+# As for what is a valid "Exchange", the package provides these as a literal,
+# and they should be type checked. 
 Res1 = StructureMotifResidue(
     struct_oper_id="1",
     chain_id="A",
@@ -409,9 +480,11 @@ Res2 = StructureMotifResidue(
     label_seq_id=162
 )
 
-# After declaring a minimum of 2 and as many as 10 residues, they can be passed into a list for use in the query itself:
+# After declaring a minimum of 2 and as many as 10 residues,
+# they can be passed into a list for use in the query itself:
 ResList = [Res1, Res2]
 ```
+
 From there, these Residues can be used in a query. As stated before, you can only include 2-10 residues in a query. If you fail to provide residues for a query, or provide the wrong amount, the package will throw a ValueError. 
 
 For a Structure Motif Query using an entry_id, the only other necessary value that must be passed into the query is the residue list. The default type of query is an entry_id query. 
@@ -425,6 +498,30 @@ from rcsbsearchapi.search import StructMotifQuery
 q1 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
 list(q1())
 ```
+
+|Arguments                   | Description                                                      |Default      |
+|----------------------------|------------------------------------------------------------------|-------------|
+|structure_search_type       |How to find given structure ("entry_id", "url", "file_path")      |"entry_id"   |
+|backbone_distance_tolerance |Tolerance for distance between Cα atoms (in Å)                    |1            |
+|side_chain_distance_toleranceTtolerance for distance between Cβ atoms (in Å)                   |1            |
+|angle_tolerance             |Angle between CαCβ vectors (in multiples of 20 degrees)           |1            |
+|entry_id                    |If "entry_id" specified, PDB ID or CSM ID                         |             |
+|url                         |If "file_url" specified, url to file                              |             |
+|file_path                   |If "file_path" specified, path to file                            |             |
+|file_extension              |If "file_url" specified, type of file linked to (ex: "cif")       |             |
+|residue_ids                 |List of StructureMotifResidue objects                             |             |
+|rmsd_cutoff                 |Upper cutoff for root-mean-square deviation (RMSD) score          |2            |
+|atom_pairing_scheme         |Which atoms to consider to compute RMSD scores and transformations.|"SIDE_CHAIN" |
+|motif_pruning_strategy      |Specifies how query motifs are pruned (i.e. simplified)           |"KRUSKAL"    |
+|allowed_structures          |If the list of structure identifiers is specified, the search will only consider those structures (ex: ["HIS", "LYS"])|None         |
+|excluded_structures         |If the list of structure identifiers is specified, the search will exclude those structures from the search space|None         |
+|limit                       |Stop after accepting this many hits                               |             |
+
+If you provide an entry_id, the other optional parameters can be ignored.
+
+If you provide a file_url, you must also provide a file_extension.
+
+If you provide a file_path, you must also provide a file_extension.
 
 See [Structure Motif Search Examples](additional_examples.md#Structure-Motif-Search-Examples) for more use cases.
 
@@ -450,8 +547,25 @@ q1 = ChemSimilarityQuery(
 list(q1())
 ```
 
-See [Chemical Similarity Search Examples](additional_examples.md#Chemical-Similarity-Search-Examples) for more use cases.
+|Arguments              |Required|Description                                                                             |Default      |
+|-----------------------|--------|----------------------------------------------------------------------------------------|-------------|
+|value                  |yes     |chemical formula or descriptor (SMILES or InChI)                                        |             |
+|query_type             |no      |"formula" or "descriptor"                                                               |"formula"    |
+|descriptor_type        |no      |if "descriptor", whether it's "SMILES" or "InCHI"                                       |             |
+|match_subset           |no      |if "formula", return chemical components/structures that contain the formula as a subset|False        |
+|match_type             |no      |if "descriptor", type of matches to find and return (see below)                         |             |
 
+
+| match_type                        |                                           |
+|-----------------------------------|-------------------------------------------|
+| "graph-relaxed"                   | Similar Ligands (including Stereoisomers) |
+| "graph-relaxed-stereo"            | Similar Ligands (Stereospecific)          |
+| "fingerprint-similarity"          | Similar Ligands (Quick screen)            |
+| "sub-struct-graph-relaxed-stereo" | Substructure (Stereospecific)             |
+| "sub-struct-graph-relaxed"        | Substructure (including Stereoisomers)    |
+| "graph-exact"                     | Exact match                               |
+
+See [Chemical Similarity Search Examples](additional_examples.md#Chemical-Similarity-Search-Examples) for more use cases.
 
 ## Count Queries
 ### Counting Results
@@ -477,7 +591,13 @@ q = AttributeQuery(
     value="2019-08-20"
 )
 
-facet_results = q.facets(facets=Facet(name="Methods", aggregation_type="terms", attribute="exptl.method"))
+facet_results = q.facets(
+    facets=Facet(
+        name="Methods",
+        aggregation_type="terms",
+        attribute="exptl.method"
+    )
+)
 print(facet_results)
 ```
 

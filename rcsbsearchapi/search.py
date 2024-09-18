@@ -580,9 +580,6 @@ class Attr:
             value = value.value
         return self.greater_or_equal(value)
 
-    def __bool__(self) -> Terminal:  # pylint: disable=invalid-bool-returned
-        return self.exists()
-
     def __contains__(self, value: Union[str, List[str], "Value[str]", "Value[List[str]]"]) -> Terminal:
         """Maps to contains_words or contains_phrase depending on the value passed.
 
@@ -601,22 +598,7 @@ class Attr:
             return self.contains_phrase(value)
 
 
-@dataclass(frozen=True)
-class AttrLeaf:
-    attribute: str
-    type: Union[str, List]
-    description: Union[str, List]
-
-    def __contains__(self, key):
-        return key in self.__dict__
-
-    def __getitem__(self, key):
-        if key in self.__dict__:
-            return self.__dict__[key]
-        raise KeyError(f"'{key}' not found in object")
-
-
-SCHEMA = Schema(Attr, "SchemaGroup")
+SCHEMA = Schema(Attr)
 
 
 class AttributeQuery(Terminal):
@@ -647,11 +629,11 @@ class AttributeQuery(Terminal):
         Also can specify service and negation
 
         Args:
-            attribute: specify attribute for search (i.e struct.title, exptl.method, rcsb_id)
-            operator: specify operation to be done for search (i.e "contains_phrase", "exact_match")
-            value: text query
-            service: specify what search service (i.e "text", "text_chem")
-            negation: logical not
+            attribute: full attribute name (i.e struct.title, exptl.method, rcsb_id)
+            operator: operation for query (i.e "contains_phrase", "exact_match")
+            value: search term(s)
+            service: specify structure or chemical search service (i.e "text", "text_chem")
+            negation: indicates if the operator is negated
         """
         paramsD = {"attribute": attribute, "operator": operator, "negation": negation}
 
@@ -688,9 +670,14 @@ class SequenceQuery(Terminal):
     """Special case of a terminal for protein, DNA, or RNA sequence queries"""
 
     def __init__(self, value: str, evalue_cutoff: Optional[float] = 0.1, identity_cutoff: Optional[float] = 0, sequence_type: Optional[SequenceType] = "protein"):
-        """The string value is a target sequence that is searched
+        """
         Args:
-            value: sequence query
+            value (str): protein or nucleotide sequence 
+            evalue_cutoff (Optional[float], optional): upper cutoff for E-value (lower is more significant).
+                Defaults to 0.1.
+            identity_cutoff (Optional[float], optional): lower cutoff for percent sequence match (0-1). Defaults to 0.
+            sequence_type (Optional[SequenceType], optional): type of biological sequence ("protein", "dna", "rna").
+                Defaults to "protein".
         """
         if len(value) < SEQUENCE_SEARCH_MIN_NUM_OF_RESIDUES:  # (placeholder for now) look into deriving constraints from API Schema programatically
             raise ValueError("The sequence must contain at least 25 residues")
@@ -706,6 +693,12 @@ class SeqMotifQuery(Terminal):
     """Special case of a terminal for protein, DNA, or RNA sequence motif queries"""
 
     def __init__(self, value: str, pattern_type: Optional[SeqMode] = "simple", sequence_type: Optional[SequenceType] = "protein"):
+        """
+        Args:
+            value (str): motif to search
+            pattern_type (Optional[SeqMode], optional): motif syntax ("simple", "prosite", "regex"). Defaults to "simple".
+            sequence_type (Optional[SequenceType], optional): type of biological sequence ("protein", "dna", "rna"). Defaults to "protein".
+        """
         if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
             raise ValueError("The sequence motif must contain at least 2 characters")
         else:
@@ -720,14 +713,27 @@ class StructSimilarityQuery(Terminal):
         structure_search_type: StructEntryType = "entry_id",
         entry_id: Optional[str] = None,
         file_url: Optional[str] = None,
+        file_format: Optional[str] = None,
         file_path: Optional[str] = None,
         structure_input_type: Optional[StructSimInputType] = "assembly_id",
         assembly_id: Optional[str] = "1",
         chain_id: Optional[str] = None,
         operator: StructSimOperator = "strict_shape_match",
         target_search_space: StructSimSearchSpace = "assembly",
-        file_format: Optional[str] = None,
     ):
+        """
+        Args:
+            structure_search_type (StructEntryType, optional): how to find given structure ("entry_id", "file_url", "file_path"). Defaults to "entry_id".
+            entry_id (Optional[str], optional): if "entry_id" specified, PDB ID or CSM ID. Defaults to None.
+            file_url (Optional[str], optional): if "file_url" specified, url to file . Defaults to None.
+            file_path (Optional[str], optional): if "file_path" specified, path to file. Defaults to None.
+            file_format (Optional[str], optional): if "file_url" specified, type of file linked to (ex: "cif"). Defaults to None.
+            structure_input_type (Optional[StructSimInputType], optional): type of the given structure . Defaults to "assembly_id".
+            assembly_id (Optional[str], optional): if input_type is "assembly_id", the assembly id number. Defaults to "1".
+            chain_id (Optional[str], optional): if input_type is "chain_id", the chain id letter. Defaults to None.
+            operator (StructSimOperator, optional): search mode ("strict_shape_match" or "relaxed_shape_match"). Defaults to "strict_shape_match".
+            target_search_space (StructSimSearchSpace, optional): target objects against which the query will be compared for shape similarity. Defaults to "assembly".
+        """
 
         parameters = {"operator": operator, "target_search_space": target_search_space}
 
@@ -802,6 +808,24 @@ class StructMotifQuery(Terminal):
         excluded_structures: Optional[list] = None,  # List of strings
         limit: Optional[int] = None,
     ):
+        """
+        Args:
+            structure_search_type (StructEntryType, optional): how to find given structure ("entry_id", "url", "file_path"). Defaults to "entry_id".
+            backbone_distance_tolerance (StructMotifTolerance, optional): tolerance for distance between Cα atoms (in Å). Defaults to 1.
+            side_chain_distance_tolerance (StructMotifTolerance, optional): tolerance for distance between Cβ atoms (in Å). Defaults to 1.
+            angle_tolerance (StructMotifTolerance, optional): angle between CαCβ vectors (in multiples of 20 degrees). Defaults to 1.
+            entry_id (Optional[str], optional): if "entry_id" specified, PDB ID or CSM ID . Defaults to None.
+            url (Optional[str], optional): if "file_url" specified, url to file. Defaults to None.
+            file_path (Optional[str], optional): if "file_path" specified, path to file. Defaults to None.
+            file_extension (Optional[str], optional): if "file_url" specified, type of file linked to (ex: "cif"). Defaults to None.
+            residue_ids (Optional[list], optional): list of StructureMotifResidue objects . Defaults to None.
+            rmsd_cutoff (int, optional): upper cutoff for root-mean-square deviation (RMSD) score. Defaults to 2.
+            atom_pairing_scheme (StructMotifAtomPairing, optional): Which atoms to consider to compute RMSD scores and transformations. Defaults to "SIDE_CHAIN".
+            motif_pruning_strategy (StructMotifPruning, optional): specifies how query motifs are pruned (i.e. simplified). Defaults to "KRUSKAL".
+            allowed_structures (Optional[list], optional): list of allowed residues specified by strings (ex: ["HIS", "LYS"]). Defaults to None.
+            excluded_structures (Optional[list], optional): if the list of structure identifiers is specified, the search will exclude those structures from the search space. Defaults to None.
+            limit (Optional[int], optional): stop after accepting this many hits. Defaults to None.
+        """
         # we will construct value, and then pass it through. That's like 95% of this lol
         if not residue_ids:
             raise ValueError("You must include residues in a Structure Motif Query")
@@ -868,21 +892,29 @@ class ChemSimilarityQuery(Terminal):
         self,
         value: Optional[str] = None,
         query_type: ChemSimType = "formula",
-        match_subset: Optional[bool] = False,
         descriptor_type: Optional[SubsetDescriptorType] = None,
+        match_subset: Optional[bool] = False,
         match_type: Optional[ChemSimMatchType] = None,
     ):
-        """Guide for "descriptor_type" options:
-        +-------------------------------------------+-----------------------------------+
-        | Match Type                                | descriptor_type                   |
-        +===========================================+===================================+
-          Similar Ligands (Stereospecific)          | "graph-relaxed-stereo"
-          Similar Ligands (including Stereoisomers) | "graph-relaxed"
-          Similar Ligands (Quick screen)            | "fingerprint-similarity"
-          Substructure (Stereospecific)             | "sub-struct-graph-relaxed-stereo"
-          Substructure (including Stereoisomers)    | "sub-struct-graph-relaxed"
-          Exact match                               | "graph-exact"
-        +-------------------------------------------+-----------------------------------+
+        """
+        Args:
+            value (Optional[str], optional): chemical formula or descriptor (SMILES or InChI). Defaults to None.
+            query_type (ChemSimType, optional): "formula" or "descriptor". Defaults to "formula".
+            descriptor_type (Optional[SubsetDescriptorType], optional): if "descriptor", whether it's "SMILES" or "InCHI". Defaults to None.
+            match_subset (Optional[bool], optional): if "formula", return chemical components/structures that contain the formula as a subset. Defaults to False.
+            match_type (Optional[ChemSimMatchType], optional): if "descriptor", type of matches to find and return (see below). Defaults to None.
+
+        Guide for "match_type" options:
+        +-----------------------------------+-------------------------------------------+
+        | match_type                        |                                           |
+        +===================================+===========================================+
+        | "graph-relaxed"                   | Similar Ligands (including Stereoisomers) |
+        | "graph-relaxed-stereo"            | Similar Ligands (Stereospecific)          |
+        | "fingerprint-similarity"          | Similar Ligands (Quick screen)            |
+        | "sub-struct-graph-relaxed-stereo" | Substructure (Stereospecific)             |
+        | "sub-struct-graph-relaxed"        | Substructure (including Stereoisomers)    |
+        | "graph-exact"                     | Exact match                               |
+        +-----------------------------------+-------------------------------------------+
         """
 
         parameters = {"value": value, "type": query_type}
@@ -1168,10 +1200,6 @@ class PartialQuery:
 
     @_attr_delegate(Attr.__ge__)
     def __ge__(self, value: TNumberLike) -> Query:
-        ...
-
-    @_attr_delegate(Attr.__bool__)
-    def __bool__(self) -> Query:
         ...
 
     @_attr_delegate(Attr.__contains__)

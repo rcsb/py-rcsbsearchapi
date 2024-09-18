@@ -164,7 +164,6 @@ class Schema:
     def __init__(
         self,
         attr_type,
-        schema_group_type,  # either "SchemaGroup" or "dict"
         refetch=True,
         use_fallback=True,
         reload=True,
@@ -200,12 +199,7 @@ class Schema:
         if reload:
             self.struct_schema = self._reload_schema(struct_attr_schema_url, struct_attr_schema_file, refetch, use_fallback)
             self.chem_schema = self._reload_schema(chem_attr_schema_url, chem_attr_schema_file, refetch, use_fallback)
-
-            # if schema_group_type == "dict":
-            #     self.rcsb_attributes_dict = self._make_schema_dict()
-
-            if schema_group_type == "SchemaGroup":
-                self.rcsb_attributes = self._make_schema_group()
+        self.rcsb_attributes = self._make_schema_group()
 
     def _reload_schema(self, schema_url: str, schema_file: str, refetch=True, use_fallback=True):
         sD = {}
@@ -268,8 +262,6 @@ class Schema:
                     return self.Attr(fullname, attrtype, desc)
                 # For non-redundant nodes
                 return self.Attr(fullname, attrtype, node.get("description", desc))
-                # return {"attribute": fullname, "type": attrtype, "description": node.get("description", desc)}
-                # return AttrLeaf(fullname, attrtype, node.get("description", ""))
             elif node["type"] == "array":
                 # skip to items
                 return self._make_group(fullname, [(node["items"], attrtype, node.get("description", desc))])
