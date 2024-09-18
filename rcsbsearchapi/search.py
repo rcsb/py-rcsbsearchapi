@@ -675,7 +675,7 @@ class SequenceQuery(Terminal):
     def __init__(self, value: str, evalue_cutoff: Optional[float] = 0.1, identity_cutoff: Optional[float] = 0, sequence_type: Optional[SequenceType] = "protein"):
         """
         Args:
-            value (str): protein or nucleotide sequence 
+            value (str): protein or nucleotide sequence
             evalue_cutoff (Optional[float], optional): upper cutoff for E-value (lower is more significant).
                 Defaults to 0.1.
             identity_cutoff (Optional[float], optional): lower cutoff for percent sequence match (0-1). Defaults to 0.
@@ -826,7 +826,8 @@ class StructMotifQuery(Terminal):
             atom_pairing_scheme (StructMotifAtomPairing, optional): Which atoms to consider to compute RMSD scores and transformations. Defaults to "SIDE_CHAIN".
             motif_pruning_strategy (StructMotifPruning, optional): specifies how query motifs are pruned (i.e. simplified). Defaults to "KRUSKAL".
             allowed_structures (Optional[list], optional): list of allowed residues specified by strings (ex: ["HIS", "LYS"]). Defaults to None.
-            excluded_structures (Optional[list], optional): if the list of structure identifiers is specified, the search will exclude those structures from the search space. Defaults to None.
+            excluded_structures (Optional[list], optional): if the list of structure identifiers is specified, the search will exclude those structures from the search space.
+                Defaults to None.
             limit (Optional[int], optional): stop after accepting this many hits. Defaults to None.
         """
         # we will construct value, and then pass it through. That's like 95% of this lol
