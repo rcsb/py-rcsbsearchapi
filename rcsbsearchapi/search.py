@@ -356,10 +356,13 @@ class Attr:
     +--------------------+---------------------+
     | range              | dict (keys below)*  |
     +--------------------+---------------------+
-    | exists             | bool(attr)          |
+    | exists             |                     |
     +--------------------+---------------------+
     | in\\_              |                     |
     +--------------------+---------------------+
+
+    Previously, __bool__ was overloaded to run the exists function, but __bool__ can't be overloaded to return non-boolean value.
+    Method overloading bool was deleted.
 
     Rather than their normal bool return values, operators return Terminals.
 

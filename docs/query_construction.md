@@ -36,8 +36,9 @@ List of supported comparative operators:
 |>=      |greater than or equal to|
 |<       |less than               |
 |<=      |less than or equal to   |
-|bool()  |exists                  |
 |in      |contains phrase or contains words|
+
+To use the `exists` operator, create an [AttributeQuery](quickstart.md#attribute-search)
 
 For methods to search and find details on attributes within this package, go to the [attributes page](attributes.md)
 For a full list of attributes, please refer to the [RCSB PDB schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
@@ -513,8 +514,8 @@ list(q1())
 |rmsd_cutoff                 |Upper cutoff for root-mean-square deviation (RMSD) score          |2            |
 |atom_pairing_scheme         |Which atoms to consider to compute RMSD scores and transformations.|"SIDE_CHAIN" |
 |motif_pruning_strategy      |Specifies how query motifs are pruned (i.e. simplified)           |"KRUSKAL"    |
-|allowed_structures          |If the list of structure identifiers is specified, the search will only consider those structures (ex: ["HIS", "LYS"])|None         |
-|excluded_structures         |If the list of structure identifiers is specified, the search will exclude those structures from the search space|None         |
+|allowed_structures          |If the list of structure identifiers is specified, the search will only consider those structures (ex: ["HIS", "LYS"])||
+|excluded_structures         |If the list of structure identifiers is specified, the search will exclude those structures from the search space||
 |limit                       |Stop after accepting this many hits                               |             |
 
 If you provide an entry_id, the other optional parameters can be ignored.
