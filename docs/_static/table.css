@@ -1,13 +1,13 @@
 table {
     width: 100% !important; /* Ensure the table takes the full width of the container */
     table-layout: auto !important;
-    border-collapse: collapse; /* Remove space between borders (optional for aesthetics) */
+    border-collapse: collapse !important; /* Remove space between borders (optional for aesthetics) */
 }
 
 th, td {
     word-wrap: break-word !important; /* Force long words to wrap */
     word-break: break-all !important; /* Forces word breaks, even in long URLs or text */
-    white-space: normal; /* Allow wrapping within table cells */
-    text-align: left; /* Optional: Align text to the left to avoid centering issues */
-    padding: 8px; /* Optional: Add some padding to improve readability */
+    white-space: normal !important; /* Allow wrapping within table cells */
+    text-align: left !important; /* Optional: Align text to the left to avoid centering issues */
+    padding: 8px !important; /* Optional: Add some padding to improve readability */
 }
