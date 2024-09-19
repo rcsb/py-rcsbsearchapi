@@ -11,6 +11,8 @@ This package requires Python 3.7 or later.
 
 # Quickstart
 
+## Quickstart
+
 ## Installation
 
 Get it from PyPI:
@@ -22,7 +24,11 @@ Or, download from [GitHub](https://github.com/rcsb/py-rcsbsearchapi)
 ## Getting Started
 Full documentation available at [readthedocs](https://rcsbsearchapi.readthedocs.io/en/latest/index.html)
 
-To perform a general search for structures associated with the phrase "Hemoglobin", you can create a TextQuery. This does a "full-text" search, which is a general search on text associated with PDB structures or molecular definitions. Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
+### Basic Query Construction
+
+#### Full-text search
+To perform a "full-text" search for structures associated with the term "Hemoglobin", you can create a `TextQuery`:
+
 ```python
 from rcsbsearchapi import TextQuery
 
@@ -33,67 +39,59 @@ query = TextQuery(value="Hemoglobin")
 results = query()
 
 # Results are returned as an iterator of result identifiers.
-for id in results:
-    print(id)
+for rid in results:
+    print(rid)
 ```
 
-Besides general text searches, you can also search for specific structure or chemical attributes. 
+#### Attribute search
+To perform a search for specific structure or chemical attributes, you can create an `AttributeQuery`.
 
-Using different operators such as `contains_phrase` or `exact_match`, attributes can be compared to a value.
-You can also check whether an attribute exists for a given structure by using the `exists` operator. 
-
-Refer to the [Search Attributes](https://search.rcsb.org/structure-search-attributes.html) and [Chemical Attributes](https://search.rcsb.org/chemical-search-attributes.html) documentation for a full list of attributes and applicable operators.
-
-To search an attribute, you can make an `AttributeQuery`.
 ```python
 from rcsbsearchapi import AttributeQuery
 
-# Construct the query
+# Construct a query searching for structures from humans
 query = AttributeQuery(
     attribute="rcsb_entity_source_organism.scientific_name",
-    operator="exact_match",  # other operators include "contains_phrase" and "exists"
+    operator="exact_match",  # Other operators include "contains_phrase", "exists", and more
     value="Homo sapiens"
 )
-results = list(query())  # construct a list from query results
+
+# Execute query and construct a list from results
+results = list(query())
 print(results)
 ```
 
-You can also use `rcsb_attributes` (imported below as `attrs`) to create `AttributeQuery`s.
+Refer to the [Search Attributes](https://search.rcsb.org/structure-search-attributes.html) and [Chemical Attributes](https://search.rcsb.org/chemical-search-attributes.html) documentation for a full list of attributes and applicable operators.
 
-When using certain operators such as `exact_match`, `greater`, or `less`, you can use Python operators like `==`, `>`, or `<`.
-
-Using this syntax, attribute names can be tab-completed. 
+Alternatively, you can also construct attribute queries with comparative operators using the `rcsb_attributes` object (which also allows for names to be tab-completed):
 
 ```python
 from rcsbsearchapi import rcsb_attributes as attrs
 
 # Search for structures from humans
 query = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
-results = list(query())  # construct a list from query results
+
+# Run query and construct a list from results
+results = list(query())
 print(results)
 ```
 
-You can combine multiple queries using Python bitwise operators. 
+#### Grouping sub-queries
 
-|Operator|Description             |
-|--------|------------------------|
-|&       |AND                     |
-|\|      |OR                      |
-|~       |NOT                     |
-|^       |XOR/symmetric difference|
-|-       |set difference          |
+You can combine multiple queries using Python bitwise operators. 
 
 ```python
 from rcsbsearchapi import rcsb_attributes as attrs
 
-# Query for human epidermal growth factor receptor (EGFR) structures with investigational or experimental drugs
-# EGFR is involved in cell division and often overexpressed or mutated in some cancers
+# Query for human epidermal growth factor receptor (EGFR) structures (UniProt ID P00533)
+#  with investigational or experimental drugs bound
 q1 = attrs.rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession == "P00533"
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
 q4 = attrs.drugbank_info.drug_groups == "experimental"
 
-# Structures matching UniProt id P00533 AND from humans AND (investigational or experimental drug group)
+# Structures matching UniProt ID P00533 AND from humans
+#  AND (investigational OR experimental drug group)
 query = q1 & q2 & (q3 | q4)
 
 # Execute query and print first 10 ids
@@ -101,14 +99,30 @@ results = list(query())
 print(results[:10])
 ```
 
-These examples are in `operator syntax`. You can also make queries in `fluent syntax`. Learn more about both syntaxes and implementation details in [readthedocs: Queries](https://rcsbsearchapi.readthedocs.io/en/latest/queries.html).
+These examples are in `operator` syntax. You can also make queries in `fluent` syntax. Learn more about both syntaxes and implementation details in [Constructing and Executing Queries](query_construction.md#constructing-and-executing-queries).
+
+### Supported Search Services
+The list of supported search service types are listed in the table below. For more details on their usage, see [Search Service Types](query_construction.md#search-service-types).
+
+|Search service                    |QueryType                 |
+|----------------------------------|--------------------------|
+|Full-text                         |`TextQuery()`             |
+|Attribute (structure or chemical) |`AttributeQuery()`        |
+|Sequence similarity               |`SequenceQuery()`         |
+|Sequence motif                    |`SequenceMotifQuery()`    |
+|Structure similarity              |`StructSimilarityQuery()` |
+|Structure motif                   |`StructMotifQuery()`      |
+|Chemical similarity               |`ChemSimilarityQuery()`   |
+
+Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
 
 ## Jupyter Notebooks
-A runnable jupyter notebook with this example is available in [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb), or can be run online using Google Colab:
+A runnable jupyter notebook is available in [notebooks/quickstart.ipynb](https://github.com/rcsb/py-rcsbsearchapi/blob/master/notebooks/quickstart.ipynb), or can be run online using Google Colab:
 <a href="https://colab.research.google.com/github/rcsb/py-rcsbsearchapi/blob/master/notebooks/quickstart.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-An additional example including a Covid-19 related example is in [notebooks/covid.ipynb](notebooks/covid.ipynb):
+An additional Covid-19 related example is in [notebooks/covid.ipynb](https://github.com/rcsb/py-rcsbsearchapi/blob/master/notebooks/covid.ipynb):
 <a href="https://colab.research.google.com/github//rcsb/py-rcsbsearchapi/blob/master/notebooks/covid.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
 
 ## Supported Features
 
