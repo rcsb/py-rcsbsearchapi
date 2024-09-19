@@ -230,18 +230,92 @@ class Query(ABC):
         response = s._single_query()
         return response["total_count"] if response else 0
 
+    # TODO: with request options done this way, they can only be used one at a time...seems unideal
     def facets(self, facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]] = None, return_type: ReturnType = "entry") -> List:
         """Perform a facets query and return the buckets"""
         s = Session(self, return_type=return_type, rows=0, facets=facets)
         response = s._single_query()
         return response["facets"] if response else []
+
+    def group_by(
+            self,
+            aggregation_method: str,
+            similarity_cutoff: Optional[int] = None,
+            ranking_criteria_type: Optional[RankingCriteriaType] = None,
+            return_type: Optional[Literal['entry', 'assembly', 'polymer_entity', 'non_polymer_entity', 'polymer_instance', 'mol_definition']] = None,
+            group_by_return_type: Optional[str] = "representatives"
+    ) -> Session:
+        """Perform a group_by query
+
+        Args:
+            aggregation_method (str): "matching_deposit_group_id", "sequence_identity", "matching_uniprot_accession".
+            similarity_cutoff (int, optional): only for aggregation method "sequence identity", identity threshold for grouping. 100, 95, 90,70, 50, or 30. Defaults to None.
+            ranking_criteria_type (Optional[RankingCriteriaType], optional): control ordering of results. Defaults to None.
+            return_type (Optional[str], optional): PDB data type to return (ex: "assembly"), Automatically determined based on aggregation method if not provided. Defaults to None.
+            group_by_return_type (Optional[str], optional): Determines the representation of grouped data:
+                "groups" - search results are divided into groups and each group is returned with all associated search hits;
+                "representatives" - only a single search hit is returned per group. Defaults to "representatives".
+
+        Returns:
+            Session: Session object with group_by parameter
+        """
+        if aggregation_method == "matching_deposit_group_id":
+            if not return_type:
+                return_type = "entry"
+
+            s = Session(
+                self,
+                return_type=return_type,
+                aggregation_method=aggregation_method,
+                similarity_cutoff=similarity_cutoff,
+                ranking_criteria_type=ranking_criteria_type,
+                group_by_return_type=group_by_return_type
+            )
+        else:
+            if not return_type:
+                return_type = "polymer_entity"
+
+            s = Session(
+                self,
+                return_type=return_type,
+                aggregation_method=aggregation_method,
+                similarity_cutoff=similarity_cutoff,
+                ranking_criteria_type=ranking_criteria_type,
+                group_by_return_type=group_by_return_type
+            )
+        return s
     
-    def group_by(self, aggregation_method: str = None, ranking_criteria_type: Optional[RankingCriteriaType] = None, return_type: ReturnType = "entry") -> Dict:
-        """Perform a group_by query"""
-        s = Session(self, return_type=return_type, rows=0, aggregation_method=aggregation_method, ranking_criteria_type=ranking_criteria_type)
-        response = s._single_query()
-        assert isinstance(response, Dict)  # for type-checking
-        return response
+    def sort(
+        self,
+        sort_by: str,
+        direction: Optional[str] = None,
+        node_filter: Optional[Union[GroupFilter, TerminalFilter]] = None
+    ) -> Session:
+        """control sorting of results
+
+        Args:
+            sort_by (str): "score" to sort by relevancy scores or full attribute name
+            node_filter (Optional[GroupFilter, TerminalFilter], optional): filter for results. Defaults to None.
+            direction (str, optional): "asc" (ascending) or "desc" (descending). Defaults to None.
+
+        Returns:
+            Session: Session with given sort request options
+        """
+        sort_dict = {"sort_by":sort_by}
+
+        if direction is not None:
+            sort_dict["direction"] = direction
+        
+        if node_filter is not None:
+            assert isinstance(node_filter, TerminalFilter) or isinstance(node_filter, GroupFilter)  # for mypy
+            sort_dict["filter"]=node_filter.to_dict()
+
+        session = Session(
+            self,
+            sort=[sort_dict]
+        )
+
+        return session
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -1419,15 +1493,20 @@ class FilterFacet:
 class RankingCriteriaType:
     """Request option controlling the order that results are returned"""
 
-    def __init__(self, sort_by: str, filter: Optional[GroupFilter] = None, direction: Optional[str] = None):
+    def __init__(self, sort_by: str, node_filter: Optional[Union[GroupFilter, TerminalFilter]] = None, direction: Optional[str] = None):
         self.sort_by = sort_by
-        self.filter = filter
+        self.node_filter = node_filter
         self.direction = direction
 
     def to_dict(self):
         rank_dict = dict(sort_by=self.sort_by)
-        if self.filter is not None:
-            rank_dict["filter"] = self.filter.to_dict()
+        if self.node_filter is not None:
+            if isinstance(self.node_filter, GroupFilter):
+                rank_dict["filter"] = self.node_filter.to_dict()
+            elif isinstance(self.node_filter, TerminalFilter):
+                rank_dict["filter"] = self.node_filter.to_dict()
+            else:
+                raise ValueError(f"Invalid filter type: {type(self.node_filter)}. Please use a GroupFilter or TerminalFilter.")
         if self.direction is not None:
             rank_dict["direction"] = self.direction
         return rank_dict
@@ -1449,19 +1528,25 @@ class Session(Iterable[str]):
     facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]]
     aggregation_method: Optional[str]
     ranking_criteria_type: Optional[RankingCriteriaType]
+    group_by_return_type: Optional[str]
+    sort: Optional[List]
 
     def __init__(
-        # parameter added below for computed model inclusion
+        # parameter added below for computed model inclusion]
+        # pylint: disable=dangerous-default-value
         self,
         query: Query,
         return_type: ReturnType = "entry",
         rows: int = 10000,
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
-        # pylint: disable=dangerous-default-value
         facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None,
         aggregation_method: Optional[str] = None,
-        ranking_criteria_type: Optional[RankingCriteriaType] = None
+        similarity_cutoff: Optional[int] = None,
+        ranking_criteria_type: Optional[RankingCriteriaType] = None,
+        group_by_return_type: Optional[str] = None,
+        sort: Optional[List] = None
+        # pylint: enable=dangerous-default-value
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
@@ -1472,7 +1557,10 @@ class Session(Iterable[str]):
         self.results_verbosity = results_verbosity
         self.facets = facets
         self.aggregation_method = aggregation_method
+        self.similarity_cutoff = similarity_cutoff
         self.ranking_criteria_type = ranking_criteria_type
+        self.group_by_return_type = group_by_return_type
+        self.sort = sort
 
     @staticmethod
     def make_uuid() -> str:
@@ -1504,11 +1592,17 @@ class Session(Iterable[str]):
                 query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.facets]
             else:
                 query_dict["request_options"]["facets"] = [self.facets.to_dict()]
-        if self.aggregation_method is not None:
+        if self.aggregation_method:
             query_dict["request_options"]["group_by"] = {}
             query_dict["request_options"]["group_by"]["aggregation_method"] = self.aggregation_method
-            if self.ranking_criteria_type is not None:
+            if self.similarity_cutoff:
+                query_dict["request_options"]["group_by"]["similarity_cutoff"] = self.similarity_cutoff
+            if self.ranking_criteria_type:
                 query_dict["request_options"]["group_by"]["ranking_criteria_type"] = self.ranking_criteria_type.to_dict()
+            if self.group_by_return_type:
+                query_dict["request_options"]["group_by_return_type"] = self.group_by_return_type
+        if self.sort is not None:
+            query_dict["request_options"]["sort"] = self.sort
         return query_dict
 
     def _single_query(self, start=0) -> Optional[Dict]:
@@ -1524,34 +1618,55 @@ class Session(Iterable[str]):
         else:
             raise requests.HTTPError(f"Unexpected status: {response.status_code}")
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> Union[Iterator[str], Iterator]:
         "Generator for all results as a list of identifiers"
         start = 0
         req_count = 0
         response = self._single_query(start=start)
         if response is None:
             return  # be explicit for mypy
-        result_set = response["result_set"] if response else []
+        if "result_set" in response:
+            result_set = response["result_set"]
+        elif "group_set" in response:
+            result_set = response["group_set"]
+        else:
+            result_set = []
         start += self.rows
         logging.debug("Got %s ids", len(result_set))
+        print(len(result_set))
 
         if len(result_set) == 0:
             return
         yield from result_set
 
         total = response["total_count"]
+        print(total)
 
         while start < total:
-            assert len(result_set) == self.rows
+            # If no grouping is applied, check that result_set = rows
+            # If grouping is applied, result set could be lower than rows # TODO: check
+            if self.aggregation_method is None:
+                assert len(result_set) == self.rows
             req_count += 1
             if req_count == REQUESTS_PER_SECOND:
-                time.sleep(1.2)  # This prevents the user from bottlenecking the server with requests.
+                time.sleep(1.2)  # This prevents the user from bottlenecking the server with requests. TODO: is this longer than required?
                 req_count = 0
             response = self._single_query(start=start)
-            result_set = response["result_set"] if response else []
+            assert isinstance(response, dict)
+            if "result_set" in response:
+                result_set = response["result_set"]
+            elif "group_set" in response:
+                result_set = response["group_set"]
+            else: 
+                result_set = []
             logging.debug("Got %s ids", len(result_set))
             start += self.rows
             yield from result_set
+
+    def to_dict(self) -> Dict:
+        response = self._single_query()
+        assert isinstance(response, Dict)
+        return response
 
     def iquery(self, limit: Optional[int] = None) -> List[str]:
         """Evaluate the query and display an interactive progress bar.
@@ -1587,5 +1702,4 @@ class Session(Iterable[str]):
         params = self._make_params()
         params["request_options"]["paginate"]["rows"] = 25
         data = json.dumps(params, separators=(",", ":"))
-        print(f"query_builder_link data: {data} \n\n {urllib.parse.quote(data)}")
         return f"https://www.rcsb.org/search?request={urllib.parse.quote(data)}"
