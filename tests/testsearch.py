@@ -32,8 +32,7 @@ from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, Sequenc
 from rcsbsearchapi.search import Session, Value
 from rcsbsearchapi.search import ChemSimilarityQuery
 from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
-from rcsbsearchapi.search import RankingCriteriaType
-
+from rcsbsearchapi.search import GroupBy, RankingCriteriaType, GroupByReturnType, Sort
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -1178,13 +1177,19 @@ class SearchTests(unittest.TestCase):
         with self.subTest("1. Group by deposit ID + ranking_criteria_type"):
             # TerminalFilter
             try:
-                query = AttributeQuery("exptl.method", operator="exact_match", value="electron microscopy")
                 tf = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="sequence_identity")
-                query.group_by(
-                    aggregation_method="matching_uniprot_accession",
-                    ranking_criteria_type=RankingCriteriaType(sort_by="score", node_filter=tf, direction="asc"),
-                    return_type="polymer_entity"
+                query = AttributeQuery(
+                    attribute="exptl.method",
+                    operator="exact_match",
+                    value="electron microscopy",
+                    request_options=[
+                        GroupBy(
+                            aggregation_method="matching_deposit_group_id",
+                            ranking_criteria_type=RankingCriteriaType(sort_by="score", filter=tf, direction="asc"),
+                        )
+                    ]
                 )
+                list(query())
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
 
@@ -1194,77 +1199,128 @@ class SearchTests(unittest.TestCase):
                 tf1 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="electron microscopy")
                 tf2 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.similarity_cutoff", operator="equals", value=100)
                 gf = GroupFilter(logical_operator="and", nodes=[tf1, tf2])
-                query.group_by(
-                    aggregation_method="matching_deposit_group_id",
-                    ranking_criteria_type=RankingCriteriaType(sort_by="score", node_filter=gf, direction="asc")
+                query = AttributeQuery(
+                    attribute="exptl.method",
+                    operator="exact_match",
+                    value="electron microscopy",
+                    request_options=[
+                        GroupBy(
+                            aggregation_method="matching_deposit_group_id",
+                            ranking_criteria_type=RankingCriteriaType(sort_by="score", filter=gf, direction="asc"),
+                        )
+                    ]
                 )
+                list(query())
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
+
         with self.subTest("2. Group by sequence identity"):
             try:
-                query = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
                 tf1 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="electron microscopy")
                 tf2 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.similarity_cutoff", operator="equals", value=100)
                 gf = GroupFilter(logical_operator="and", nodes=[tf1, tf2])
-                query.group_by(
-                    aggregation_method="sequence_identity",
-                    similarity_cutoff=95,
-                    ranking_criteria_type=RankingCriteriaType(sort_by="score", node_filter=gf, direction="asc")
+                query = AttributeQuery(
+                    attribute="rcsb_assembly_info.polymer_entity_count",
+                    operator="equals",
+                    value=1,
+                    request_options=[
+                        GroupBy(
+                            aggregation_method="sequence_identity",
+                            similarity_cutoff=95,
+                            ranking_criteria_type=RankingCriteriaType(sort_by="score", filter=gf, direction="asc")
+                        )
+                    ]
                 )
+                list(query(return_type="polymer_entity"))
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
+
         with self.subTest("3. Group by UniProt Accession"):
             # using standard sort options
             try:
-                query = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
                 tf1 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="electron microscopy")
                 tf2 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.similarity_cutoff", operator="equals", value=100)
                 gf = GroupFilter(logical_operator="and", nodes=[tf1, tf2])
-                query.group_by(
-                    aggregation_method="sequence_identity",
-                    similarity_cutoff=95,
-                    ranking_criteria_type=RankingCriteriaType(sort_by="score", node_filter=gf, direction="asc")
+                query = AttributeQuery(
+                    attribute="entity_poly.rcsb_mutation_count",
+                    operator="equals",
+                    value=10,
+                    request_options=[
+                        GroupBy(
+                            aggregation_method="matching_uniprot_accession",
+                            ranking_criteria_type=RankingCriteriaType(sort_by="score", filter=gf, direction="asc")
+                        )
+                    ]
                 )
+                list(query(return_type="polymer_entity"))
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
-            
+       
             # using uniprot specific ranking_criteria_type
             try:
-                query = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
-                query.group_by(
-                    aggregation_method="sequence_identity",
-                    similarity_cutoff=95,
-                    ranking_criteria_type=RankingCriteriaType(sort_by="coverage")
+                query = AttributeQuery(
+                    attribute="entity_poly.rcsb_mutation_count",
+                    operator="equals",
+                    value=10,
+                    request_options=[
+                        GroupBy(
+                            aggregation_method="matching_uniprot_accession",
+                            ranking_criteria_type=RankingCriteriaType(sort_by="coverage")
+                        )
+                    ]
                 )
+                list(query(return_type="polymer_entity"))
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
-    
+
     def testSort(self):
         with self.subTest("1. Sorting without filter"):
             try:
-                query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens")
-                query.sort(sort_by="rcsb_assembly_info.polymer_entity_count", direction="asc")
+                query = AttributeQuery(
+                    "rcsb_entity_source_organism.ncbi_scientific_name",
+                    operator="exact_match",
+                    value="Homo sapiens",
+                    request_options=[
+                        Sort(sort_by="rcsb_assembly_info.polymer_entity_count", direction="asc")
+                    ]
+                )
+                list(query())
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
-    
+
         with self.subTest("1. Sorting with filter"):
             # Terminal Filter
+            try:
+                tf = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="electron microscopy")
+                query = AttributeQuery(
+                    "rcsb_entity_source_organism.ncbi_scientific_name",
+                    operator="exact_match",
+                    value="Homo sapiens",
+                    request_options=[
+                        Sort(sort_by="rcsb_assembly_info.polymer_entity_count", direction="asc", filter=tf)
+                    ]
+                )
+                list(query())
+            except Exception as error:
+                self.fail(f"Failed unexpectedly: {error}")
+
+            # Group Filter
             try:
                 tf1 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="electron microscopy")
                 tf2 = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.similarity_cutoff", operator="equals", value=100)
                 gf = GroupFilter(logical_operator="and", nodes=[tf1, tf2])
-                query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens")
-                query.sort(sort_by="rcsb_assembly_info.polymer_entity_count", direction="asc", node_filter=gf)
+                query = AttributeQuery(
+                    "rcsb_entity_source_organism.ncbi_scientific_name",
+                    operator="exact_match",
+                    value="Homo sapiens",
+                    request_options=[
+                        Sort(sort_by="rcsb_assembly_info.polymer_entity_count", direction="asc", filter=gf)
+                    ]
+                )
+                list(query())
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
-            
-            # Group Filter
-            try:
-                tf = TerminalFilter(attribute="rcsb_polymer_entity_group_membership.aggregation_method", operator="exact_match", value="electron microscopy")
-                query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens")
-                query.sort(sort_by="rcsb_assembly_info.polymer_entity_count", direction="asc", node_filter=tf)
-            except Exception as error:
-                self.fail(f"Failed unexpectedly: {error}")
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
@@ -1295,7 +1351,7 @@ def buildSearch():
     # suiteSelect.addTest(SearchTests("testResultsCount"))
     # suiteSelect.addTest(SearchTests("testResultsVerbosity"))
     # suiteSelect.addTest(SearchTests("testFacetQuery"))
-    # suiteSelect.addTest(SearchTests("testGroupBy"))
+    suiteSelect.addTest(SearchTests("testGroupBy"))
     suiteSelect.addTest(SearchTests("testSort"))
     return suiteSelect
 

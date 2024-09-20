@@ -11,7 +11,7 @@ import urllib.parse
 import uuid
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, asdict, is_dataclass
 from datetime import date
 from typing import (
     Any,
@@ -155,6 +155,12 @@ class Query(ABC):
 
     Queries are immutable, and all modifying functions return new instances.
     """
+    # Request options must be an attribute of Query,
+    # allowing propagation of request_options from AttributeQuery, StructMotifQuery, etc --> Terminal --> Query --> Session
+    request_options: List[RequestOption]
+
+    def __init__(self, request_options: List[RequestOption]):
+        self.request_options = request_options
 
     @abstractmethod
     def to_dict(self) -> Dict:
@@ -210,18 +216,40 @@ class Query(ABC):
         return (self & ~other) | (~self & other)
 
     def exec(
-        self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact"
+        self,
+        return_type: ReturnType = "entry",
+        rows: int = 10000,
+        return_content_type: List[ReturnContentType] = ["experimental"],
+        results_verbosity: VerbosityLevel = "compact",
     ) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return Session(self, return_type, rows, return_content_type, results_verbosity)
+        return Session(
+            query=self,
+            return_type=return_type,
+            rows=rows,
+            return_content_type=return_content_type,
+            results_verbosity=results_verbosity,
+            request_options=self.request_options
+        )
 
     def __call__(
-        self, return_type: ReturnType = "entry", rows: int = 10000, return_content_type: List[ReturnContentType] = ["experimental"], results_verbosity: VerbosityLevel = "compact"
+        self,
+        return_type: ReturnType = "entry",
+        rows: int = 10000,
+        return_content_type:
+        List[ReturnContentType] = ["experimental"],
+        results_verbosity:
+        VerbosityLevel = "compact",
     ) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return self.exec(return_type, rows, return_content_type, results_verbosity)
+        return self.exec(
+            return_type=return_type,
+            rows=rows,
+            return_content_type=return_content_type,
+            results_verbosity=results_verbosity,
+        )
 
     def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
         # pylint: disable=dangerous-default-value
@@ -230,7 +258,6 @@ class Query(ABC):
         response = s._single_query()
         return response["total_count"] if response else 0
 
-    # TODO: with request options done this way, they can only be used one at a time...seems unideal
     def facets(self, facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]] = None, return_type: ReturnType = "entry") -> List:
         """Perform a facets query and return the buckets"""
         s = Session(self, return_type=return_type, rows=0, facets=facets)
@@ -284,38 +311,6 @@ class Query(ABC):
                 group_by_return_type=group_by_return_type
             )
         return s
-    
-    def sort(
-        self,
-        sort_by: str,
-        direction: Optional[str] = None,
-        node_filter: Optional[Union[GroupFilter, TerminalFilter]] = None
-    ) -> Session:
-        """control sorting of results
-
-        Args:
-            sort_by (str): "score" to sort by relevancy scores or full attribute name
-            node_filter (Optional[GroupFilter, TerminalFilter], optional): filter for results. Defaults to None.
-            direction (str, optional): "asc" (ascending) or "desc" (descending). Defaults to None.
-
-        Returns:
-            Session: Session with given sort request options
-        """
-        sort_dict = {"sort_by":sort_by}
-
-        if direction is not None:
-            sort_dict["direction"] = direction
-        
-        if node_filter is not None:
-            assert isinstance(node_filter, TerminalFilter) or isinstance(node_filter, GroupFilter)  # for mypy
-            sort_dict["filter"]=node_filter.to_dict()
-
-        session = Session(
-            self,
-            sort=[sort_dict]
-        )
-
-        return session
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -375,6 +370,7 @@ class Terminal(Query):
     service: Union[List, str]
     params: Dict[str, Any]
     node_id: int = 0
+    request_options: Optional[List[RequestOption]] = None
 
     def to_dict(self):
         return dict(
@@ -386,7 +382,13 @@ class Terminal(Query):
 
     def __invert__(self):
         if isinstance(self, AttributeQuery):
-            return AttributeQuery(attribute=self.params.get("attribute"), operator=self.params.get("operator"), negation=not self.params.get("negation"), value=self.params.get("value"))
+            return AttributeQuery(
+                attribute=self.params.get("attribute"),
+                operator=self.params.get("operator"),
+                negation=not self.params.get("negation"),
+                value=self.params.get("value"),
+                request_options=self.request_options
+            )
         else:
             raise TypeError("Negation is not supported by type " + str(type(self)))  # Attribute Queries are the only query type to support inversion.
 
@@ -395,7 +397,7 @@ class Terminal(Query):
             return (self, node_id + 1)
         else:
             return (
-                Terminal(self.service, self.params, node_id),
+                Terminal(self.service, self.params, node_id, self.request_options),
                 node_id + 1,
             )
 
@@ -718,11 +720,12 @@ class AttributeQuery(Terminal):
 
     def __init__(
         self,
-        attribute: str = None,
-        operator: str = None,
+        attribute: Optional[str] = None,
+        operator: Optional[str] = None,
         value: Optional[TValue] = None,
         service: Optional[str] = None,
         negation: Optional[bool] = False,
+        request_options: Optional[List[RequestOption]] = None
     ):
         """Search for the string value given possible attribute or operator
         Also can specify service and negation
@@ -733,6 +736,7 @@ class AttributeQuery(Terminal):
             value: text query
             service: specify what search service (i.e "text", "text_chem")
             negation: logical not
+            request_options: TODO
         """
         paramsD = {"attribute": attribute, "operator": operator, "negation": negation}
 
@@ -750,7 +754,7 @@ class AttributeQuery(Terminal):
                 + f"{error_msg}"
             )
         assert isinstance(service, str)
-        super().__init__(params=paramsD, service=service)
+        super().__init__(params=paramsD, service=service, request_options=request_options)
 
 
 class TextQuery(Terminal):
@@ -1490,27 +1494,90 @@ class FilterFacet:
         return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
 
+class RequestOption(ABC):
+    """Base class for request options"""
+
+    @abstractmethod
+    def to_dict(self) -> Dict:
+        """Get dictionary representing request option, skips values of None"""
+        assert is_dataclass(self)
+        request_dict: Dict = {}
+        for field in fields(self):
+            field_name = field.name
+            field_value = getattr(self, field_name)
+            if field_value:
+                if not (isinstance(field_value, str) or isinstance(field_value, int) or isinstance(field_value, bool)):
+                    field_value = field_value.to_dict()
+                request_dict[field_name] = field_value
+        return request_dict
+
+
+@dataclass(frozen=True)
+class Sort(RequestOption):
+    """
+    control sorting of results
+
+    sort_by (str): "score" to sort by relevancy scores or full attribute name
+    filter (Optional[GroupFilter, TerminalFilter], optional): filter for results. Defaults to None.
+    direction (str, optional): "asc" (ascending) or "desc" (descending). Defaults to None.
+    """
+    sort_by: str
+    direction: Optional[str] = None
+    filter: Optional[Union[GroupFilter, TerminalFilter]] = None
+
+    def to_dict(self) -> Dict:
+        return super().to_dict()
+
+@dataclass(frozen=True)
+class GroupBy(RequestOption):
+    """
+    return results as groups
+
+    aggregation_method (str): "matching_deposit_group_id", "sequence_identity", "matching_uniprot_accession".
+    similarity_cutoff (int, optional): only for aggregation method "sequence identity", identity threshold for grouping. 100, 95, 90,70, 50, or 30. Defaults to None.
+    ranking_criteria_type (Optional[RankingCriteriaType], optional): control ordering of results. Defaults to None.
+    return_type (Optional[str], optional): PDB data type to return (ex: "assembly"), Automatically determined based on aggregation method if not provided. Defaults to None.
+    group_by_return_type (Optional[str], optional): Determines the representation of grouped data:
+        "groups" - search results are divided into groups and each group is returned with all associated search hits;
+        "representatives" - only a single search hit is returned per group. Defaults to "representatives".
+    """
+    aggregation_method: str
+    similarity_cutoff: Optional[int] = None
+    ranking_criteria_type: Optional[RankingCriteriaType] = None
+
+    def to_dict(self,) -> Dict:
+        return super().to_dict()
+
+
+@dataclass(frozen=True)
+class GroupByReturnType(RequestOption):
+    group_by_return_type: Literal["groups", "representatives"]
+
+    def to_dict(self) -> Dict:
+        return super().to_dict()
+
+
+@dataclass(frozen=True)
 class RankingCriteriaType:
     """Request option controlling the order that results are returned"""
-
-    def __init__(self, sort_by: str, node_filter: Optional[Union[GroupFilter, TerminalFilter]] = None, direction: Optional[str] = None):
-        self.sort_by = sort_by
-        self.node_filter = node_filter
-        self.direction = direction
+    sort_by: str
+    filter: Optional[Union[GroupFilter, TerminalFilter]] = None
+    direction: Optional[Literal["asc", "desc"]] = None
 
     def to_dict(self):
         rank_dict = dict(sort_by=self.sort_by)
-        if self.node_filter is not None:
-            if isinstance(self.node_filter, GroupFilter):
-                rank_dict["filter"] = self.node_filter.to_dict()
-            elif isinstance(self.node_filter, TerminalFilter):
-                rank_dict["filter"] = self.node_filter.to_dict()
+        if self.filter:
+            if isinstance(self.filter, GroupFilter):
+                rank_dict["filter"] = self.filter.to_dict()
+            elif isinstance(self.filter, TerminalFilter):
+                rank_dict["filter"] = self.filter.to_dict()
             else:
-                raise ValueError(f"Invalid filter type: {type(self.node_filter)}. Please use a GroupFilter or TerminalFilter.")
+                raise ValueError(f"Invalid filter type: {type(self.filter)}. Please use a GroupFilter or TerminalFilter.")
         if self.direction is not None:
             rank_dict["direction"] = self.direction
         return rank_dict
-        
+
+
 class Session(Iterable[str]):
     """A single query session.
 
@@ -1530,6 +1597,7 @@ class Session(Iterable[str]):
     ranking_criteria_type: Optional[RankingCriteriaType]
     group_by_return_type: Optional[str]
     sort: Optional[List]
+    request_options: Optional[List[RequestOption]]
 
     def __init__(
         # parameter added below for computed model inclusion]
@@ -1545,7 +1613,8 @@ class Session(Iterable[str]):
         similarity_cutoff: Optional[int] = None,
         ranking_criteria_type: Optional[RankingCriteriaType] = None,
         group_by_return_type: Optional[str] = None,
-        sort: Optional[List] = None
+        sort: Optional[List] = None,
+        request_options: Optional[List[RequestOption]] = None
         # pylint: enable=dangerous-default-value
     ):
         self.query_id = Session.make_uuid()
@@ -1561,6 +1630,7 @@ class Session(Iterable[str]):
         self.ranking_criteria_type = ranking_criteria_type
         self.group_by_return_type = group_by_return_type
         self.sort = sort
+        self.request_options = request_options
 
     @staticmethod
     def make_uuid() -> str:
@@ -1592,17 +1662,22 @@ class Session(Iterable[str]):
                 query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.facets]
             else:
                 query_dict["request_options"]["facets"] = [self.facets.to_dict()]
-        if self.aggregation_method:
-            query_dict["request_options"]["group_by"] = {}
-            query_dict["request_options"]["group_by"]["aggregation_method"] = self.aggregation_method
-            if self.similarity_cutoff:
-                query_dict["request_options"]["group_by"]["similarity_cutoff"] = self.similarity_cutoff
-            if self.ranking_criteria_type:
-                query_dict["request_options"]["group_by"]["ranking_criteria_type"] = self.ranking_criteria_type.to_dict()
-            if self.group_by_return_type:
-                query_dict["request_options"]["group_by_return_type"] = self.group_by_return_type
-        if self.sort is not None:
-            query_dict["request_options"]["sort"] = self.sort
+
+        if self.request_options:
+            for request_option in self.request_options:
+                if isinstance(request_option, Sort):
+                    if "sort" not in query_dict["request_options"]:
+                        query_dict["request_options"]["sort"] = []
+                    query_dict["request_options"]["sort"].append(request_option.to_dict())
+
+                if isinstance(request_option, GroupBy):
+                    if "group_by" in query_dict["request_options"]:
+                        raise ValueError("Multiple GroupBy request options are not allowed")
+                    query_dict["request_options"]["group_by"] = request_option.to_dict()
+
+                if isinstance(request_option, GroupByReturnType):
+                    query_dict["request_options"]["group_by_return_type"] = request_option.to_dict()
+
         return query_dict
 
     def _single_query(self, start=0) -> Optional[Dict]:
@@ -1633,19 +1708,17 @@ class Session(Iterable[str]):
             result_set = []
         start += self.rows
         logging.debug("Got %s ids", len(result_set))
-        print(len(result_set))
 
         if len(result_set) == 0:
             return
         yield from result_set
 
         total = response["total_count"]
-        print(total)
 
         while start < total:
             # If no grouping is applied, check that result_set = rows
-            # If grouping is applied, result set could be lower than rows # TODO: check
-            if self.aggregation_method is None:
+            # If grouping is applied, result set could be lower than rows
+            if (self.request_options) and (not [option for option in self.request_options if isinstance(option, GroupBy)]):
                 assert len(result_set) == self.rows
             req_count += 1
             if req_count == REQUESTS_PER_SECOND:
