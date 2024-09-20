@@ -26,9 +26,10 @@ import os
 from itertools import islice
 import requests
 from rcsbsearchapi.const import CHEMICAL_ATTRIBUTE_SEARCH_SERVICE, STRUCTURE_ATTRIBUTE_SEARCH_SERVICE, RETURN_UP_URL
-from rcsbsearchapi import Attr, Group, Session, TextQuery, Value
+from rcsbsearchapi import Attr, Group, TextQuery
 from rcsbsearchapi import rcsb_attributes as attrs
 from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, SequenceQuery, SeqMotifQuery, StructSimilarityQuery, fileUpload, StructureMotifResidue, StructMotifQuery
+from rcsbsearchapi.search import Session, Value
 from rcsbsearchapi.search import ChemSimilarityQuery
 from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
 
@@ -200,7 +201,7 @@ class SearchTests(unittest.TestCase):
         """Attempt to make an invalid, malformed query. Upon finding an error,
         catch the error and pass, continuing tests. An exception is only thrown
         if the query somehow completes successfully. """
-        q1 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR")
+        q1 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR", service="text")
         session = Session(q1)
         try:
             set(session)
@@ -274,7 +275,7 @@ class SearchTests(unittest.TestCase):
 
     def testAttribute(self):
         """Test the attributes - make sure that they are assigned correctly, etc. """
-        attr = Attr("attr")
+        attr = Attr(attribute="attr", type="type")
 
         term = attr == "value"
         ok = isinstance(term, Terminal)
@@ -305,7 +306,7 @@ class SearchTests(unittest.TestCase):
 
     def testPartialQuery(self):
         """Test the ability to perform partial queries. """
-        query = Attr("a").equals("aval").and_("b")
+        query = Attr(attribute="a", type="text").equals("aval").and_("b")
 
         ok = isinstance(query, PartialQuery)
         self.assertTrue(ok)
@@ -330,7 +331,7 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         ok = query.nodes[1].params.get("value") == "bval"
 
-        query = query.and_(Attr("c") < 5)
+        query = query.and_(Attr("c", "text") < 5)
         ok = len(query.nodes) == 3
         self.assertTrue(ok)
         ok = query.nodes[2].params.get("attribute") == "c"
@@ -344,7 +345,7 @@ class SearchTests(unittest.TestCase):
 
         ok = isinstance(query, PartialQuery)
         self.assertTrue(ok)
-        ok = query.attr == Attr("d")
+        ok = query.attr == Attr("d", "text")
         self.assertTrue(ok)
         ok = query.operator == "or"
         self.assertTrue(ok)
@@ -369,7 +370,7 @@ class SearchTests(unittest.TestCase):
 
     def testOperators(self):
         """Test operators such as contain and in. """
-        q1 = attrs.rcsb_id.in_(["4HHB", "2GS2"])  # test in
+        q1 = attrs.rcsb_entry_container_identifiers.rcsb_id.in_(["4HHB", "2GS2"])  # test in
         results = list(q1())
         ok = len(results) == 2
         logger.info("In search results length: (%d) ok: (%r)", len(results), ok)
@@ -977,6 +978,7 @@ class SearchTests(unittest.TestCase):
             CHEMICAL_ATTRIBUTE_SEARCH_SERVICE  # this constant specifies "text_chem" service
         )
         result = q3.count()
+        print("Q3 COUNT", result)
         ok = result == len(list(q3()))
         self.assertTrue(ok)
         logger.info("Counting results of chemical Attribute query: (%d), ok : (%r)", result, ok)
@@ -1032,7 +1034,7 @@ class SearchTests(unittest.TestCase):
         logger.info("Counting results of Chemical similarity query: (%d), ok : (%r)", result, ok)
 
         ok = False
-        q9 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR")
+        q9 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR", service="textx")
         try:
             _ = q9.count()
         except requests.HTTPError:
