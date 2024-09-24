@@ -157,7 +157,7 @@ class Query(ABC):
     """
     # Request options must be an attribute of Query,
     # allowing propagation of request_options from AttributeQuery, StructMotifQuery, etc --> Terminal --> Query --> Session
-    request_options: List[RequestOption]
+    request_options: Optional[List[RequestOption]]
 
     def __init__(self, request_options: List[RequestOption]):
         self.request_options = request_options
@@ -224,7 +224,7 @@ class Query(ABC):
     ) -> "Session":
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
-        return Session(
+        session = Session(
             query=self,
             return_type=return_type,
             rows=rows,
@@ -232,6 +232,24 @@ class Query(ABC):
             results_verbosity=results_verbosity,
             request_options=self.request_options
         )
+
+        # If ReturnCounts is in the request_options, return only the total count
+        response = session.to_dict()
+        if self.request_options:
+            if any(isinstance(request_opt, ReturnCounts) for request_opt in self.request_options):
+                if response == {}:
+                    return 0
+                return response["total_count"]
+
+        if "explain_metadata" in response:
+            explain_metadata = response["explain_metadata"]
+            setattr(session, "explain_metadata", explain_metadata)
+
+        if "facets" in response:
+            facets = response["facets"]
+            setattr(session, "facets", facets)
+
+        return session
 
     def __call__(
         self,
@@ -250,67 +268,6 @@ class Query(ABC):
             return_content_type=return_content_type,
             results_verbosity=results_verbosity,
         )
-
-    def count(self, return_type: ReturnType = "entry", return_content_type: List[ReturnContentType] = ["experimental"]) -> int:
-        # pylint: disable=dangerous-default-value
-        """Get the number of results found by this query"""
-        s = Session(self, return_type, 0, return_content_type)
-        response = s._single_query()
-        return response["total_count"] if response else 0
-
-    def facets(self, facets: Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]] = None, return_type: ReturnType = "entry") -> List:
-        """Perform a facets query and return the buckets"""
-        s = Session(self, return_type=return_type, rows=0, facets=facets)
-        response = s._single_query()
-        return response["facets"] if response else []
-
-    def group_by(
-            self,
-            aggregation_method: str,
-            similarity_cutoff: Optional[int] = None,
-            ranking_criteria_type: Optional[RankingCriteriaType] = None,
-            return_type: Optional[Literal['entry', 'assembly', 'polymer_entity', 'non_polymer_entity', 'polymer_instance', 'mol_definition']] = None,
-            group_by_return_type: Optional[str] = "representatives"
-    ) -> Session:
-        """Perform a group_by query
-
-        Args:
-            aggregation_method (str): "matching_deposit_group_id", "sequence_identity", "matching_uniprot_accession".
-            similarity_cutoff (int, optional): only for aggregation method "sequence identity", identity threshold for grouping. 100, 95, 90,70, 50, or 30. Defaults to None.
-            ranking_criteria_type (Optional[RankingCriteriaType], optional): control ordering of results. Defaults to None.
-            return_type (Optional[str], optional): PDB data type to return (ex: "assembly"), Automatically determined based on aggregation method if not provided. Defaults to None.
-            group_by_return_type (Optional[str], optional): Determines the representation of grouped data:
-                "groups" - search results are divided into groups and each group is returned with all associated search hits;
-                "representatives" - only a single search hit is returned per group. Defaults to "representatives".
-
-        Returns:
-            Session: Session object with group_by parameter
-        """
-        if aggregation_method == "matching_deposit_group_id":
-            if not return_type:
-                return_type = "entry"
-
-            s = Session(
-                self,
-                return_type=return_type,
-                aggregation_method=aggregation_method,
-                similarity_cutoff=similarity_cutoff,
-                ranking_criteria_type=ranking_criteria_type,
-                group_by_return_type=group_by_return_type
-            )
-        else:
-            if not return_type:
-                return_type = "polymer_entity"
-
-            s = Session(
-                self,
-                return_type=return_type,
-                aggregation_method=aggregation_method,
-                similarity_cutoff=similarity_cutoff,
-                ranking_criteria_type=ranking_criteria_type,
-                group_by_return_type=group_by_return_type
-            )
-        return s
 
     @overload
     def and_(self, other: "Query") -> "Query":
@@ -459,7 +416,7 @@ class Attr:
     """
 
     attribute: str
-    type: Union[List, str]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    type: Optional[str]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
     description: Optional[Union[str, List[str]]] = None
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> "AttributeQuery":
@@ -760,19 +717,26 @@ class AttributeQuery(Terminal):
 class TextQuery(Terminal):
     """Special case of a Terminal for free-text queries"""
 
-    def __init__(self, value: str):
+    def __init__(self, value: str, request_options: Optional[List[RequestOption]] = None):
         """Search for the string value anywhere in the text
 
         Args:
             value: free-text query
         """
-        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, params={"value": value})
+        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, params={"value": value}, request_options=request_options)
 
 
 class SequenceQuery(Terminal):
     """Special case of a terminal for protein, DNA, or RNA sequence queries"""
 
-    def __init__(self, value: str, evalue_cutoff: Optional[float] = 0.1, identity_cutoff: Optional[float] = 0, sequence_type: Optional[SequenceType] = "protein"):
+    def __init__(
+            self,
+            value: str,
+            evalue_cutoff: Optional[float] = 0.1,
+            identity_cutoff: Optional[float] = 0,
+            sequence_type: Optional[SequenceType] = "protein",
+            request_options: Optional[List[RequestOption]] = None
+    ):
         """The string value is a target sequence that is searched
         Args:
             value: sequence query
@@ -783,18 +747,26 @@ class SequenceQuery(Terminal):
             raise ValueError("Identity cutoff should be between 0 and 1 (inclusive)")
         else:
             super().__init__(
-                service=SEQUENCE_SEARCH_SERVICE, params={"evalue_cutoff": evalue_cutoff, "identity_cutoff": identity_cutoff, "sequence_type": sequence_type, "value": value}
+                service=SEQUENCE_SEARCH_SERVICE,
+                params={"evalue_cutoff": evalue_cutoff, "identity_cutoff": identity_cutoff, "sequence_type": sequence_type, "value": value},
+                request_options=request_options
             )
 
 
 class SeqMotifQuery(Terminal):
     """Special case of a terminal for protein, DNA, or RNA sequence motif queries"""
 
-    def __init__(self, value: str, pattern_type: Optional[SeqMode] = "simple", sequence_type: Optional[SequenceType] = "protein"):
+    def __init__(
+        self,
+        value: str,
+        pattern_type: Optional[SeqMode] = "simple",
+        sequence_type: Optional[SequenceType] = "protein",
+        request_options: Optional[List[RequestOption]] = None
+    ):
         if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
             raise ValueError("The sequence motif must contain at least 2 characters")
         else:
-            super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value, "pattern_type": pattern_type, "sequence_type": sequence_type})
+            super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value, "pattern_type": pattern_type, "sequence_type": sequence_type}, request_options=request_options)
 
 
 class StructSimilarityQuery(Terminal):
@@ -812,6 +784,7 @@ class StructSimilarityQuery(Terminal):
         operator: StructSimOperator = "strict_shape_match",
         target_search_space: StructSimSearchSpace = "assembly",
         file_format: Optional[str] = None,
+        request_options: Optional[List[RequestOption]] = None
     ):
 
         parameters = {"operator": operator, "target_search_space": target_search_space}
@@ -828,7 +801,7 @@ class StructSimilarityQuery(Terminal):
         elif structure_search_type == "file_upload":
             parameters["value"] = {"url": fileUpload(file_path, file_format), "format": "bcif"}
 
-        super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters)
+        super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters, request_options=request_options)
 
 
 class StructureMotifResidue:
@@ -886,6 +859,7 @@ class StructMotifQuery(Terminal):
         allowed_structures: Optional[list] = None,  # List of strings
         excluded_structures: Optional[list] = None,  # List of strings
         limit: Optional[int] = None,
+        request_options: Optional[List[RequestOption]] = None
     ):
         # we will construct value, and then pass it through. That's like 95% of this lol
         if not residue_ids:
@@ -943,7 +917,7 @@ class StructMotifQuery(Terminal):
 
         # now call super
 
-        super().__init__(service=STRUCTMOTIF_SEARCH_SERVICE, params=params)
+        super().__init__(service=STRUCTMOTIF_SEARCH_SERVICE, params=params, request_options=request_options)
 
 
 class ChemSimilarityQuery(Terminal):
@@ -956,6 +930,7 @@ class ChemSimilarityQuery(Terminal):
         match_subset: Optional[bool] = False,
         descriptor_type: Optional[SubsetDescriptorType] = None,
         match_type: Optional[ChemSimMatchType] = None,
+        request_options: Optional[List[RequestOption]] = None,
     ):
         """Guide for "descriptor_type" options:
         +-------------------------------------------+-----------------------------------+
@@ -979,7 +954,7 @@ class ChemSimilarityQuery(Terminal):
             parameters["descriptor_type"] = descriptor_type
             parameters["match_type"] = match_type
 
-        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters)
+        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters, request_options=request_options)
 
 
 @dataclass(frozen=True)
@@ -988,13 +963,25 @@ class Group(Query):
 
     operator: TAndOr
     nodes: Iterable[Query] = ()
+    request_options: Optional[List[RequestOption]] = None
+
+    def __post_init__(self):
+        request_options = []
+
+        for node in self.nodes:
+            if node.request_options:
+                request_options += [opt for opt in node.request_options if opt not in request_options]
+
+        if request_options:
+            object.__setattr__(self, "request_options", request_options)
 
     def to_dict(self):
-        return dict(
+        group_dict = dict(
             type="group",
             logical_operator=self.operator,
             nodes=[node.to_dict() for node in self.nodes],
         )
+        return group_dict
 
     def __invert__(self):
         if self.operator == "and":
@@ -1365,137 +1352,61 @@ class Range:
         return d
 
 
-class Facet:
-    """Facets can be used (in conjunction with the facet() function on a Query) in order to group and perform calculations and statistics on PDB data.
-    Facets arrange search results into categories (buckets) based on the requested field values.
-    """
+# class TerminalFilter:
+#     """
+#     Terminal filter class for use with FilterFacet queries
+#     """
 
-    def __init__(
-        self,
-        name: str,
-        aggregation_type: AggregationType,
-        attribute: str,
-        interval: Optional[Union[int, str]] = None,
-        ranges: Optional[List[Range]] = None,
-        min_interval_population: Optional[int] = None,
-        max_num_intervals: Optional[int] = None,
-        precision_threshold: Optional[int] = None,
-        nested_facets: Optional[Union["Facet", "FilterFacet", List[Union["Facet", "FilterFacet"]]]] = None,
-    ):
-        """Initialize Facet object for use in a faceted query.
+#     def __init__(
+#         self,
+#         attribute: str,
+#         operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"],
+#         value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None,
+#         negation: bool = False,
+#         case_sensitive: bool = False,
+#     ):
+#         self.attribute = attribute
+#         self.operator = operator
+#         self.value = value
+#         self.negation = negation
+#         self.case_sensitive = case_sensitive
 
-        Args:
-            name (str): Specifies the name of the aggregation.
-            aggregation_type (AggregationType): Specifies the type of the aggregation. Can be "terms", "histogram", "date_histogram", "range", "date_range", or "cardinality".
-            attribute (str): Specifies the full attribute name to aggregate on.
-            interval (Optional[Union[int, str]], optional): Size of the intervals into which a given set of values is divided. Required only for use with
-            "histogram" and "date_histogram" aggregation types (defaults to None if not included).
-            ranges (Optional[List[Range]], optional): A set of ranges, each representing a bucket. Note that this aggregation includes the 'from' value and
-            excludes the 'to' value for each range. Should be a list of Range objects (leave the "include_lower" and "include_upper" fields empty). Required
-            only for use with "range" and "date_range" aggregation types (defaults to None if not included).
-            min_interval_population (Optional[int], optional): Minimum number of items (>= 0) in the bin required for the bin to be returned. Only for use with
-            "terms", "histogram", and "date_histogram" facets (defaults to 1 for these aggregation types, otherwise defaults to None).
-            max_num_intervals (Optional[int], optional): Maximum number of intervals (<= 65336) to return for a given facet. Only for use with "terms"
-            aggregation type (defaults to 65336 for this aggregation type, otherwise defaults to None).
-            precision_threshold (Optional[int], optional): Allows to trade memory for accuracy, and defines a unique count (<= 40000) below which counts are
-            expected to be close to accurate. Only for use with "cardinality" aggregation type (defaults to 40000 for this aggregation type, otherwise defaults to None).
-            nested_facets (Optional[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;, List[Union[&quot;Facet&quot;, &quot;FilterFacet&quot;]]]], optional): Enables
-            multi-dimensional aggregations. Should contain a List of Facets or FilterFacets. Can be used with any aggregation type. Defaults to None.
-        """
-        self.name = name
-        self.aggregation_type = aggregation_type
-        self.attribute = attribute
-        self.interval = interval
-        self.ranges = ranges
-        self.min_interval_population = min_interval_population
-        self.max_num_intervals = max_num_intervals
-        self.precision_threshold = precision_threshold
-        self.nested_facets = nested_facets if isinstance(nested_facets, list) or nested_facets is None else [nested_facets]
-
-        if self.aggregation_type == "terms":
-            if self.min_interval_population is None:
-                self.min_interval_population = 1
-            if self.max_num_intervals is None:
-                self.max_num_intervals = 65536
-        elif self.aggregation_type == "histogram":
-            if self.min_interval_population is None:
-                self.min_interval_population = 1
-        elif self.aggregation_type == "date_histogram":
-            if self.min_interval_population is None:
-                self.min_interval_population = 1
-        elif self.aggregation_type == "cardinality":
-            if self.precision_threshold is None:
-                self.precision_threshold = 40000
-
-    def to_dict(self) -> dict:
-        facet_dict = dict(name=self.name, aggregation_type=self.aggregation_type, attribute=self.attribute)
-        if self.interval is not None:
-            facet_dict["interval"] = self.interval
-        if self.ranges is not None:
-            facet_dict["ranges"] = [r.to_dict() for r in self.ranges]
-        if self.min_interval_population is not None:
-            facet_dict["min_interval_population"] = self.min_interval_population
-        if self.max_num_intervals is not None:
-            facet_dict["max_num_intervals"] = self.max_num_intervals
-        if self.precision_threshold is not None:
-            facet_dict["precision_threshold"] = self.precision_threshold
-        if self.nested_facets is not None:
-            facet_dict["facets"] = [f.to_dict() for f in self.nested_facets if f is not None]
-        return facet_dict
+#     def to_dict(self):
+#         tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
+#         if self.value is not None:
+#             tf_dict["parameters"]["value"] = self.value
+#         return tf_dict
 
 
-class TerminalFilter:
-    """
-    Terminal filter class for use with FilterFacet queries
-    """
+# class GroupFilter:
+#     """
+#     Group filter class for use with FilterFacet queries
+#     """
 
-    def __init__(
-        self,
-        attribute: str,
-        operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"],
-        value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None,
-        negation: bool = False,
-        case_sensitive: bool = False,
-    ):
-        self.attribute = attribute
-        self.operator = operator
-        self.value = value
-        self.negation = negation
-        self.case_sensitive = case_sensitive
+#     def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
+#         self.logical_operator = (logical_operator,)
+#         self.nodes = nodes
 
-    def to_dict(self):
-        tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
-        if self.value is not None:
-            tf_dict["parameters"]["value"] = self.value
-        return tf_dict
+#     def to_dict(self):
+#         return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
 
 
-class GroupFilter:
-    """
-    Group filter class for use with FilterFacet queries
-    """
+# class FilterFacet:
+#     """Facet queries using Filters"""
 
-    def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
-        self.logical_operator = (logical_operator,)
-        self.nodes = nodes
+#     def __init__(self, filters: Union[TerminalFilter, GroupFilter], facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]):
+#         self.filter = filters
+#         self.facets = facets if isinstance(facets, list) else [facets]
 
-    def to_dict(self):
-        return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
-
-
-class FilterFacet:
-    """Facet queries using Filters"""
-
-    def __init__(self, filters: Union[TerminalFilter, GroupFilter], facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]):
-        self.filter = filters
-        self.facets = facets if isinstance(facets, list) else [facets]
-
-    def to_dict(self):
-        return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
+#     def to_dict(self):
+#         return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
 
 class RequestOption(ABC):
-    """Base class for request options"""
+    """
+    Base class for request options
+    Note: return_all_hits, paginate not implemented. They are handled automatically by package.
+    """ 
 
     @abstractmethod
     def to_dict(self) -> Dict:
@@ -1528,6 +1439,7 @@ class Sort(RequestOption):
     def to_dict(self) -> Dict:
         return super().to_dict()
 
+
 @dataclass(frozen=True)
 class GroupBy(RequestOption):
     """
@@ -1556,6 +1468,144 @@ class GroupByReturnType(RequestOption):
     def to_dict(self) -> Dict:
         return super().to_dict()
 
+
+@dataclass(frozen=True)
+class ScoringStrategy(RequestOption):
+    scoring_strategy: Literal["combined", "sequence", "seqmotif", "strucmotif", "structure", "chemical", "text", "text_chem", "full_text"]
+
+    def to_dict(self) -> Dict:
+        return super().to_dict()
+
+
+@dataclass(frozen=True)
+class ReturnCounts(RequestOption):
+    return_counts: bool
+
+    def to_dict(self) -> Dict:
+        return super().to_dict()
+
+
+@dataclass(frozen=True)  # TODO: write tests
+class ReturnExplainMetadata(RequestOption):
+    return_explain_metadata: bool
+
+    def to_dict(self) -> Dict:
+        return super().to_dict()
+
+
+@dataclass(frozen=True)
+class Facet(RequestOption):
+    """Facet object for use in a faceted query.
+        Args:
+            name (str): Specifies the name of the aggregation.
+            aggregation_type (AggregationType): Specifies the type of the aggregation. Can be "terms", "histogram", "date_histogram", "range", "date_range", or "cardinality".
+            attribute (str): Specifies the full attribute name to aggregate on.
+            interval (Optional[Union[int, str]], optional): Size of the intervals into which a given set of values is divided. Required only for use with
+                "histogram" and "date_histogram" aggregation types (defaults to None if not included).
+            ranges (Optional[List[Range]], optional): A set of ranges, each representing a bucket. Note that this aggregation includes the 'from' value and
+                excludes the 'to' value for each range. Should be a list of Range objects (leave the "include_lower" and "include_upper" fields empty). Required
+                only for use with "range" and "date_range" aggregation types (defaults to None if not included).
+            min_interval_population (Optional[int], optional): Minimum number of items (>= 0) in the bin required for the bin to be returned. Only for use with
+                "terms", "histogram", and "date_histogram" facets (defaults to 1 for these aggregation types, otherwise defaults to None).
+            max_num_intervals (Optional[int], optional): Maximum number of intervals (<= 65336) to return for a given facet. Only for use with "terms"
+                aggregation type (defaults to 65336 for this aggregation type, otherwise defaults to None).
+            precision_threshold (Optional[int], optional): Allows to trade memory for accuracy, and defines a unique count (<= 40000) below which counts are
+                expected to be close to accurate. Only for use with "cardinality" aggregation type (defaults to 40000 for this aggregation type, otherwise defaults to None).
+            nested_facets (Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]], optional): Enables multi-dimensional aggregations.
+                Should contain a List of Facets or FilterFacets. Can be used with any aggregation type. Defaults to None.
+    """
+    name: str
+    aggregation_type: AggregationType
+    attribute: str
+    interval: Optional[Union[int, str]] = None
+    ranges: Optional[List[Range]] = None
+    min_interval_population: Optional[int] = None
+    max_num_intervals: Optional[int] = None
+    precision_threshold: Optional[int] = None
+    nested_facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None
+
+    def __post_init__(self):
+        """
+        Ensure nested_facets is assigned to a list of Facets.
+        Adjust default values based on aggregation type.
+        """
+        nested_facets = self.nested_facets if (isinstance(self.nested_facets, list) or self.nested_facets is None) else [self.nested_facets]
+        object.__setattr__(self, "nested_facets", nested_facets)
+
+        if self.aggregation_type == "terms":
+            if self.min_interval_population is None:
+                object.__setattr__(self, "min_interval_population", 1)
+            if self.max_num_intervals is None:
+                object.__setattr__(self, "max_num_intervals", 65536)
+        elif self.aggregation_type == "histogram":
+            if self.min_interval_population is None:
+                object.__setattr__(self, "min_interval_population", 1)
+        elif self.aggregation_type == "date_histogram":
+            if self.min_interval_population is None:
+                object.__setattr__(self, "min_interval_population", 1)
+        elif self.aggregation_type == "cardinality":
+            if self.precision_threshold is None:
+                object.__setattr__(self, "precision_threshold", 40000)
+
+    def to_dict(self) -> dict:
+        facet_dict: Dict[str, Any] = dict(name=self.name, aggregation_type=self.aggregation_type, attribute=self.attribute)
+        if self.interval is not None:
+            facet_dict["interval"] = self.interval
+        if self.ranges is not None:
+            facet_dict["ranges"] = [r.to_dict() for r in self.ranges]
+        if self.min_interval_population is not None:
+            facet_dict["min_interval_population"] = self.min_interval_population
+        if self.max_num_intervals is not None:
+            facet_dict["max_num_intervals"] = self.max_num_intervals
+        if self.precision_threshold is not None:
+            facet_dict["precision_threshold"] = self.precision_threshold
+        if self.nested_facets is not None:
+            facet_dict["facets"] = [f.to_dict() for f in self.nested_facets if f is not None]
+        return facet_dict
+
+
+@dataclass(frozen=True)
+class TerminalFilter(RequestOption):
+    attribute: str
+    operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"]
+    value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None
+    negation: bool = False
+    case_sensitive: bool = False
+
+    def to_dict(self):
+        tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
+        if self.value is not None:
+            tf_dict["parameters"]["value"] = self.value
+        return tf_dict
+
+
+@dataclass(frozen=True)
+class GroupFilter(RequestOption):
+    """
+    Group filter class for use with FilterFacet queries
+    """
+    logical_operator: TAndOr
+    nodes: List[Union["TerminalFilter", "GroupFilter"]]
+
+    def __post_init__(self):
+        object.__setattr__(self, "logical_operator", (self.logical_operator,))
+
+    def to_dict(self):
+        return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
+
+
+@dataclass(frozen=True)
+class FilterFacet:
+    """Facet queries using Filters"""
+    filter: Union[TerminalFilter, GroupFilter]
+    facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
+
+    def __post_init__(self):
+        facets = self.facets if isinstance(self.facets, list) else [self.facets]
+        object.__setattr__(self, "facets", facets)
+
+    def to_dict(self):
+        return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
 @dataclass(frozen=True)
 class RankingCriteriaType:
@@ -1590,30 +1640,19 @@ class Session(Iterable[str]):
     return_type: ReturnType
     start: int
     rows: int
-    return_content_type: List[ReturnContentType]
-    results_verbosity: VerbosityLevel
-    facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]]
-    aggregation_method: Optional[str]
-    ranking_criteria_type: Optional[RankingCriteriaType]
-    group_by_return_type: Optional[str]
-    sort: Optional[List]
-    request_options: Optional[List[RequestOption]]
+    facets: Optional[Dict] = None
+    count: Optional[int] = None
+    explain_metadata: Optional[Dict] = None
 
     def __init__(
-        # parameter added below for computed model inclusion]
         # pylint: disable=dangerous-default-value
+        # parameter added below for computed model inclusion]
         self,
         query: Query,
         return_type: ReturnType = "entry",
         rows: int = 10000,
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
-        facets: Optional[Union[Facet, FilterFacet, List[Union[Facet, FilterFacet]]]] = None,
-        aggregation_method: Optional[str] = None,
-        similarity_cutoff: Optional[int] = None,
-        ranking_criteria_type: Optional[RankingCriteriaType] = None,
-        group_by_return_type: Optional[str] = None,
-        sort: Optional[List] = None,
         request_options: Optional[List[RequestOption]] = None
         # pylint: enable=dangerous-default-value
     ):
@@ -1624,13 +1663,10 @@ class Session(Iterable[str]):
         self.rows = rows
         self.return_content_type = return_content_type
         self.results_verbosity = results_verbosity
-        self.facets = facets
-        self.aggregation_method = aggregation_method
-        self.similarity_cutoff = similarity_cutoff
-        self.ranking_criteria_type = ranking_criteria_type
-        self.group_by_return_type = group_by_return_type
-        self.sort = sort
         self.request_options = request_options
+        self.facets: Optional[Dict] = None
+        self.count: Optional[int] = None
+        self.explain_metadata: Optional[Dict] = None
 
     @staticmethod
     def make_uuid() -> str:
@@ -1657,13 +1693,11 @@ class Session(Iterable[str]):
             # v1 -> v2: pager parameter is renamed to paginate and results_content_type parameter added (which has a list as its value)
             request_options=dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type, results_verbosity=self.results_verbosity),
         )
-        if self.facets is not None:
-            if type(self.facets) is list:
-                query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.facets]
-            else:
-                query_dict["request_options"]["facets"] = [self.facets.to_dict()]
 
         if self.request_options:
+            if not isinstance(self.request_options, list):
+                raise ValueError("request_options argument must be a list of RequestOption objects")
+
             for request_option in self.request_options:
                 if isinstance(request_option, Sort):
                     if "sort" not in query_dict["request_options"]:
@@ -1678,6 +1712,24 @@ class Session(Iterable[str]):
                 if isinstance(request_option, GroupByReturnType):
                     query_dict["request_options"]["group_by_return_type"] = request_option.to_dict()
 
+                if isinstance(request_option, ScoringStrategy):
+                    query_dict["request_options"]["scoring_strategy"] = request_option.scoring_strategy
+
+                if isinstance(request_option, ReturnCounts):
+                    query_dict["request_options"]["return_counts"] = request_option.return_counts
+
+                    # return_counts can't be used with paginate
+                    if query_dict["request_options"]["paginate"]:
+                        query_dict["request_options"].pop("paginate")
+
+                if isinstance(request_option, ReturnExplainMetadata):
+                    query_dict["request_options"] = request_option.to_dict()
+
+                if isinstance(request_option, Facet) or isinstance(request_option, FilterFacet) or isinstance(request_option, TerminalFilter):
+                    if isinstance(request_option, list):
+                        query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.request_option]
+                    else:
+                        query_dict["request_options"]["facets"] = [request_option.to_dict()]
         return query_dict
 
     def _single_query(self, start=0) -> Optional[Dict]:
@@ -1738,7 +1790,8 @@ class Session(Iterable[str]):
 
     def to_dict(self) -> Dict:
         response = self._single_query()
-        assert isinstance(response, Dict)
+        if not isinstance(response, Dict):
+            return {}
         return response
 
     def iquery(self, limit: Optional[int] = None) -> List[str]:

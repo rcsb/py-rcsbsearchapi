@@ -32,7 +32,7 @@ from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, Sequenc
 from rcsbsearchapi.search import Session, Value
 from rcsbsearchapi.search import ChemSimilarityQuery
 from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
-from rcsbsearchapi.search import GroupBy, RankingCriteriaType, GroupByReturnType, Sort
+from rcsbsearchapi.search import GroupBy, RankingCriteriaType, GroupByReturnType, Sort, ReturnCounts, ReturnExplainMetadata, Facet, ScoringStrategy
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -957,53 +957,89 @@ class SearchTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Descriptor query type with invalid parameters failed successfully : (%r)", ok)
 
-    def testResultsCount(self):
+    def testReturnCounts(self):
         """Test firing off results count requests"""
         # Attribute query test
-        q1 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
-        result = q1.count("assembly")
-        ok = result == len(list(q1("assembly")))
+        q1 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION", request_options=[ReturnCounts(True)])
+        q2 = AttributeQuery("exptl.method", "exact_match", "X-RAY DIFFRACTION")
+        result = q1("assembly")
+        ok = result == len(list(q2("assembly")))
         self.assertTrue(ok)
         logger.info("Counting results of structural Attribute query: (%d), ok : (%r)", result, ok)
 
-        q2 = TextQuery("hemoglobin")
-        result = q2.count()
-        ok = result == len(list(q2()))
+        q3 = TextQuery("hemoglobin", request_options=[ReturnCounts(True)])
+        q4 = TextQuery("hemoglobin")
+        result = q3()
+        ok = result == len(list(q4()))
         self.assertTrue(ok)
         logger.info("Counting results of Text query: (%d), ok : (%r)", result, ok)
 
-        q3 = AttributeQuery(
+        q5 = AttributeQuery(
             "drugbank_info.brand_names",
             "contains_phrase",
             "tylenol",
-            CHEMICAL_ATTRIBUTE_SEARCH_SERVICE  # this constant specifies "text_chem" service
+            CHEMICAL_ATTRIBUTE_SEARCH_SERVICE,  # this constant specifies "text_chem" service
+            request_options=[ReturnCounts(True)]
         )
-        result = q3.count()
-        print("Q3 COUNT", result)
-        ok = result == len(list(q3()))
+        q6 = AttributeQuery(
+            "drugbank_info.brand_names",
+            "contains_phrase",
+            "tylenol",
+            CHEMICAL_ATTRIBUTE_SEARCH_SERVICE,  # this constant specifies "text_chem" service
+        )
+        result = q5()
+        ok = result == len(list(q6()))
         self.assertTrue(ok)
         logger.info("Counting results of chemical Attribute query: (%d), ok : (%r)", result, ok)
 
-        q4 = SequenceQuery("MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET"
-                           + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI"
-                           + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ"
-                           + "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS", 1, 0.9)
-        result = q4.count()
-        ok = result == len(list(q4()))
+        q7 = SequenceQuery(
+            "MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET"
+            + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI"
+            + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ"
+            + "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS",
+            1,
+            0.9,
+            request_options=[ReturnCounts(True)]
+        )
+        q8 = SequenceQuery(
+            "MTEYKLVVVGAGGVGKSALTIQLIQNHFVDEYDPTIEDSYRKQVVIDGET"
+            + "CLLDILDTAGQEEYSAMRDQYMRTGEGFLCVFAINNTKSFEDIHQYREQI"
+            + "KRVKDSDDVPMVLVGNKCDLPARTVETRQAQDLARSYGIPYIETSAKTRQ"
+            + "GVEDAFYTLVREIRQHKLRKLNPPDESGPGCMNCKCVIS",
+            1,
+            0.9,
+        )
+        result = q7()
+        ok = result == len(list(q8()))
         self.assertTrue(ok)
         logger.info("Counting results of Sequence query: (%d), ok : (%r)", result, ok)
 
-        q5 = SeqMotifQuery(
+        q9 = SeqMotifQuery(
+            "C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
+            pattern_type="prosite",
+            sequence_type="protein",
+            request_options=[ReturnCounts(True)]
+        )
+        q10 = SeqMotifQuery(
             "C-x(2,4)-C-x(3)-[LIVMFYWC]-x(8)-H-x(3,5)-H.",
             pattern_type="prosite",
             sequence_type="protein"
         )
-        result = q5.count()
-        ok = result == len(list(q5()))
+        result = q9()
+        ok = result == len(list(q10()))
         self.assertTrue(ok)
         logger.info("Counting results of Sequence motif query: (%d), ok : (%r)", result, ok)
 
-        q6 = StructSimilarityQuery(
+        q11 = StructSimilarityQuery(
+            structure_search_type="entry_id",
+            entry_id="4HHB",  # Structure Similarity Query
+            structure_input_type="assembly_id",
+            assembly_id="1",
+            operator="strict_shape_match",
+            target_search_space="assembly",
+            request_options=[ReturnCounts(True)]
+        )
+        q12 = StructSimilarityQuery(
             structure_search_type="entry_id",
             entry_id="4HHB",  # Structure Similarity Query
             structure_input_type="assembly_id",
@@ -1011,8 +1047,8 @@ class SearchTests(unittest.TestCase):
             operator="strict_shape_match",
             target_search_space="assembly"
         )
-        result = q6.count()
-        ok = result == len(list(q6()))
+        result = q11()
+        ok = result == len(list(q12()))
         self.assertTrue(ok)
         logger.info("Counting results of Structure similarity query: (%d), ok : (%r)", result, ok)
 
@@ -1022,44 +1058,49 @@ class SearchTests(unittest.TestCase):
         Res4 = StructureMotifResidue("A", "1", 245, ["GLU", "ASP", "ASN"])
         Res5 = StructureMotifResidue("A", "1", 295, ["HIS", "LYS"])
         ResList = [Res1, Res2, Res3, Res4, Res5]
-        q7 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
-        result = q7.count()
-        ok = result == len(list(q7()))
+        q13 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList, request_options=[ReturnCounts(True)])
+        q14 = StructMotifQuery(entry_id="2MNR", residue_ids=ResList)
+        result = q13()
+        ok = result == len(list(q14()))
         self.assertTrue(ok)
         logger.info("Counting results of Structure motif query: (%d), ok : (%r)", result, ok)
 
-        q8 = ChemSimilarityQuery(value="C12 H17 N4 O S")
-        result = q8.count()
-        ok = result == len(list(q8()))
+        q15 = ChemSimilarityQuery(value="C12 H17 N4 O S", request_options=[ReturnCounts(True)])
+        q16 = ChemSimilarityQuery(value="C12 H17 N4 O S")
+        result = q15()
+        ok = result == len(list(q16()))
         self.assertTrue(ok)
         logger.info("Counting results of Chemical similarity query: (%d), ok : (%r)", result, ok)
 
         ok = False
-        q9 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR", service="textx")
+        q17 = AttributeQuery("invalid_identifier", operator="exact_match", value="ERROR", service="textx", request_options=[ReturnCounts(True)])
         try:
-            _ = q9.count()
+            _ = q17()
         except requests.HTTPError:
             ok = True
         self.assertTrue(ok)
         logger.info("Counting results of Attribute query type with invalid parameters failed successfully : (%r)", ok)
 
-        q10 = TextQuery(" ")
-        result = q10.count()
+        q18 = TextQuery(" ", request_options=[ReturnCounts(True)])
+        result = q18()
         ok = result == 0
         self.assertTrue(ok)
         logger.info("Counting results of empty Text query failed successfully : (%r)", ok)
 
-        q11 = TextQuery("heat-shock transcription factor")
-        q12 = AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2")
-        q13 = q11 & q12
-        result = q13.count()
-        ok = result == len(list(q13()))
+        q19 = TextQuery("heat-shock transcription factor")
+        q20 = AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2", request_options=[ReturnCounts(True)])
+        q21 = q19 & q20
+        result = q21()
+        q22 = TextQuery("heat-shock transcription factor")
+        q23 = AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2")
+        q24 = q22 & q23
+        ok = result == len(list(q24()))
         self.assertTrue(ok)
         logger.info("Counting results queries combined with &: (%d), ok : (%r)", result, ok)
 
-        q14 = q11 | q12
-        result = q14.count()
-        ok = result == len(list(q11())) + len(list(q12())) - len(list(q13()))
+        q25 = q19 | q20
+        result = q25()
+        ok = result == len(list(q22())) + len(list(q23())) - len(list(q24()))
         self.assertTrue(ok)
         logger.info("Counting results of queries combined with &: (%d), ok : (%r)", result, ok)
 
@@ -1084,61 +1125,105 @@ class SearchTests(unittest.TestCase):
     def testFacetQuery(self):
         """Test firing off Facets queries and Filter Facet queries"""
 
-        q1 = AttributeQuery("rcsb_accession_info.initial_release_date", operator="greater", value="2019-08-20")
-        result = q1.facets(facets=Facet("Methods", "terms", "exptl.method"))
+        q1 = AttributeQuery(
+            attribute="rcsb_accession_info.initial_release_date",
+            operator="greater",
+            value="2019-08-20",
+            request_options=[Facet("Methods", "terms", "exptl.method")]
+        )
+        result = q1().facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Basic Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        blank_q = AttributeQuery("rcsb_entry_info.structure_determination_methodology", operator="exact_match", value="experimental")
-
-        result = blank_q.facets(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000))
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000)]
+        )
+        result = q1().facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Terms Facet query on Empty query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        result = blank_q.facets(return_type="polymer_entity", facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1))
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1)]
+        )
+        result = q1(return_type="polymer_entity").facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        result = blank_q.facets(facets=Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1))
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1)]
+        )
+        result = q1(return_type="polymer_entity").facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Date Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        result = blank_q.facets(
-            facets=Facet(
-                "Resolution Combined",
-                "range",
-                "rcsb_entry_info.resolution_combined",
-                ranges=[Range(None, 2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]
-            )
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[
+                Facet(
+                    "Resolution Combined",
+                    "range",
+                    "rcsb_entry_info.resolution_combined",
+                    ranges=[Range(None, 2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]
+                )
+            ]
         )
+        result = q1().facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        result = blank_q.facets(
-            facets=Facet(
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[Facet(
                 "Release Date",
                 "date_range",
                 "rcsb_accession_info.initial_release_date",
                 ranges=[Range(None, "2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]
-            )
+                )
+            ]
         )
+        result = q1().facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Date Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
-        result = blank_q.facets(facets=Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name"))
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name")]
+        )
+        result = q1().facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Cardinality Facet query results: result length : (%d), ok : (%r)", len(result), ok)
 
         f1 = Facet("Polymer Entity Types", "terms", "rcsb_entry_info.selected_polymer_entity_types")
         f2 = Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year")
-        result = blank_q.facets(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2]))
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2])]
+        )
+        result = q1().facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Multi-dimensional Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1147,7 +1232,13 @@ class SearchTests(unittest.TestCase):
         tf2 = TerminalFilter("rcsb_polymer_instance_annotation.annotation_lineage.id", "in", ["2.140.10.30", "2.120.10.80"])
         ff1 = FilterFacet(tf2, Facet("CATH Domains", "terms", "rcsb_polymer_instance_annotation.annotation_lineage.id", min_interval_population=1))
         ff2 = FilterFacet(tf1, ff1)
-        result = blank_q.facets("polymer_instance", ff2)
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[ff2]
+        )
+        result = q1("polymer_instance").facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Filter Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1156,10 +1247,10 @@ class SearchTests(unittest.TestCase):
         f3 = Facet("ec_terms", "terms", "rcsb_polymer_entity.rcsb_ec_lineage.id")
         f4 = Facet("sym_symbol_terms", "terms", "rcsb_struct_symmetry.symbol", nested_facets=f3)
         ff3 = FilterFacet(tf3, f4)
-        q2 = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
-        q3 = AttributeQuery("rcsb_assembly_info.polymer_entity_instance_count", operator="greater", value=1)
+        q2 = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1, request_options=[ff3])
+        q3 = AttributeQuery("rcsb_assembly_info.polymer_entity_instance_count", operator="greater", value=1, request_options=[ff3])
         q4 = q2 & q3
-        result = q4.facets("assembly", ff3)
+        result = q4("assembly").facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Filter Facet query with Multi-dimensional facets results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1168,7 +1259,13 @@ class SearchTests(unittest.TestCase):
         tf5 = TerminalFilter("rcsb_polymer_entity_group_membership.similarity_cutoff", "equals", value=100)
         gf1 = GroupFilter("and", [tf4, tf5])
         ff4 = FilterFacet(gf1, Facet("Distinct Protein Sequence Count", "cardinality", "rcsb_polymer_entity_group_membership.group_id"))
-        result = blank_q.facets("polymer_entity", ff4)
+        q1 = AttributeQuery(
+            attribute="rcsb_entry_info.structure_determination_methodology",
+            operator="exact_match",
+            value="experimental",
+            request_options=[ff4]
+        )
+        result = q1("polymer_entity").facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Group Filter Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1321,39 +1418,54 @@ class SearchTests(unittest.TestCase):
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
 
+    def testReturnExplainMetadata(self):
+        try:
+            query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens", request_options=[ReturnExplainMetadata(True)])
+            query().explain_metadata  # pylint: disable=expression-not-assigned
+        except Exception as error:
+            self.fail(f"Failed unexpectedly: {error}")
+
+    def testScoringStrategy(self):
+        try:
+            query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens", request_options=[ScoringStrategy("text")])
+            query()
+        except Exception as error:
+            self.fail(f"Failed unexpectedly: {error}")
+
 
 def buildSearch():
     suiteSelect = unittest.TestSuite()
-    # suiteSelect.addTest(SearchTests("testConstruction"))
-    # suiteSelect.addTest(SearchTests("testLargePagination"))
-    # suiteSelect.addTest(SearchTests("testOperators"))
-    # suiteSelect.addTest(SearchTests("testPartialQuery"))
-    # suiteSelect.addTest(SearchTests("testFreeText"))
-    # suiteSelect.addTest(SearchTests("testAttribute"))
-    # suiteSelect.addTest(SearchTests("exampleQuery1"))
-    # suiteSelect.addTest(SearchTests("exampleQuery2"))
-    # suiteSelect.addTest(SearchTests("testMalformedQuery"))
-    # suiteSelect.addTest(SearchTests("testPagination"))
-    # suiteSelect.addTest(SearchTests("testXor"))
-    # suiteSelect.addTest(SearchTests("testInversion"))
-    # suiteSelect.addTest(SearchTests("testIterable"))
-    # suiteSelect.addTest(SearchTests("testIquery"))
-    # suiteSelect.addTest(SearchTests("testSingleQuery"))
-    # suiteSelect.addTest(SearchTests("testChemSearch"))
-    # suiteSelect.addTest(SearchTests("testMismatch"))
-    # suiteSelect.addTest(SearchTests("testCSMquery"))
-    # suiteSelect.addTest(SearchTests("testSequenceQuery"))
-    # suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
-    # suiteSelect.addTest(SearchTests("testFileUpload"))
-    # suiteSelect.addTest(SearchTests("testStructSimQuery"))
-    # suiteSelect.addTest(SearchTests("testStructMotifQuery"))
-    # suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
-    # suiteSelect.addTest(SearchTests("testResultsCount"))
-    # suiteSelect.addTest(SearchTests("testResultsVerbosity"))
-    # suiteSelect.addTest(SearchTests("testFacetQuery"))
+    suiteSelect.addTest(SearchTests("testConstruction"))
+    suiteSelect.addTest(SearchTests("testLargePagination"))
+    suiteSelect.addTest(SearchTests("testOperators"))
+    suiteSelect.addTest(SearchTests("testPartialQuery"))
+    suiteSelect.addTest(SearchTests("testFreeText"))
+    suiteSelect.addTest(SearchTests("testAttribute"))
+    suiteSelect.addTest(SearchTests("exampleQuery1"))
+    suiteSelect.addTest(SearchTests("exampleQuery2"))
+    suiteSelect.addTest(SearchTests("testMalformedQuery"))
+    suiteSelect.addTest(SearchTests("testPagination"))
+    suiteSelect.addTest(SearchTests("testXor"))
+    suiteSelect.addTest(SearchTests("testInversion"))
+    suiteSelect.addTest(SearchTests("testIterable"))
+    suiteSelect.addTest(SearchTests("testIquery"))
+    suiteSelect.addTest(SearchTests("testSingleQuery"))
+    suiteSelect.addTest(SearchTests("testChemSearch"))
+    suiteSelect.addTest(SearchTests("testMismatch"))
+    suiteSelect.addTest(SearchTests("testCSMquery"))
+    suiteSelect.addTest(SearchTests("testSequenceQuery"))
+    suiteSelect.addTest(SearchTests("testSeqMotifQuery"))
+    suiteSelect.addTest(SearchTests("testFileUpload"))
+    suiteSelect.addTest(SearchTests("testStructSimQuery"))
+    suiteSelect.addTest(SearchTests("testStructMotifQuery"))
+    suiteSelect.addTest(SearchTests("testChemSimilarityQuery"))
+    suiteSelect.addTest(SearchTests("testReturnCounts"))
+    suiteSelect.addTest(SearchTests("testResultsVerbosity"))
+    suiteSelect.addTest(SearchTests("testFacetQuery"))
     suiteSelect.addTest(SearchTests("testGroupBy"))
     suiteSelect.addTest(SearchTests("testSort"))
-    return suiteSelect
+    suiteSelect.addTest(SearchTests("testReturnExplainMetadata"))
+    suiteSelect.addTest(SearchTests("testScoringStrategy"))
 
 
 if __name__ == "__main__":
