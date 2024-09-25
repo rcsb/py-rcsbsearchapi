@@ -590,26 +590,25 @@ q1 = TextQuery(value="hemoglobin")
 result_count = q1.count()
 print(result_count)
 ```
-
-## Faceted Queries
-In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. The `facets()` function runs the query `q` using the specified facet(s), and returns a list of dictionaries:
+## Request Options
+### Faceted Queries
+In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. To run a faceted query, create a `Facet` object and pass it in as a single object or list into the request_options argument during query construction.
 ```python
 from rcsbsearchapi.search import AttributeQuery, Facet, Range
 
 q = AttributeQuery(
     attribute="rcsb_accession_info.initial_release_date",
     operator="greater",
-    value="2019-08-20"
-)
-
-facet_results = q.facets(
-    facets=Facet(
+    value="2019-08-20",
+    request_options=Facet(
         name="Methods",
         aggregation_type="terms",
         attribute="exptl.method"
     )
 )
-print(facet_results)
+
+q_result = q()
+print(q_result.facets)
 ```
 
 List of available types of Faceted queries:
@@ -622,3 +621,26 @@ List of available types of Faceted queries:
 - Filter Facet
 
 See example usage of each of these types of Faceted queries at [Faceted Query Examples](additional_examples.md#Faceted-Query-Examples).
+
+### Additional Request Options
+Other request options can also be added to queries through the request_options argument. To add additional request options, create a `RequestOption` object (e.g. `Facet`, `GroupBy`, `ReturnAllHits`) and pass it into the request_options argument as single object or list of `RequestOption`s.
+
+List of `RequestOption`s
+- `Facet`
+- `GroupBy`
+- `GroupByReturnType`
+- `Sort`
+- `ScoringStrategy`
+- `ReturnCounts`
+- `ReturnExplainMetadata`
+
+
+Some request options are handled differently or are currently not implemented:
+- results_content_type: argument during query execution ([see above](#computed-structure-models))
+- results_verbosity: argument during query execution ([see above](#result-verbosity))
+- paginate: automatically handled by package. Results are paginated by package and all results are returned
+- return_all_hits: not implemented since all results are returned
+
+For more information on what each request option does, refer to the [Search API documentation](https://search.rcsb.org/#scoring-strategy).
+
+For information on how to create each `RequestOption` refer to the [API reference](api.rst).

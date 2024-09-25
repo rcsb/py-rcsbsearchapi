@@ -669,16 +669,17 @@ class AttributeQuery(Terminal):
         negation: Optional[bool] = False,
         request_options: Optional[List[RequestOption]] = None
     ):
-        """Search for the string value given possible attribute or operator
+        """
+        Search for the string value given possible attribute or operator
         Also can specify service and negation
 
         Args:
-            attribute: specify attribute for search (i.e struct.title, exptl.method, rcsb_id)
-            operator: specify operation to be done for search (i.e "contains_phrase", "exact_match")
-            value: text query
-            service: specify what search service (i.e "text", "text_chem")
-            negation: logical not
-            request_options: TODO
+            attribute (Optional[str], optional): specify attribute for search (i.e struct.title, exptl.method, rcsb_id). Defaults to None.
+            operator (Optional[str], optional): specify operation to be done for search (i.e "contains_phrase", "exact_match"). Defaults to None.
+            value (Optional[TValue], optional): value to compare attribute to. Defaults to None.
+            service (Optional[str], optional): specify what search service (i.e "text", "text_chem"). Defaults to None.
+            negation (Optional[bool], optional): logical not. Defaults to False.
+            request_options (Optional[List[RequestOption]], optional): configure filtering and information returned in response. Defaults to None.
         """
         paramsD = {"attribute": attribute, "operator": operator, "negation": negation}
 
@@ -1363,11 +1364,19 @@ class Value(Generic[T]):
 
 @dataclass(frozen=True)
 class Range:
-    """Primarily for use with "range" and "date_range" aggregations with the Facet class.
-    include_upper and include_lower should not be used with Facet queries."""
+    """
+    Primarily for use with "range" and "date_range" aggregations with the Facet class.
+    include_upper and include_lower should not be used with Facet queries.
 
-    start: Union[str, float] = None
-    end: Union[str, float] = None
+    Either start or end are required to construct
+    Attributes:
+        start (Optional[Union[str, float]])
+        end (Optional[Union[str, float]])
+        include_lower (Optional[bool]): whether to include start value in range
+        include_upper (Optional[bool]): whether to include end value in range
+    """
+    start: Optional[Union[str, float]] = None
+    end: Optional[Union[str, float]] = None
     include_lower: Optional[bool] = None
     include_upper: Optional[bool] = None
 
@@ -1384,61 +1393,11 @@ class Range:
         return d
 
 
-# class TerminalFilter:
-#     """
-#     Terminal filter class for use with FilterFacet queries
-#     """
-
-#     def __init__(
-#         self,
-#         attribute: str,
-#         operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"],
-#         value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None,
-#         negation: bool = False,
-#         case_sensitive: bool = False,
-#     ):
-#         self.attribute = attribute
-#         self.operator = operator
-#         self.value = value
-#         self.negation = negation
-#         self.case_sensitive = case_sensitive
-
-#     def to_dict(self):
-#         tf_dict = dict(type="terminal", service="text", parameters=dict(attribute=self.attribute, operator=self.operator, negation=self.negation, case_sensitive=self.case_sensitive))
-#         if self.value is not None:
-#             tf_dict["parameters"]["value"] = self.value
-#         return tf_dict
-
-
-# class GroupFilter:
-#     """
-#     Group filter class for use with FilterFacet queries
-#     """
-
-#     def __init__(self, logical_operator: TAndOr, nodes: List[Union["TerminalFilter", "GroupFilter"]]):
-#         self.logical_operator = (logical_operator,)
-#         self.nodes = nodes
-
-#     def to_dict(self):
-#         return dict(type="group", logical_operator=self.logical_operator[0], nodes=[node.to_dict() for node in self.nodes])
-
-
-# class FilterFacet:
-#     """Facet queries using Filters"""
-
-#     def __init__(self, filters: Union[TerminalFilter, GroupFilter], facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]):
-#         self.filter = filters
-#         self.facets = facets if isinstance(facets, list) else [facets]
-
-#     def to_dict(self):
-#         return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
-
-
 class RequestOption(ABC):
     """
     Base class for request options
     Note: return_all_hits, paginate not implemented. They are handled automatically by package.
-    """ 
+    """
 
     @abstractmethod
     def to_dict(self) -> Dict:
@@ -1460,9 +1419,10 @@ class Sort(RequestOption):
     """
     control sorting of results
 
-    sort_by (str): "score" to sort by relevancy scores or full attribute name
-    filter (Optional[GroupFilter, TerminalFilter], optional): filter for results. Defaults to None.
-    direction (str, optional): "asc" (ascending) or "desc" (descending). Defaults to None.
+    Attributes:
+        sort_by (str): "score" to sort by relevancy scores or full attribute name
+        filter (Optional[GroupFilter, TerminalFilter], optional): filter for results. Defaults to None.
+        direction (str, optional): "asc" (ascending) or "desc" (descending). Defaults to None.
     """
     sort_by: str
     direction: Optional[str] = None
@@ -1477,13 +1437,10 @@ class GroupBy(RequestOption):
     """
     return results as groups
 
-    aggregation_method (str): "matching_deposit_group_id", "sequence_identity", "matching_uniprot_accession".
-    similarity_cutoff (int, optional): only for aggregation method "sequence identity", identity threshold for grouping. 100, 95, 90,70, 50, or 30. Defaults to None.
-    ranking_criteria_type (Optional[RankingCriteriaType], optional): control ordering of results. Defaults to None.
-    return_type (Optional[str], optional): PDB data type to return (ex: "assembly"), Automatically determined based on aggregation method if not provided. Defaults to None.
-    group_by_return_type (Optional[str], optional): Determines the representation of grouped data:
-        "groups" - search results are divided into groups and each group is returned with all associated search hits;
-        "representatives" - only a single search hit is returned per group. Defaults to "representatives".
+    Attributes:
+        aggregation_method (str): "matching_deposit_group_id", "sequence_identity", "matching_uniprot_accession".
+        similarity_cutoff (int, optional): only for aggregation method "sequence identity", identity threshold for grouping. 100, 95, 90,70, 50, or 30. Defaults to None.
+        ranking_criteria_type (Optional[RankingCriteriaType], optional): control ordering of results. Defaults to None.
     """
     aggregation_method: str
     similarity_cutoff: Optional[int] = None
@@ -1495,6 +1452,14 @@ class GroupBy(RequestOption):
 
 @dataclass(frozen=True)
 class GroupByReturnType(RequestOption):
+    """
+    Used with GroupBy to control return type
+
+    Attributes:
+        group_by_return_type (Literal["groups", "representatives"]):
+            "groups" - search results are divided into groups and each group is returned with all associated search hits
+            "representatives" - only a single search hit is returned per group 
+    """
     group_by_return_type: Literal["groups", "representatives"]
 
     def to_dict(self) -> Dict:
@@ -1503,6 +1468,14 @@ class GroupByReturnType(RequestOption):
 
 @dataclass(frozen=True)
 class ScoringStrategy(RequestOption):
+    """
+    Control scoring algorithm to be used for scores calculation of the final result set
+    If ScoringStrategy isn't added to a query,"combined" is used.
+
+    Attributes:
+        scoring_strategy (Literal["combined", "sequence", "seqmotif", "strucmotif", "structure", "chemical", "text", "text_chem", "full_text"]):
+            which scoring strategy to use. Must be matched to query type.
+    """
     scoring_strategy: Literal["combined", "sequence", "seqmotif", "strucmotif", "structure", "chemical", "text", "text_chem", "full_text"]
 
     def to_dict(self) -> Dict:
@@ -1511,6 +1484,12 @@ class ScoringStrategy(RequestOption):
 
 @dataclass(frozen=True)
 class ReturnCounts(RequestOption):
+    """
+    Whether to return only total count of results rather than identifiers. When undefined, search result identifiers are returned
+
+    Attributes:
+        return_counts (bool)
+    """
     return_counts: bool
 
     def to_dict(self) -> Dict:
@@ -1527,8 +1506,10 @@ class ReturnExplainMetadata(RequestOption):
 
 @dataclass(frozen=True)
 class Facet(RequestOption):
-    """Facet object for use in a faceted query.
-        Args:
+    """
+    Facet object for use in a faceted query.
+
+        Attributes:
             name (str): Specifies the name of the aggregation.
             aggregation_type (AggregationType): Specifies the type of the aggregation. Can be "terms", "histogram", "date_histogram", "range", "date_range", or "cardinality".
             attribute (str): Specifies the full attribute name to aggregate on.
@@ -1598,6 +1579,17 @@ class Facet(RequestOption):
 
 @dataclass(frozen=True)
 class TerminalFilter(RequestOption):
+    """A filter based on a single Terminal node. Can be combined into GroupFilters
+
+    Attribute:
+            attribute (str): specify attribute for search (i.e struct.title, exptl.method, rcsb_id). Defaults to None.
+            operator (Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"]):
+                specify operation to be done for search (i.e "contains_phrase", "exact_match"). Defaults to None.
+            value (Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]], optional):
+                The search term(s). Can be a single or multiple words, numbers, dates, date math expressions, or ranges.
+            negation (bool, optional): logical not. Defaults to False.
+            case_sensitive (bool, optional): whether to do case sensitive matching of value. Defaults to False.
+    """
     attribute: str
     operator: Literal["equals", "greater", "greater_or_equal", "less", "less_or_equal", "range", "exact_match", "in", "exists"]
     value: Optional[Union[str, int, float, bool, Range, List[str], List[int], List[float]]] = None
@@ -1615,6 +1607,10 @@ class TerminalFilter(RequestOption):
 class GroupFilter(RequestOption):
     """
     Group filter class for use with FilterFacet queries
+
+    Attributes:
+        logical operator (TAndOr): "and", "or" logical operator
+        nodes (List[Union["TerminalFilter", "GroupFilter"]]): list of filters to combine
     """
     logical_operator: TAndOr
     nodes: List[Union["TerminalFilter", "GroupFilter"]]
@@ -1628,7 +1624,13 @@ class GroupFilter(RequestOption):
 
 @dataclass(frozen=True)
 class FilterFacet:
-    """Facet queries using Filters"""
+    """Filter results that contribute to bucket count
+
+    Attributes:
+        filter (Union[TerminalFilter, GroupFilter]): filter to apply to facets
+        facets (Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]])
+    
+    """
     filter: Union[TerminalFilter, GroupFilter]
     facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
 
@@ -1641,7 +1643,14 @@ class FilterFacet:
 
 @dataclass(frozen=True)
 class RankingCriteriaType:
-    """Request option controlling the order that results are returned"""
+    """
+    Request option controlling the order that results are returned
+    
+    Attributes:
+        sort_by (str): "score", "size", "count", or full attribute name
+        filter (Optional[Union[GroupFilter, TerminalFilter]], optional): filter out results
+        direction (Optional[Literal["asc", "desc"]]): The order in which to sort. Undefined defaults to “desc”.
+    """
     sort_by: str
     filter: Optional[Union[GroupFilter, TerminalFilter]] = None
     direction: Optional[Literal["asc", "desc"]] = None
@@ -1676,8 +1685,7 @@ class Session(Iterable[str]):
     count: Optional[int] = None
     explain_metadata: Optional[Dict] = None
 
-    def __init__(
-        # pylint: disable=dangerous-default-value
+    def __init__(  # pylint: disable=dangerous-default-value
         # parameter added below for computed model inclusion]
         self,
         query: Query,
@@ -1686,7 +1694,6 @@ class Session(Iterable[str]):
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
         request_options: Optional[List[RequestOption]] = None
-        # pylint: enable=dangerous-default-value
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
@@ -1821,6 +1828,7 @@ class Session(Iterable[str]):
             yield from result_set
 
     def to_dict(self) -> Dict:
+        """return full json response"""
         response = self._single_query()
         if not isinstance(response, Dict):
             return {}
