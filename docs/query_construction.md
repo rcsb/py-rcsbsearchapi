@@ -617,7 +617,7 @@ List of available types of Faceted queries:
 - Histogram Facet
 - Range Facet
 - Date Range Facet
-- Cardnality Facet
+- Cardinality Facet
 - Multidimensional Facet
 - Filter Facet
 
