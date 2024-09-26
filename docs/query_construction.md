@@ -580,14 +580,16 @@ See [Chemical Similarity Search Examples](additional_examples.md#Chemical-Simila
 
 ## Count Queries
 ### Counting Results
-If only the number of results is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
+If only the number of results is desired, the count request option can be used. This query returns the number of experimental models associated with "hemoglobin".
 ```python
-from rcsbsearchapi.search import TextQuery
+from rcsbsearchapi.search import TextQuery, ReturnCounts
 
-q1 = TextQuery(value="hemoglobin")
+q1 = TextQuery(
+    value="hemoglobin",
+    request_options=[ReturnCounts(True)]
+)
 
-# As with `query()`, `return_type` and `return_content_type` can be parameters to `count()`
-result_count = q1.count()
+result_count = q1()
 print(result_count)
 ```
 ## Request Options
@@ -600,11 +602,13 @@ q = AttributeQuery(
     attribute="rcsb_accession_info.initial_release_date",
     operator="greater",
     value="2019-08-20",
-    request_options=Facet(
-        name="Methods",
-        aggregation_type="terms",
-        attribute="exptl.method"
-    )
+    request_options=[
+        Facet(
+            name="Methods",
+            aggregation_type="terms",
+            attribute="exptl.method"
+        )
+    ]
 )
 
 q_result = q()

@@ -1352,7 +1352,7 @@ class SearchTests(unittest.TestCase):
                 list(query(return_type="polymer_entity"))
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
-       
+ 
             # using uniprot specific ranking_criteria_type
             try:
                 query = AttributeQuery(
@@ -1419,11 +1419,8 @@ class SearchTests(unittest.TestCase):
                 self.fail(f"Failed unexpectedly: {error}")
 
     def testReturnExplainMetadata(self):
-        try:
-            query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens", request_options=[ReturnExplainMetadata(True)])
-            query().explain_metadata  # pylint: disable=expression-not-assigned
-        except Exception as error:
-            self.fail(f"Failed unexpectedly: {error}")
+        query = AttributeQuery("rcsb_entity_source_organism.ncbi_scientific_name", operator="exact_match", value="Homo sapiens", request_options=[ReturnExplainMetadata(True)])
+        self.assertIsNotNone(query().explain_metadata)
 
     def testScoringStrategy(self):
         try:
@@ -1466,6 +1463,7 @@ def buildSearch():
     suiteSelect.addTest(SearchTests("testSort"))
     suiteSelect.addTest(SearchTests("testReturnExplainMetadata"))
     suiteSelect.addTest(SearchTests("testScoringStrategy"))
+    return suiteSelect
 
 
 if __name__ == "__main__":

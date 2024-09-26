@@ -221,7 +221,7 @@ class Query(ABC):
         rows: int = 10000,
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
-    ) -> "Session":
+    ) -> Union["Session", int]:
         # pylint: disable=dangerous-default-value
         """Evaluate this query and return an iterator of all result IDs"""
         session = Session(
@@ -1693,7 +1693,7 @@ class Session(Iterable[str]):
         rows: int = 10000,
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
-        request_options: Optional[List[RequestOption]] = None
+        request_options: Optional[Union[List[RequestOption], RequestOption]] = None
     ):
         self.query_id = Session.make_uuid()
         self.query = query.assign_ids()
@@ -1734,9 +1734,6 @@ class Session(Iterable[str]):
         )
 
         if self.request_options:
-            if not isinstance(self.request_options, list):
-                raise ValueError("request_options argument must be a list of RequestOption objects")
-
             for request_option in self.request_options:
                 if isinstance(request_option, Sort):
                     if "sort" not in query_dict["request_options"]:
@@ -1749,12 +1746,18 @@ class Session(Iterable[str]):
                     query_dict["request_options"]["group_by"] = request_option.to_dict()
 
                 if isinstance(request_option, GroupByReturnType):
-                    query_dict["request_options"]["group_by_return_type"] = request_option.to_dict()
+                    if "group_by_return_type" in query_dict["request_options"]:
+                        raise ValueError("Multiple GroupByReturnType request options are not allowed")
+                    query_dict["request_options"]["group_by_return_type"] = request_option.group_by_return_type
 
                 if isinstance(request_option, ScoringStrategy):
+                    if "scoring_strategy" in query_dict["request_options"]:
+                        raise ValueError("Multiple ScoringStrategy request options are not allowed")
                     query_dict["request_options"]["scoring_strategy"] = request_option.scoring_strategy
 
                 if isinstance(request_option, ReturnCounts):
+                    if "return_counts" in query_dict["request_options"]:
+                        raise ValueError("Multiple ReturnCounts request options are not allowed")
                     query_dict["request_options"]["return_counts"] = request_option.return_counts
 
                     # return_counts can't be used with paginate
@@ -1762,13 +1765,17 @@ class Session(Iterable[str]):
                         query_dict["request_options"].pop("paginate")
 
                 if isinstance(request_option, ReturnExplainMetadata):
-                    query_dict["request_options"] = request_option.to_dict()
+                    if "return_counts" in query_dict["request_options"]:
+                        raise ValueError("Multiple ReturnCounts request options are not allowed")
+                    query_dict["request_options"]["return_explain_metadata"] = request_option.return_explain_metadata
 
                 if isinstance(request_option, Facet) or isinstance(request_option, FilterFacet) or isinstance(request_option, TerminalFilter):
+                    if "facets" not in query_dict["request_options"]:
+                        query_dict["request_options"]["facets"] = []
                     if isinstance(request_option, list):
-                        query_dict["request_options"]["facets"] = [facet.to_dict() for facet in self.request_option]
+                        query_dict["request_options"]["facets"] += [facet.to_dict() for facet in self.request_option]
                     else:
-                        query_dict["request_options"]["facets"] = [request_option.to_dict()]
+                        query_dict["request_options"]["facets"].append(request_option.to_dict())
         return query_dict
 
     def _single_query(self, start=0) -> Optional[Dict]:

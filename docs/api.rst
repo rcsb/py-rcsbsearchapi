@@ -5,3 +5,8 @@ API Documentation
     :members:
     :private-members:
     :special-members: __init__
+
+.. automodule:: rcsbsearchapi.search
+    :members:
+    :private-members:
+    :special-members: __init__

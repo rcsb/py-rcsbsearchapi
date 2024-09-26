@@ -353,121 +353,186 @@ from rcsbsearchapi.search import ChemSimilarityQuery
 
 # Query with type = descriptor, descriptor type = InChI,
 # match type = substructure (sterospecific) or sub-struct-graph-relaxed-stereo
-q3 = ChemSimilarityQuery(value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
-                         query_type="descriptor",
-                         descriptor_type="InChI",
-                         match_type="sub-struct-graph-relaxed-stereo")
+q3 = ChemSimilarityQuery(
+    value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
+    query_type="descriptor",
+    descriptor_type="InChI",
+    match_type="sub-struct-graph-relaxed-stereo")
 list(q3())
 ```
 ## Faceted Query Examples
+For more details on arguments, reference the [API reference](api.rst)
+
 In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. The `facets()` function runs the query `q` using the specified facet(s), and returns a list of dictionaries:
 ```python
-from rcsbsearchapi.search import AttributeQuery, Facet, Range
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet
 
 q = AttributeQuery(
     attribute="rcsb_accession_info.initial_release_date",
     operator="greater",
-    value="2019-08-20")
-q.facets(facets=Facet(name="Methods", aggregation_type="terms", attribute="exptl.method"))
+    value="2019-08-20",
+    request_options=[
+        Facet(name="Methods", aggregation_type="terms", attribute="exptl.method")
+    ]
+)
+q().facets
 ```
 
 ### Terms Facets
 Terms faceting is a multi-bucket aggregation where buckets are dynamically built - one per unique value. We can specify the minimum count (`>= 0`) for a bucket to be returned using the parameter `min_interval_population` (default value `1`). We can also control the number of buckets returned (`<= 65336`) using the parameter `max_num_intervals` (default value `65336`).
 ```python
-from rcsbsearchapi.search import AttributeQuery, Facet, Range
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet
 
 # This is the default query used by the RCSB Search API when no query is specified.
 # This default query will be used for most of the examples found below for faceted queries.
-base_q = AttributeQuery(
+q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
-    value="experimental") 
+    value="experimental",
+    request_options=[
+        Facet(
+            name="Journals",
+            aggregation_type="terms",
+            attribute="rcsb_primary_citation.rcsb_journal_abbrev",
+            min_interval_population=1000
+        )
+    ]
+) 
 
-base_q.facets(
-    facets=Facet(
-        name="Journals",
-        aggregation_type="terms",
-        attribute="rcsb_primary_citation.rcsb_journal_abbrev",
-        min_interval_population=1000
-    )
-)
+q().facets
 ```
 
 ### Histogram Facets
 Histogram facets build fixed-sized buckets (intervals) over numeric values. The size of the intervals must be specified in the parameter `interval`. We can also specify `min_interval_population` if desired.
 ```python
-base_q.facets(
-    return_type="polymer_entity",
-    facets=Facet(
-        name="Formula Weight",
-        aggregation_type="histogram",
-        attribute="rcsb_polymer_entity.formula_weight",
-        interval=50,
-        min_interval_population=1
-    )
-)
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet
+
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+    request_options=[
+        Facet(
+            name="Formula Weight",
+            aggregation_type="histogram",
+            attribute="rcsb_polymer_entity.formula_weight",
+            interval=50,
+            min_interval_population=1
+        )
+    ]
+) 
+
+q("polymer_entity").facets
 ```
 
 ### Date Histogram Facets
 Similar to histogram facets, date histogram facets build buckets over date values. For date histogram aggregations, we must specify `interval="year"`. Again, we may also specify `min_interval_population`.
 ```python
-base_q.facets(
-    facets=Facet(
-        name="Release Date",
-        aggregation_type="date_histogram",
-        attribute="rcsb_accession_info.initial_release_date",
-        interval="year",
-        min_interval_population=1
-    )
-)
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet
+
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+    request_options=[
+        Facet(
+            name="Release Date",
+            aggregation_type="date_histogram",
+            attribute="rcsb_accession_info.initial_release_date",
+            interval="year",
+            min_interval_population=1
+        )
+    ]
+) 
+
+q().facets
 ```
 
 ### Range Facets
 We can define the buckets ourselves by using range facets. In order to specify the ranges, we use the `Range` class. Note that the range includes the `start` value and excludes the `end` value (`include_lower` and `include_upper` should not be specified). If the `start` or `end` is omitted, the minimum or maximum boundaries will be used by default. The buckets should be provided as a list of `Range` objects to the `ranges` parameter.  
 ```python
-base_q.facets(
-    facets=Facet(
-        name="Resolution Combined",
-        aggregation_type="range",
-        attribute="rcsb_entry_info.resolution_combined",
-        ranges=[Range(start=None,end=2),
-        Range(start=2, end=2.2),
-        Range(start=2.2, end=2.4),
-        Range(start=4.6, end=None)]
-    )
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet, Range
+
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+        request_options=[
+            Facet(
+                name="Resolution Combined",
+                aggregation_type="range",
+                attribute="rcsb_entry_info.resolution_combined",
+                ranges=[Range(start=None,end=2),
+                Range(start=2, end=2.2),
+                Range(start=2.2, end=2.4),
+                Range(start=4.6, end=None)]
+            )
+        ]
 )
+
+q().facets
 ```
 
 ### Date Range Facets
 Date range facets allow us to specify date values as bucket ranges, using [date math expressions](https://search.rcsb.org/#date-math-expressions).
 ```python
-base_q.facets(
-    facets=Facet(
-        name="Release Date",
-        aggregation_type="date_range",
-        attribute="rcsb_accession_info.initial_release_date",
-        ranges=[
-            Range(start=None,end="2020-06-01||-12M"),
-            Range(start="2020-06-01", end="2020-06-01||+12M"),
-            Range(start="2020-06-01||+12M", end=None)
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet, Range
+
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+        request_options=[
+            Facet(
+                name="Release Date",
+                aggregation_type="date_range",
+                attribute="rcsb_accession_info.initial_release_date",
+                ranges=[
+                    Range(start=None,end="2020-06-01||-12M"),
+                    Range(start="2020-06-01", end="2020-06-01||+12M"),
+                    Range(start="2020-06-01||+12M", end=None)
+                ]
+            )
         ]
-    )
 )
+
+q().facets
 ```
 
 ### Cardinality Facets 
 Cardinality facets return a single value: the count of distinct values returned for a given field. A `precision_threshold` (`<= 40000`, default value `40000`) may be specified.
 ```python
-base_q.facets(
-    facets=Facet(
-        name="Organism Names Count",
-        aggregation_type="cardinality",
-        attribute="rcsb_entity_source_organism.ncbi_scientific_name"))
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet
+
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+    request_options=[
+        Facet(
+            name="Organism Names Count",
+            aggregation_type="cardinality",
+            attribute="rcsb_entity_source_organism.ncbi_scientific_name"
+        )
+    ]
+) 
+
+q().facets
 ```
 
 ### Multidimensional Facets
 Complex, multi-dimensional aggregations are possible by specifying additional facets in the `nested_facets` parameter, as in the example below:
 ```python
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Facet
+
 f1 = Facet(
     name="Polymer Entity Types",
     aggregation_type="terms",
@@ -479,19 +544,28 @@ f2 = Facet(
     attribute="rcsb_accession_info.initial_release_date",
     interval="year"
 )
-base_q.facets(
-    facets=Facet(
-        name="Experimental Method",
-        aggregation_type="terms",
-        attribute="rcsb_entry_info.experimental_method",
-        nested_facets=[f1, f2]
-    )
-)
+
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+    request_options=[
+        Facet(
+            name="Experimental Method",
+            aggregation_type="terms",
+            attribute="rcsb_entry_info.experimental_method",
+            nested_facets=[f1, f2]
+        )
+    ]
+) 
+
+q().facets
 ```
 
 ### Filter Facets
 Filters allow us to filter documents that contribute to bucket count. Similar to queries, we can group several `TerminalFilter`s into a single `GroupFilter`. We can combine a filter with a facet using the `FilterFacet` class. Terminal filters should specify an `attribute` and `operator`, as well as possible a `value` and whether or not it should be a `negation` and/or `case_sensitive`. Group filters should specify a `logical_operator` (which should be either `"and"` or `"or"`) and a list of filters (`nodes`) that should be combined. Finally, the `FilterFacet` should be provided with a filter and a (list of) facet(s). Here are some examples:
 ```python
+from rcsbsearchapi import AttributeQuery
 from rcsbsearchapi.search import TerminalFilter, GroupFilter, FilterFacet
 
 tf1 = TerminalFilter(
@@ -505,7 +579,7 @@ tf2 = TerminalFilter(
     value=["2.140.10.30", "2.120.10.80"]
 )
 ff2 = FilterFacet(
-    filters=tf2,
+    filter=tf2,
     facets=Facet(
         name="CATH Domains",
         aggregation_type="terms",
@@ -513,9 +587,20 @@ ff2 = FilterFacet(
         min_interval_population=1
     )
 )
-ff1 = FilterFacet(filters=tf1, facets=ff2)
-base_q.facets("polymer_instance", ff1)
 
+q = AttributeQuery(
+    attribute="rcsb_entry_info.structure_determination_methodology",
+    operator="exact_match",
+    value="experimental",
+    request_options=[
+        FilterFacet(
+            filter=tf1,
+            facets=ff2
+        )
+    ]
+) 
+
+q("polymer_instance").facets
 
 tf1 = TerminalFilter(
     attribute="rcsb_struct_symmetry.kind",
@@ -535,19 +620,20 @@ f1 = Facet(
     nested_facets=f2
 )
 
-ff = FilterFacet(filters=tf1, facets=f1)
+ff = FilterFacet(filter=tf1, facets=f1)
 q1 = AttributeQuery(
     attribute="rcsb_assembly_info.polymer_entity_count",
     operator="equals",
     value=1
+    request_options=[ff]
 )
 q2 = AttributeQuery(
     attribute="rcsb_assembly_info.polymer_entity_instance_count",
     operator="greater",
     value=1
 )
-q = q1 & q2
-q.facets("assembly", ff)
+q = q1 & q2  # request_options on one query apply to both once combined
+q("assembly").facets
 
 tf1 = TerminalFilter(
     attribute="rcsb_polymer_entity_group_membership.aggregation_method",
@@ -560,12 +646,138 @@ tf2 = TerminalFilter(
     value=100)
 gf = GroupFilter(logical_operator="and", nodes=[tf1, tf2])
 ff = FilterFacet(
-    filters=gf,
+    filter=gf,
     facets=Facet(
         "Distinct Protein Sequence Count",
         "cardinality",
         "rcsb_polymer_entity_group_membership.group_id"
     )
 )
-base_q.facets("polymer_entity", ff)
+q = AttributeQuery(
+    attribute="rcsb_assembly_info.polymer_entity_count",
+    operator="equals",
+    value=1,
+    request_options=[ff]
+)
+q("polymer_entity").facets
+```
+
+## GroupBy and GroupByReturnType Example
+For more details on arguments, reference the [API reference](api.rst).
+
+Sequence Identity and Matching Uniprot Accession examples from [Search API Documentation](https://search.rcsb.org/#group-by-return-type).
+
+### Matching Deposit Group ID
+Grouping on the basis of common identifier for a group of entries deposited as a collection.
+
+This example searches for Human Growth Receptor protein groups from humans with investigational or experimental drugs bound.
+Since GroupByReturnType is specified as "representatives", one representative structure per group is returned.
+
+```python
+from rcsbsearchapi import AttributeQuery, TextQuery
+from rcsbsearchapi import rcsb_attributes as attrs
+from rcsbsearchapi.search import GroupBy, GroupByReturnType
+
+q1 = TextQuery("interleukin")
+q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
+q3 = attrs.drugbank_info.drug_groups == "investigational"
+q4 = AttributeQuery(
+    attribute="drugbank_info.drug_groups",
+    operator="exact_match",
+    value="experimental",
+    # request_options must be used with  AttributeQuery constructor
+    request_options=[
+        GroupBy(
+            aggregation_method="matching_deposit_group_id"
+        ),
+        GroupByReturnType("representatives")  # only a single search hit is returned per group
+    ]
+)
+
+query = q1 & q2 & (q3 | q4)  # request_options on one query apply to all once combined
+list(query())
+```
+
+### Sequence Identity
+The method used to group search hits on the basis of protein sequence clusters that meet a predefined identity threshold.
+
+This example groups together identical human sequences from high-resolution (1.0-2.0Å) structures determined by X-ray crystallography. Among the resulting groups, there is a cluster of human glutathione transferases in complex with different substrates.
+```python
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi import rcsb_attributes as attrs
+from rcsbsearchapi.search import GroupBy, GroupByReturnType, RankingCriteriaType
+q1 = attrs.rcsb_entity_source_organism.taxonomy_lineage.name == "Homo sapiens"
+q2 = attrs.exptl.method == "X-RAY DIFFRACTION"
+q3 = attrs.rcsb_entry_info.resolution_combined >= 1
+q4 = AttributeQuery(
+    attribute="rcsb_entry_info.resolution_combined",
+    operator="less_or_equal",
+    value=2,
+    request_options=[
+        GroupBy(
+            aggregation_method="sequence_identity",
+            similarity_cutoff=100,  # 100, 95, 90, 70, 50, or 30
+            ranking_criteria_type=RankingCriteriaType(
+                sort_by="entity_poly.rcsb_sample_sequence_length",
+                direction="desc"
+            )
+        ),
+        GroupByReturnType("groups")  # divide into groups returned with all associated hits
+    ]
+)
+
+query = q1 & q2 & q3 & q4  # request_options on one query apply to all once combined
+list(query("polymer_entity"))  # "sequence_identity" must use return type "polymer_entity"
+```
+
+### Matching Uniprot Accession
+This example demonstrates how to use matching_uniprot_accession grouping to get distinct Spike protein S1 proteins released from the beginning of 2020 with. Here, all entities are represented by distinct groups of SARS-CoV, SARS-CoV-2 and Pangolin coronavirus spike proteins.
+
+```python
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi import rcsb_attributes as attrs
+from rcsbsearchapi.search import GroupBy, GroupByReturnType, RankingCriteriaType
+
+q1 = AttributeQuery(
+    attribute="rcsb_polymer_entity.pdbx_description",
+    operator="contains_phrase",
+    value="Spike protein S1",
+    request_options=[
+        GroupBy(
+            aggregation_method="matching_uniprot_accession",
+            ranking_criteria_type= RankingCriteriaType(
+                sort_by="coverage"
+            )
+        ),
+        GroupByReturnType("groups")
+    ]
+)
+q2 = attrs.rcsb_accession_info.initial_release_date > "2020-01-01"
+
+query = q1 & q2  # request_options on one query apply to all once combined
+list(query("polymer_entity"))
+```
+
+## Sort Example
+The SortBy request option can be used to control sorting of results. By default, results are sorted by "score" in descending order.
+You can also sort by attribute name and apply filters.
+
+Example from [RCSB PDB Search API](https://search.rcsb.org/#sorting) page.
+
+```python
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import Sort
+
+query = AttributeQuery(
+    attribute="struct.title",
+    operator="contains_phrase",
+    value="hiv protease",
+    request_options=[
+        Sort(
+            sort_by="rcsb_accession_info.initial_release_date",
+            direction="desc"
+        )
+    ]
+)
+list(query())
 ```
