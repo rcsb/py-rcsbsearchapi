@@ -595,6 +595,7 @@ print(result_count)
 ## Request Options
 ### Faceted Queries
 In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. To run a faceted query, create a `Facet` object and pass it in as a single object or list into the request_options argument during query construction.
+
 ```python
 from rcsbsearchapi.search import AttributeQuery, Facet, Range
 

@@ -723,7 +723,9 @@ class SequenceQuery(Terminal):
             sequence_type: Optional[SequenceType] = "protein",
             request_options: Optional[List[RequestOption]] = None
     ):
-        """The string value is a target sequence that is searched
+        """
+        The string value is a target sequence that is searched
+        
         Args:
             value (str): protein or nucleotide sequence
             evalue_cutoff (Optional[float], optional): upper cutoff for E-value (lower is more significant).
