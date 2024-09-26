@@ -133,6 +133,7 @@ def fileUpload(filepath: str, fmt: str = "cif") -> str:
         spec = res.json()["key"]
     except KeyError:
         raise TypeError("There was an issue processing the file. Check the file format.")
+    x.close()
     return RETURN_UP_URL + spec
 
 
