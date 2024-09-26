@@ -725,7 +725,7 @@ class SequenceQuery(Terminal):
     ):
         """
         The string value is a target sequence that is searched
-        
+
         Args:
             value (str): protein or nucleotide sequence
             evalue_cutoff (Optional[float], optional): upper cutoff for E-value (lower is more significant).
@@ -1430,7 +1430,7 @@ class Sort(RequestOption):
     direction: Optional[str] = None
     filter: Optional[Union[GroupFilter, TerminalFilter]] = None
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict:  # pylint: disable=useless-parent-delegation
         return super().to_dict()
 
 
@@ -1448,7 +1448,7 @@ class GroupBy(RequestOption):
     similarity_cutoff: Optional[int] = None
     ranking_criteria_type: Optional[RankingCriteriaType] = None
 
-    def to_dict(self,) -> Dict:
+    def to_dict(self,) -> Dict:  # pylint: disable=useless-parent-delegation
         return super().to_dict()
 
 
@@ -1464,7 +1464,7 @@ class GroupByReturnType(RequestOption):
     """
     group_by_return_type: Literal["groups", "representatives"]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict:  # pylint: disable=useless-parent-delegation
         return super().to_dict()
 
 
@@ -1480,7 +1480,7 @@ class ScoringStrategy(RequestOption):
     """
     scoring_strategy: Literal["combined", "sequence", "seqmotif", "strucmotif", "structure", "chemical", "text", "text_chem", "full_text"]
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict:  # pylint: disable=useless-parent-delegation
         return super().to_dict()
 
 
@@ -1494,15 +1494,15 @@ class ReturnCounts(RequestOption):
     """
     return_counts: bool
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict:  # pylint: disable=useless-parent-delegation
         return super().to_dict()
 
 
-@dataclass(frozen=True)  # TODO: write tests
+@dataclass(frozen=True)
 class ReturnExplainMetadata(RequestOption):
     return_explain_metadata: bool
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict:  # pylint: disable=useless-parent-delegation
         return super().to_dict()
 
 
@@ -1831,7 +1831,7 @@ class Session(Iterable[str]):
                 result_set = response["result_set"]
             elif "group_set" in response:
                 result_set = response["group_set"]
-            else: 
+            else:
                 result_set = []
             logging.debug("Got %s ids", len(result_set))
             start += self.rows

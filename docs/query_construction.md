@@ -625,12 +625,12 @@ List of available types of Faceted queries:
 - Multidimensional Facet
 - Filter Facet
 
-See example usage of each of these types of Faceted queries at [Faceted Query Examples](additional_examples.md#Faceted-Query-Examples).
+See example usage of each of these types of Faceted queries at [Faceted Query Examples](additional_examples.md#faceted-query-examples).
 
 ### Additional Request Options
-Other request options can also be added to queries through the request_options argument. To add additional request options, create a `RequestOption` object (e.g. `Facet`, `GroupBy`, `ReturnAllHits`) and pass it into the request_options argument as single object or list of `RequestOption`s.
+Other request options can also be added to queries through the `request_options` argument. To add additional request options, create a `RequestOption` object (e.g. `Facet`, `GroupBy`, `ReturnCounts`) and pass it into the request_options argument as single object or list of `RequestOption`s.
 
-List of `RequestOption`s
+List of available `RequestOption`s
 - `Facet`
 - `GroupBy`
 - `GroupByReturnType`
@@ -648,4 +648,4 @@ Some request options are handled differently or are currently not implemented:
 
 For more information on what each request option does, refer to the [Search API documentation](https://search.rcsb.org/#scoring-strategy).
 
-For information on how to create each `RequestOption` refer to the [API reference](api.rst).
+For information on how to create each `RequestOption`, see the [API reference](api.rst).

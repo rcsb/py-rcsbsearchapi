@@ -361,7 +361,7 @@ q3 = ChemSimilarityQuery(
 list(q3())
 ```
 ## Faceted Query Examples
-For more details on arguments, reference the [API reference](api.rst)
+For more details on arguments, see the [API reference](api.rst)
 
 In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. The `facets()` function runs the query `q` using the specified facet(s), and returns a list of dictionaries:
 ```python
@@ -467,10 +467,12 @@ q = AttributeQuery(
                 name="Resolution Combined",
                 aggregation_type="range",
                 attribute="rcsb_entry_info.resolution_combined",
-                ranges=[Range(start=None,end=2),
-                Range(start=2, end=2.2),
-                Range(start=2.2, end=2.4),
-                Range(start=4.6, end=None)]
+                ranges=[
+                    Range(start=None,end=2),
+                    Range(start=2, end=2.2),
+                    Range(start=2.2, end=2.4),
+                    Range(start=4.6, end=None)
+                ]
             )
         ]
 )
@@ -663,7 +665,7 @@ q("polymer_entity").facets
 ```
 
 ## GroupBy and GroupByReturnType Example
-For more details on arguments to create `RequestOption` objects, go to [API reference](api.rst).
+For more details on arguments to create `RequestOption` objects, see the [API reference](api.rst).
 
 Sequence Identity and Matching Uniprot Accession examples from [Search API Documentation](https://search.rcsb.org/#group-by-return-type).
 
