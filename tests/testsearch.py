@@ -32,7 +32,7 @@ from rcsbsearchapi.search import PartialQuery, Terminal, AttributeQuery, Sequenc
 from rcsbsearchapi.search import Session, Value
 from rcsbsearchapi.search import ChemSimilarityQuery
 from rcsbsearchapi.search import Facet, Range, TerminalFilter, GroupFilter, FilterFacet
-from rcsbsearchapi.search import GroupBy, RankingCriteriaType, GroupByReturnType, Sort, ReturnCounts, ReturnExplainMetadata, Facet, ScoringStrategy
+from rcsbsearchapi.search import GroupBy, RankingCriteriaType, Sort, ReturnCounts, ReturnExplainMetadata, ScoringStrategy
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -1191,11 +1191,12 @@ class SearchTests(unittest.TestCase):
             attribute="rcsb_entry_info.structure_determination_methodology",
             operator="exact_match",
             value="experimental",
-            request_options=[Facet(
-                "Release Date",
-                "date_range",
-                "rcsb_accession_info.initial_release_date",
-                ranges=[Range(None, "2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]
+            request_options=[
+                Facet(
+                    "Release Date",
+                    "date_range",
+                    "rcsb_accession_info.initial_release_date",
+                    ranges=[Range(None, "2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]
                 )
             ]
         )
@@ -1352,7 +1353,7 @@ class SearchTests(unittest.TestCase):
                 list(query(return_type="polymer_entity"))
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
- 
+
             # using uniprot specific ranking_criteria_type
             try:
                 query = AttributeQuery(

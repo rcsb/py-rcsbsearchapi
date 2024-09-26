@@ -663,7 +663,7 @@ q("polymer_entity").facets
 ```
 
 ## GroupBy and GroupByReturnType Example
-For more details on arguments, reference the [API reference](api.rst).
+For more details on arguments to create `RequestOption` objects, go to [API reference](api.rst).
 
 Sequence Identity and Matching Uniprot Accession examples from [Search API Documentation](https://search.rcsb.org/#group-by-return-type).
 
@@ -685,7 +685,7 @@ q4 = AttributeQuery(
     attribute="drugbank_info.drug_groups",
     operator="exact_match",
     value="experimental",
-    # request_options must be used with  AttributeQuery constructor
+    # request_options must be used with the AttributeQuery constructor not attrs
     request_options=[
         GroupBy(
             aggregation_method="matching_deposit_group_id"
@@ -755,11 +755,11 @@ q1 = AttributeQuery(
 q2 = attrs.rcsb_accession_info.initial_release_date > "2020-01-01"
 
 query = q1 & q2  # request_options on one query apply to all once combined
-list(query("polymer_entity"))
+list(query("polymer_entity"))  # "matching_uniprot_accession" must use return type "polymer_entity"
 ```
 
 ## Sort Example
-The SortBy request option can be used to control sorting of results. By default, results are sorted by "score" in descending order.
+The Sort request option can be used to control sorting of results. By default, results are sorted by "score" in descending order.
 You can also sort by attribute name and apply filters.
 
 Example from [RCSB PDB Search API](https://search.rcsb.org/#sorting) page.

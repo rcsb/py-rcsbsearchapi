@@ -11,7 +11,7 @@ import urllib.parse
 import uuid
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, fields, asdict, is_dataclass
+from dataclasses import dataclass, fields, is_dataclass
 from datetime import date
 from typing import (
     Any,
@@ -1460,7 +1460,7 @@ class GroupByReturnType(RequestOption):
     Attributes:
         group_by_return_type (Literal["groups", "representatives"]):
             "groups" - search results are divided into groups and each group is returned with all associated search hits
-            "representatives" - only a single search hit is returned per group 
+            "representatives" - only a single search hit is returned per group
     """
     group_by_return_type: Literal["groups", "representatives"]
 
@@ -1631,7 +1631,7 @@ class FilterFacet:
     Attributes:
         filter (Union[TerminalFilter, GroupFilter]): filter to apply to facets
         facets (Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]])
-    
+
     """
     filter: Union[TerminalFilter, GroupFilter]
     facets: Union[Facet, "FilterFacet", List[Union[Facet, "FilterFacet"]]]
@@ -1643,11 +1643,12 @@ class FilterFacet:
     def to_dict(self):
         return dict(filter=self.filter.to_dict(), facets=[facet.to_dict() for facet in self.facets])
 
+
 @dataclass(frozen=True)
 class RankingCriteriaType:
     """
     Request option controlling the order that results are returned
-    
+
     Attributes:
         sort_by (str): "score", "size", "count", or full attribute name
         filter (Optional[Union[GroupFilter, TerminalFilter]], optional): filter out results
