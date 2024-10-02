@@ -1093,7 +1093,6 @@ class SearchTests(unittest.TestCase):
             value="2019-08-20",
         )
         result = q1(facets=[Facet("Methods", "terms", "exptl.method")]).facets_results
-        print(result)
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Basic Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1104,7 +1103,6 @@ class SearchTests(unittest.TestCase):
             value="experimental",
         )
         result = q1(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000)).facets_results
-        print(result)
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Terms Facet query on Empty query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1114,7 +1112,10 @@ class SearchTests(unittest.TestCase):
             operator="exact_match",
             value="experimental",
         )
-        result = q1(return_type="polymer_entity", facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1)).facets_results
+        result = q1(
+            return_type="polymer_entity",
+            facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1)
+        ).facets_results
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1330,12 +1331,12 @@ class SearchTests(unittest.TestCase):
                     value=10,
                 )
                 list(query(
-                        return_type="polymer_entity",
-                        group_by=GroupBy(
-                            aggregation_method="matching_uniprot_accession",
-                            ranking_criteria_type=RankingCriteriaType(sort_by="score", filter=gf, direction="asc")
-                        )
-                    ))
+                    return_type="polymer_entity",
+                    group_by=GroupBy(
+                        aggregation_method="matching_uniprot_accession",
+                        ranking_criteria_type=RankingCriteriaType(sort_by="score", filter=gf, direction="asc")
+                    )
+                ))
             except Exception as error:
                 self.fail(f"Failed unexpectedly: {error}")
 
