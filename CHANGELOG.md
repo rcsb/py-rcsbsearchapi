@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.7.0 (2024-10-02)
+## v2.0.0 (2024-10-02)
 
 - Facets changed from function to argument during execution
 - Count changed from function to argument during execution
