@@ -156,13 +156,6 @@ class Query(ABC):
 
     Queries are immutable, and all modifying functions return new instances.
     """
-    # Request options must be an attribute of Query,
-    # allowing propagation of request_options from AttributeQuery, StructMotifQuery, etc --> Terminal --> Query --> Session
-    request_options: Optional[List[RequestOption]]
-
-    def __init__(self, request_options: List[RequestOption], facets):
-        self.request_options = request_options
-
     @abstractmethod
     def to_dict(self) -> Dict:
         """Get dictionary representing this query"""
@@ -238,7 +231,6 @@ class Query(ABC):
             rows=rows,
             return_content_type=return_content_type,
             results_verbosity=results_verbosity,
-            request_options=self.request_options,
             return_counts=return_counts,
             facets=facets,
             group_by=group_by,
@@ -248,8 +240,9 @@ class Query(ABC):
             scoring_strategy=scoring_strategy,
         )
 
-        # If ReturnCounts is in the request_options, return only the total count
         response = session.to_dict()
+
+        # If return_counts exists, return only the total count  
         if return_counts:
             if not response:
                 return 0
@@ -261,7 +254,7 @@ class Query(ABC):
 
         if "facets" in response:
             facets = response["facets"]
-            setattr(session, "facets_results", facets)
+            setattr(session, "facets", facets)
 
         return session
 
@@ -355,7 +348,6 @@ class Terminal(Query):
     service: Union[List, str]
     params: Dict[str, Any]
     node_id: int = 0
-    request_options: Optional[List[RequestOption]] = None
 
     def to_dict(self):
         return dict(
@@ -372,7 +364,6 @@ class Terminal(Query):
                 operator=self.params.get("operator"),
                 negation=not self.params.get("negation"),
                 value=self.params.get("value"),
-                request_options=self.request_options
             )
         else:
             raise TypeError("Negation is not supported by type " + str(type(self)))  # Attribute Queries are the only query type to support inversion.
@@ -382,7 +373,7 @@ class Terminal(Query):
             return (self, node_id + 1)
         else:
             return (
-                Terminal(self.service, self.params, node_id, self.request_options),
+                Terminal(self.service, self.params, node_id),
                 node_id + 1,
             )
 
@@ -695,7 +686,6 @@ class AttributeQuery(Terminal):
         value: Optional[TValue] = None,
         service: Optional[Union[List[str], str]] = None,
         negation: Optional[bool] = False,
-        request_options: Optional[List[RequestOption]] = None
     ):
         """
         Search for the string value given possible attribute or operator
@@ -707,7 +697,6 @@ class AttributeQuery(Terminal):
             value (Optional[TValue], optional): value to compare attribute to. Defaults to None.
             service (Optional[str], optional): specify what search service (i.e "text", "text_chem"). Defaults to None.
             negation (Optional[bool], optional): logical not. Defaults to False.
-            request_options (Optional[List[RequestOption]], optional): configure filtering and information returned in response. Defaults to None.
         """
         paramsD: Dict = {"attribute": attribute, "operator": operator, "negation": negation}
 
@@ -725,19 +714,19 @@ class AttributeQuery(Terminal):
                 + f"{error_msg}"
             )
         assert isinstance(service, str)
-        super().__init__(params=paramsD, service=service, request_options=request_options)
+        super().__init__(params=paramsD, service=service)
 
 
 class TextQuery(Terminal):
     """Special case of a Terminal for free-text queries"""
 
-    def __init__(self, value: str, request_options: Optional[List[RequestOption]] = None):
+    def __init__(self, value: str):
         """Search for the string value anywhere in the text
 
         Args:
             value: free-text query
         """
-        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, params={"value": value}, request_options=request_options)
+        super().__init__(service=FULL_TEXT_SEARCH_SERVICE, params={"value": value})
 
 
 class SequenceQuery(Terminal):
@@ -749,7 +738,6 @@ class SequenceQuery(Terminal):
             evalue_cutoff: Optional[float] = 0.1,
             identity_cutoff: Optional[float] = 0,
             sequence_type: Optional[SequenceType] = "protein",
-            request_options: Optional[List[RequestOption]] = None
     ):
         """
         The string value is a target sequence that is searched
@@ -770,7 +758,6 @@ class SequenceQuery(Terminal):
             super().__init__(
                 service=SEQUENCE_SEARCH_SERVICE,
                 params={"evalue_cutoff": evalue_cutoff, "identity_cutoff": identity_cutoff, "sequence_type": sequence_type, "value": value},
-                request_options=request_options
             )
 
 
@@ -782,7 +769,6 @@ class SeqMotifQuery(Terminal):
         value: str,
         pattern_type: Optional[SeqMode] = "simple",
         sequence_type: Optional[SequenceType] = "protein",
-        request_options: Optional[List[RequestOption]] = None
     ):
         """
         Args:
@@ -793,7 +779,7 @@ class SeqMotifQuery(Terminal):
         if len(value) < SEQMOTIF_SEARCH_MIN_CHARACTERS:
             raise ValueError("The sequence motif must contain at least 2 characters")
         else:
-            super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value, "pattern_type": pattern_type, "sequence_type": sequence_type}, request_options=request_options)
+            super().__init__(service=SEQMOTIF_SEARCH_SERVICE, params={"value": value, "pattern_type": pattern_type, "sequence_type": sequence_type})
 
 
 class StructSimilarityQuery(Terminal):
@@ -811,7 +797,6 @@ class StructSimilarityQuery(Terminal):
         operator: StructSimOperator = "strict_shape_match",
         target_search_space: StructSimSearchSpace = "assembly",
         file_format: Optional[str] = None,
-        request_options: Optional[List[RequestOption]] = None
     ):
         """
         Args:
@@ -843,7 +828,7 @@ class StructSimilarityQuery(Terminal):
             assert isinstance(file_format, str)
             parameters["value"] = {"url": fileUpload(file_path, file_format), "format": "bcif"}
 
-        super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters, request_options=request_options)
+        super().__init__(service=STRUCT_SIM_SEARCH_SERVICE, params=parameters)
 
 
 class StructureMotifResidue:
@@ -900,7 +885,6 @@ class StructMotifQuery(Terminal):
         allowed_structures: Optional[list] = None,  # List of strings
         excluded_structures: Optional[list] = None,  # List of strings
         limit: Optional[int] = None,
-        request_options: Optional[List[RequestOption]] = None
     ):
         """
         Args:
@@ -977,7 +961,7 @@ class StructMotifQuery(Terminal):
 
         # now call super
 
-        super().__init__(service=STRUCTMOTIF_SEARCH_SERVICE, params=params, request_options=request_options)
+        super().__init__(service=STRUCTMOTIF_SEARCH_SERVICE, params=params)
 
 
 class ChemSimilarityQuery(Terminal):
@@ -990,7 +974,6 @@ class ChemSimilarityQuery(Terminal):
         descriptor_type: Optional[SubsetDescriptorType] = None,
         match_subset: Optional[bool] = False,
         match_type: Optional[ChemSimMatchType] = None,
-        request_options: Optional[List[RequestOption]] = None,
     ):
         """
         Args:
@@ -1022,7 +1005,7 @@ class ChemSimilarityQuery(Terminal):
             parameters["descriptor_type"] = descriptor_type
             parameters["match_type"] = match_type
 
-        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters, request_options=request_options)
+        super().__init__(service=CHEM_SIM_SEARCH_SERVICE, params=parameters)
 
 
 @dataclass(frozen=True)
@@ -1031,17 +1014,6 @@ class Group(Query):
 
     operator: TAndOr
     nodes: Iterable[Query] = ()
-    request_options: Optional[List[RequestOption]] = None
-
-    def __post_init__(self):
-        request_options = []
-
-        for node in self.nodes:
-            if node.request_options:
-                request_options += [opt for opt in node.request_options if opt not in request_options]
-
-        if request_options:
-            object.__setattr__(self, "request_options", request_options)
 
     def to_dict(self):
         group_dict = dict(
@@ -1659,7 +1631,7 @@ class Session(Iterable[str]):
     return_type: ReturnType
     start: int
     rows: int
-    facets_results: Optional[Dict] = None
+    facets: Optional[Dict] = None
     count: Optional[int] = None
     explain_metadata: Optional[Dict] = None
 
@@ -1671,7 +1643,6 @@ class Session(Iterable[str]):
         rows: int = 10000,
         return_content_type: List[ReturnContentType] = ["experimental"],
         results_verbosity: VerbosityLevel = "compact",
-        request_options: Optional[Union[List[RequestOption], RequestOption]] = None,
         return_counts: bool = False,
         facets: Optional[List[Union[Facet, FilterFacet]]] = None,
         group_by: Optional[GroupBy] = None,
@@ -1687,18 +1658,18 @@ class Session(Iterable[str]):
         self.rows = rows
 
         # request options
-        self.return_content_type = return_content_type
-        self.results_verbosity = results_verbosity
-        self.facets = facets
-        self.group_by = group_by
-        self.group_by_return_type = group_by_return_type
-        self.sort = sort
-        self.return_counts = return_counts
-        self.return_explain_metadata = return_explain_metadata
-        self.scoring_strategy = scoring_strategy
+        self._return_content_type = return_content_type
+        self._results_verbosity = results_verbosity
+        self._facets = facets
+        self._group_by = group_by
+        self._group_by_return_type = group_by_return_type
+        self._sort = sort
+        self._return_counts = return_counts
+        self._return_explain_metadata = return_explain_metadata
+        self._scoring_strategy = scoring_strategy
 
         # request_option results
-        self.facets_results: Optional[Dict] = None
+        self.facets: Optional[Dict] = None
         self.count: Optional[int] = None
         self.explain_metadata: Optional[Dict] = None
 
@@ -1722,50 +1693,50 @@ class Session(Iterable[str]):
         "Generate GET parameters as a dict"
 
         # Generate request options as a dictionary, adding additional request options if present
-        request_options_dict = dict(paginate=dict(start=start, rows=self.rows), results_content_type=self.return_content_type, results_verbosity=self.results_verbosity)
+        request_options_dict = dict(paginate=dict(start=start, rows=self.rows), results_content_type=self._return_content_type, results_verbosity=self._results_verbosity)
 
-        if self.return_counts:
-            request_options_dict["return_counts"] = self.return_counts
+        if self._return_counts:
+            request_options_dict["return_counts"] = self._return_counts
 
             # return_counts can't be used with paginate
             if request_options_dict["paginate"]:
                 request_options_dict.pop("paginate")
 
-        if self.facets:
-            if isinstance(self.facets, list):
-                request_options_dict["facets"] = [facet.to_dict() for facet in self.facets]
+        if self._facets:
+            if isinstance(self._facets, list):
+                request_options_dict["facets"] = [facet.to_dict() for facet in self._facets]
             else:
-                request_options_dict["facets"] = [self.facets.to_dict()]
+                request_options_dict["facets"] = [self._facets.to_dict()]
 
-        if self.group_by:
-            if (self.group_by.aggregation_method == "matching_deposit_group_id") and (self.return_type != "entry"):
+        if self._group_by:
+            if (self._group_by.aggregation_method == "matching_deposit_group_id") and (self.return_type != "entry"):
                 logging.warning('group_by "matching_deposit_group_id" must be used with return_type "entry". '
                                 'Return type has been changed to "entry".')
-                self.return_type = "entry"
+                setattr(self, "return_type", "entry")
 
-            if (self.group_by.aggregation_method in ["sequence_identity", "matching_uniprot_accession"]) and (self.return_type != "polymer_entity"):
+            if (self._group_by.aggregation_method in ["sequence_identity", "matching_uniprot_accession"]) and (self.return_type != "polymer_entity"):
                 logging.warning('group_by "%s" must be used with return_type "polymer_entity". '
-                                'Return type has been changed to "polymer_entity".', self.group_by.aggregation_method)
-                self.return_type = "polymer_entity"
+                                'Return type has been changed to "polymer_entity".', self._group_by.aggregation_method)
+                setattr(self, "return_type", "polymer_entity")
 
-            request_options_dict["group_by"] = self.group_by.to_dict()
+            request_options_dict["group_by"] = self._group_by.to_dict()
 
-        if self.group_by_return_type:
-            if self.group_by is None:
+        if self._group_by_return_type:
+            if self._group_by is None:
                 raise ValueError("group_by_return_type must be used with group_by request option")
-            request_options_dict["group_by_return_type"] = self.group_by_return_type
+            request_options_dict["group_by_return_type"] = self._group_by_return_type
 
-        if self.sort:
-            if isinstance(self.sort, list):
-                request_options_dict["sort"] = [sort_obj.to_dict() for sort_obj in self.sort]
+        if self._sort:
+            if isinstance(self._sort, list):
+                request_options_dict["sort"] = [sort_obj.to_dict() for sort_obj in self._sort]
             else:
-                request_options_dict["sort"] = [self.sort.to_dict()]
+                request_options_dict["sort"] = [self._sort.to_dict()]
 
-        if self.return_explain_metadata:
-            request_options_dict["return_explain_metadata"] = self.return_explain_metadata
+        if self._return_explain_metadata:
+            request_options_dict["return_explain_metadata"] = self._return_explain_metadata
 
-        if self.scoring_strategy:
-            request_options_dict["scoring_strategy"] = self.scoring_strategy
+        if self._scoring_strategy:
+            request_options_dict["scoring_strategy"] = self._scoring_strategy
 
         query_dict = dict(
             query=self.query.to_dict(),
@@ -1814,7 +1785,7 @@ class Session(Iterable[str]):
         while start < total:
             # If no grouping is applied, check that result_set = rows
             # If grouping is applied, result set could be lower than rows
-            if not self.group_by:
+            if not self._group_by:
                 assert len(result_set) == self.rows
             req_count += 1
             if req_count == REQUESTS_PER_SECOND:

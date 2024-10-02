@@ -1092,7 +1092,7 @@ class SearchTests(unittest.TestCase):
             operator="greater",
             value="2019-08-20",
         )
-        result = q1(facets=[Facet("Methods", "terms", "exptl.method")]).facets_results
+        result = q1(facets=[Facet("Methods", "terms", "exptl.method")]).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Basic Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1102,7 +1102,7 @@ class SearchTests(unittest.TestCase):
             operator="exact_match",
             value="experimental",
         )
-        result = q1(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000)).facets_results
+        result = q1(facets=Facet("Journals", "terms", "rcsb_primary_citation.rcsb_journal_abbrev", min_interval_population=1000)).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Terms Facet query on Empty query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1115,7 +1115,7 @@ class SearchTests(unittest.TestCase):
         result = q1(
             return_type="polymer_entity",
             facets=Facet("Formula Weight", "histogram", "rcsb_polymer_entity.formula_weight", interval=50, min_interval_population=1)
-        ).facets_results
+        ).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1128,7 +1128,7 @@ class SearchTests(unittest.TestCase):
         result = q1(
             return_type="polymer_entity",
             facets=Facet("Release Date", "date_histogram", "rcsb_accession_info.initial_release_date", interval="year", min_interval_population=1)
-        ).facets_results
+        ).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Date Histogram Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1145,7 +1145,7 @@ class SearchTests(unittest.TestCase):
                 "rcsb_entry_info.resolution_combined",
                 ranges=[Range(None, 2), Range(2, 2.2), Range(2.2, 2.4), Range(4.6, None)]
             )
-        ).facets_results
+        ).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1162,7 +1162,7 @@ class SearchTests(unittest.TestCase):
                 "rcsb_accession_info.initial_release_date",
                 ranges=[Range(None, "2020-06-01||-12M"), Range("2020-06-01", "2020-06-01||+12M"), Range("2020-06-01||+12M", None)]
             )
-        ).facets_results
+        ).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Date Range Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1174,7 +1174,7 @@ class SearchTests(unittest.TestCase):
         )
         result = q1(
             facets=Facet("Organism Names Count", "cardinality", "rcsb_entity_source_organism.ncbi_scientific_name")
-        ).facets_results
+        ).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Cardinality Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1186,7 +1186,7 @@ class SearchTests(unittest.TestCase):
             operator="exact_match",
             value="experimental",
         )
-        result = q1(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2])).facets_results
+        result = q1(facets=Facet("Experimental Method", "terms", "rcsb_entry_info.experimental_method", nested_facets=[f1, f2])).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Multi-dimensional Facet query results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1200,7 +1200,7 @@ class SearchTests(unittest.TestCase):
             operator="exact_match",
             value="experimental",
         )
-        result = q1(return_type="polymer_instance", facets=[ff2]).facets_results
+        result = q1(return_type="polymer_instance", facets=[ff2]).facets
         print(f"filterfacet:\n {result}")
         ok = len(result) > 0
         self.assertTrue(ok)
@@ -1213,7 +1213,7 @@ class SearchTests(unittest.TestCase):
         q2 = AttributeQuery("rcsb_assembly_info.polymer_entity_count", operator="equals", value=1)
         q3 = AttributeQuery("rcsb_assembly_info.polymer_entity_instance_count", operator="greater", value=1)
         q4 = q2 & q3
-        result = q4(return_type="assembly", facets=ff3).facets_results
+        result = q4(return_type="assembly", facets=ff3).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Filter Facet query with Multi-dimensional facets results: result length : (%d), ok : (%r)", len(result), ok)
@@ -1227,7 +1227,7 @@ class SearchTests(unittest.TestCase):
             operator="exact_match",
             value="experimental",
         )
-        result = q1(return_type="polymer_entity", facets=ff4).facets_results
+        result = q1(return_type="polymer_entity", facets=ff4).facets
         ok = len(result) > 0
         self.assertTrue(ok)
         logger.info("Group Filter Facet query results: result length : (%d), ok : (%r)", len(result), ok)

@@ -582,19 +582,16 @@ See [Chemical Similarity Search Examples](additional_examples.md#Chemical-Simila
 ### Counting Results
 If only the number of results is desired, the count request option can be used. This query returns the number of experimental models associated with "hemoglobin".
 ```python
-from rcsbsearchapi.search import TextQuery, ReturnCounts
+from rcsbsearchapi.search import TextQuery
 
-q1 = TextQuery(
-    value="hemoglobin",
-    request_options=[ReturnCounts(True)]
-)
+q1 = TextQuery(value="hemoglobin")
 
-result_count = q1()
+result_count = q1(return_counts=True)
 print(result_count)
 ```
 ## Request Options
 ### Faceted Queries
-In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. To run a faceted query, create a `Facet` object and pass it in as a single object or list into the request_options argument during query construction.
+In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. To run a faceted query, create a `Facet` object and pass it in as a single object or list into the `facets` argument during query execution.
 
 ```python
 from rcsbsearchapi.search import AttributeQuery, Facet, Range
@@ -603,16 +600,13 @@ q = AttributeQuery(
     attribute="rcsb_accession_info.initial_release_date",
     operator="greater",
     value="2019-08-20",
-    request_options=[
-        Facet(
-            name="Methods",
-            aggregation_type="terms",
-            attribute="exptl.method"
-        )
-    ]
 )
 
-q_result = q()
+q_result = q(facets=Facet(
+    name="Methods",
+    aggregation_type="terms",
+    attribute="exptl.method"
+))
 print(q_result.facets)
 ```
 
@@ -628,24 +622,24 @@ List of available types of Faceted queries:
 See example usage of each of these types of Faceted queries at [Faceted Query Examples](additional_examples.md#faceted-query-examples).
 
 ### Additional Request Options
-Other request options can also be added to queries through the `request_options` argument. To add additional request options, create a `RequestOption` object (e.g. `Facet`, `GroupBy`, `ReturnCounts`) and pass it into the request_options argument as single object or list of `RequestOption`s.
+Other request options can also be added to queries through arguments at execution. `facet`, `group_by`, and `sort` are more complex request_options  and require creating a `RequestOption` object (`Facet`, `GroupBy`, `Sort`).
 
-List of available `RequestOption`s
-- `Facet`
-- `GroupBy`
-- `GroupByReturnType`
-- `Sort`
-- `ScoringStrategy`
-- `ReturnCounts`
-- `ReturnExplainMetadata`
+List of available request options:
+- `results_content_type`
+- `results_verbosity`
+- `return_counts`
+- `facets`
+- `group_by`
+- `group_by_return_type`
+- `sort`
+- `return_explain_metadata`
+- `scoring_strategy`
 
 
-Some request options are handled differently or are currently not implemented:
-- results_content_type: argument during query execution ([see above](#computed-structure-models))
-- results_verbosity: argument during query execution ([see above](#result-verbosity))
+Some request options are not currently not implemented:
 - paginate: automatically handled by package. Results are paginated by package and all results are returned
 - return_all_hits: not implemented since all results are returned
 
 For more information on what each request option does, refer to the [Search API documentation](https://search.rcsb.org/#scoring-strategy).
 
-For information on how to create each `RequestOption`, see the [API reference](api.rst).
+For information on how to create `RequestOption` objects, see the [API reference](api.rst).

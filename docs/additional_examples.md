@@ -96,13 +96,14 @@ from rcsbsearchapi.search import StructSimilarityQuery
 q1 = StructSimilarityQuery(entry_id="4HHB")
 
 # Same example but with parameters explicitly specified
-q1 = StructSimilarityQuery(structure_search_type="entry_id",
-                           entry_id="4HHB",
-                           structure_input_type="assembly_id",
-                           assembly_id="1",
-                           operator="strict_shape_match",
-                           target_search_space="assembly"
-                           )
+q1 = StructSimilarityQuery(
+    structure_search_type="entry_id",
+    entry_id="4HHB",
+    structure_input_type="assembly_id",
+    assembly_id="1",
+    operator="strict_shape_match",
+    target_search_space="assembly"
+)
 for rid in q1("assembly"):
     print(rid)
 ```
@@ -114,27 +115,33 @@ from rcsbsearchapi.search import StructSimilarityQuery
 
 # More complex query:
 # Entry ID value "4HHB", chain ID "B", operator "relaxed", and target search space "Chains"
-q2 = StructSimilarityQuery(structure_search_type="entry_id",
-                                   entry_id="4HHB",
-                                   structure_input_type="chain_id",
-                                   chain_id="B",
-                                   operator="relaxed_shape_match",
-                                   target_search_space="polymer_entity_instance")
+q2 = StructSimilarityQuery(
+    structure_search_type="entry_id",
+    entry_id="4HHB",
+    structure_input_type="chain_id",
+    chain_id="B",
+    operator="relaxed_shape_match",
+    target_search_space="polymer_entity_instance"
+)
 list(q2())
 ```
 Structure similarity queries also allow users to upload a file from their local computer or input a file url from the website to query the PDB archive for similar proteins. The file represents a target protein structure in the file formats "cif", "bcif", "pdb", "cif.gz", or "pdb.gz". If a user wants to use a file url for queries, the user must specify the structure search type, the value (being the url), and the file format of the file. This is also the same case for file upload, except the value is the absolute path leading to the file that is in the local machine. An example for file url is below for 4HHB (hemoglobin).
 ```python
 from rcsbsearchapi.search import StructSimilarityQuery
 
-q3 = StructSimilarityQuery(structure_search_type="file_url",
-                           file_url="https://files.rcsb.org/view/4HHB.cif",
-                           file_format="cif")
+q3 = StructSimilarityQuery(
+    structure_search_type="file_url",
+    file_url="https://files.rcsb.org/view/4HHB.cif",
+    file_format="cif"
+)
 list(q3())
 
 # To upload your own structure file, use the `file_path` parameter:
-q4 = StructSimilarityQuery(structure_search_type="file_upload",
-                           file_path="/PATH/TO/FILE.cif",  # specify local model file path
-                           file_format="cif")
+q4 = StructSimilarityQuery(
+    structure_search_type="file_upload",
+    file_path="/PATH/TO/FILE.cif",  # specify local model file path
+    file_format="cif"
+)
 list(q4())
 ```
 
@@ -162,7 +169,8 @@ Res2 = StructureMotifResidue(
     struct_oper_id="1",
     chain_id="A",
     exchanges=["LYS", "HIS"],
-    label_seq_id=192)
+    label_seq_id=192
+)
 
 # After declaring a minimum of 2 and as many as 10 residues,
 # they can be passed into a list for use in the query itself:
@@ -207,8 +215,8 @@ q3 = StructMotifQuery(
     structure_search_type="file_upload",
     file_path=filepath,
     file_extension="cif",
-    residue_ids=ResList)
-
+    residue_ids=ResList
+)
 list(q3())
 ```
 There are many additional parameters that Structure Motif Query supports. These include a variety of features such as backbone distance tolerance, side chain distance tolerance, angle tolerance, RMSD cutoff, limits (stop searching after this many hits), atom pairing schemes, motif pruning strategy, allowed structures, and excluded structures. These can be mixed and matched as needed to make accurate and useful queries. All of these have some default value which is used when a parameter isn't provided. These parameters conform to the defaults used by the Search API. 
@@ -220,7 +228,8 @@ Below will demonstrate how to define these parameters using non-positional argum
 backbone = StructMotifQuery(
     entry_id="2MNR",
     backbone_distance_tolerance=2,
-    residue_ids=ResList)
+    residue_ids=ResList
+)
 list(backbone())
 
 # specifying sidechain distance tolerance: 0-3, default is 1
@@ -266,7 +275,8 @@ list(limit())
 atom = StructMotifQuery(
     entry_id="2MNR",
     atom_pairing_scheme="ALL",
-    residue_ids=ResList)
+    residue_ids=ResList
+)
 list(atom())
 
 # specifying motif pruning strategy, default = "KRUSKAL"
@@ -277,7 +287,8 @@ list(atom())
 pruning = StructMotifQuery(
     entry_id="2MNR",
     motif_pruning_strategy="NONE",
-    residue_ids=ResList)
+    residue_ids=ResList
+)
 list(pruning())
 
 # specifying allowed structures, default excluded
@@ -286,7 +297,8 @@ list(pruning())
 allowed = StructMotifQuery(
     entry_id="2MNR",
     allowed_structures=list(limit()),
-    residue_ids=ResList)
+    residue_ids=ResList
+)
 list(allowed())
 
 # specifying structures to exclude, default excluded
@@ -331,9 +343,11 @@ from rcsbsearchapi.search import ChemSimilarityQuery
 q1 = ChemSimilarityQuery(value="C12 H17 N4 O S")
 
 # Same example but with all the parameters listed
-q1 = ChemSimilarityQuery(value="C12 H17 N4 O S",
-                         query_type="formula",
-                         match_subset=False)
+q1 = ChemSimilarityQuery(
+    value="C12 H17 N4 O S",
+    query_type="formula",
+    match_subset=False
+)
 list(q1())
 ```
 Below is are two examples of using query option descriptor. Both descriptor type parameters are also used.
@@ -342,10 +356,12 @@ from rcsbsearchapi.search import ChemSimilarityQuery
 
 # Query with type = descriptor, descriptor type = SMILES,
 # match type = similar ligands (sterospecific) or graph-relaxed-stereo
-q2 = ChemSimilarityQuery(value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
-                         query_type="descriptor",
-                         descriptor_type="SMILES",
-                         match_type="graph-relaxed-stereo")
+q2 = ChemSimilarityQuery(
+    value="Cc1c(sc[n+]1Cc2cnc(nc2N)C)CCO",
+    query_type="descriptor",
+    descriptor_type="SMILES",
+    match_type="graph-relaxed-stereo"
+)
 list(q2())
 ```
 ```python
@@ -357,7 +373,8 @@ q3 = ChemSimilarityQuery(
     value="InChI=1S/C13H10N2O4/c16-10-6-5-9(11(17)14-10)15-12(18)7-3-1-2-4-8(7)13(15)19/h1-4,9H,5-6H2,(H,14,16,17)/t9-/m0/s1",
     query_type="descriptor",
     descriptor_type="InChI",
-    match_type="sub-struct-graph-relaxed-stereo")
+    match_type="sub-struct-graph-relaxed-stereo"
+)
 list(q3())
 ```
 ## Faceted Query Examples
@@ -371,12 +388,9 @@ from rcsbsearchapi.search import Facet
 q = AttributeQuery(
     attribute="rcsb_accession_info.initial_release_date",
     operator="greater",
-    value="2019-08-20",
-    request_options=[
-        Facet(name="Methods", aggregation_type="terms", attribute="exptl.method")
-    ]
+    value="2019-08-20"
 )
-q().facets
+q(facets=Facet(name="Methods", aggregation_type="terms", attribute="exptl.method")).facets
 ```
 
 ### Terms Facets
@@ -391,17 +405,16 @@ q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
     value="experimental",
-    request_options=[
-        Facet(
-            name="Journals",
-            aggregation_type="terms",
-            attribute="rcsb_primary_citation.rcsb_journal_abbrev",
-            min_interval_population=1000
-        )
-    ]
 ) 
 
-q().facets
+q(
+    facets= Facet(
+        name="Journals",
+        aggregation_type="terms",
+        attribute="rcsb_primary_citation.rcsb_journal_abbrev",
+        min_interval_population=1000
+    )
+).facets
 ```
 
 ### Histogram Facets
@@ -413,19 +426,19 @@ from rcsbsearchapi.search import Facet
 q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
-    value="experimental",
-    request_options=[
-        Facet(
-            name="Formula Weight",
-            aggregation_type="histogram",
-            attribute="rcsb_polymer_entity.formula_weight",
-            interval=50,
-            min_interval_population=1
-        )
-    ]
+    value="experimental"
 ) 
 
-q("polymer_entity").facets
+q(
+    return_type="polymer_entity",
+    facets=Facet(
+        name="Formula Weight",
+        aggregation_type="histogram",
+        attribute="rcsb_polymer_entity.formula_weight",
+        interval=50,
+        min_interval_population=1
+    )
+).facets
 ```
 
 ### Date Histogram Facets
@@ -437,19 +450,18 @@ from rcsbsearchapi.search import Facet
 q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
-    value="experimental",
-    request_options=[
-        Facet(
-            name="Release Date",
-            aggregation_type="date_histogram",
-            attribute="rcsb_accession_info.initial_release_date",
-            interval="year",
-            min_interval_population=1
-        )
-    ]
+    value="experimental"
 ) 
 
-q().facets
+q(
+    facets=Facet(
+        name="Release Date",
+        aggregation_type="date_histogram",
+        attribute="rcsb_accession_info.initial_release_date",
+        interval="year",
+        min_interval_population=1
+    )
+).facets
 ```
 
 ### Range Facets
@@ -461,23 +473,22 @@ from rcsbsearchapi.search import Facet, Range
 q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
-    value="experimental",
-        request_options=[
-            Facet(
-                name="Resolution Combined",
-                aggregation_type="range",
-                attribute="rcsb_entry_info.resolution_combined",
-                ranges=[
-                    Range(start=None,end=2),
-                    Range(start=2, end=2.2),
-                    Range(start=2.2, end=2.4),
-                    Range(start=4.6, end=None)
-                ]
-            )
-        ]
+    value="experimental"
 )
 
-q().facets
+q(
+    facets=Facet(
+        name="Resolution Combined",
+        aggregation_type="range",
+        attribute="rcsb_entry_info.resolution_combined",
+        ranges=[
+            Range(start=None,end=2),
+            Range(start=2, end=2.2),
+            Range(start=2.2, end=2.4),
+            Range(start=4.6, end=None)
+        ]
+    )
+).facets
 ```
 
 ### Date Range Facets
@@ -489,22 +500,21 @@ from rcsbsearchapi.search import Facet, Range
 q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
-    value="experimental",
-        request_options=[
-            Facet(
-                name="Release Date",
-                aggregation_type="date_range",
-                attribute="rcsb_accession_info.initial_release_date",
-                ranges=[
-                    Range(start=None,end="2020-06-01||-12M"),
-                    Range(start="2020-06-01", end="2020-06-01||+12M"),
-                    Range(start="2020-06-01||+12M", end=None)
-                ]
-            )
-        ]
+    value="experimental"
 )
 
-q().facets
+q(
+    facets=Facet(
+        name="Release Date",
+        aggregation_type="date_range",
+        attribute="rcsb_accession_info.initial_release_date",
+        ranges=[
+            Range(start=None,end="2020-06-01||-12M"),
+            Range(start="2020-06-01", end="2020-06-01||+12M"),
+            Range(start="2020-06-01||+12M", end=None)
+        ]
+    )
+).facets
 ```
 
 ### Cardinality Facets 
@@ -517,16 +527,15 @@ q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
     value="experimental",
-    request_options=[
-        Facet(
-            name="Organism Names Count",
-            aggregation_type="cardinality",
-            attribute="rcsb_entity_source_organism.ncbi_scientific_name"
-        )
-    ]
 ) 
 
-q().facets
+q(
+    facets=Facet(
+        name="Organism Names Count",
+        aggregation_type="cardinality",
+        attribute="rcsb_entity_source_organism.ncbi_scientific_name"
+    )
+).facets
 ```
 
 ### Multidimensional Facets
@@ -551,24 +560,23 @@ q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
     value="experimental",
-    request_options=[
-        Facet(
-            name="Experimental Method",
-            aggregation_type="terms",
-            attribute="rcsb_entry_info.experimental_method",
-            nested_facets=[f1, f2]
-        )
-    ]
 ) 
 
-q().facets
+q(
+    facets=Facet(
+        name="Experimental Method",
+        aggregation_type="terms",
+        attribute="rcsb_entry_info.experimental_method",
+        nested_facets=[f1, f2]
+    )
+).facets
 ```
 
 ### Filter Facets
 Filters allow us to filter documents that contribute to bucket count. Similar to queries, we can group several `TerminalFilter`s into a single `GroupFilter`. We can combine a filter with a facet using the `FilterFacet` class. Terminal filters should specify an `attribute` and `operator`, as well as possible a `value` and whether or not it should be a `negation` and/or `case_sensitive`. Group filters should specify a `logical_operator` (which should be either `"and"` or `"or"`) and a list of filters (`nodes`) that should be combined. Finally, the `FilterFacet` should be provided with a filter and a (list of) facet(s). Here are some examples:
 ```python
 from rcsbsearchapi import AttributeQuery
-from rcsbsearchapi.search import TerminalFilter, GroupFilter, FilterFacet
+from rcsbsearchapi.search import TerminalFilter, GroupFilter, FilterFacet, Facet
 
 tf1 = TerminalFilter(
     attribute="rcsb_polymer_instance_annotation.type",
@@ -593,17 +601,15 @@ ff2 = FilterFacet(
 q = AttributeQuery(
     attribute="rcsb_entry_info.structure_determination_methodology",
     operator="exact_match",
-    value="experimental",
-    request_options=[
-        FilterFacet(
-            filter=tf1,
-            facets=ff2
-        )
-    ]
+    value="experimental"
 ) 
 
-q("polymer_instance").facets
-
+q(
+    return_type="polymer_instance",
+    facets=FilterFacet(filter=tf1, facets=ff2
+)).facets
+```
+```python
 tf1 = TerminalFilter(
     attribute="rcsb_struct_symmetry.kind",
     operator="exact_match",
@@ -627,16 +633,16 @@ q1 = AttributeQuery(
     attribute="rcsb_assembly_info.polymer_entity_count",
     operator="equals",
     value=1
-    request_options=[ff]
 )
 q2 = AttributeQuery(
     attribute="rcsb_assembly_info.polymer_entity_instance_count",
     operator="greater",
     value=1
 )
-q = q1 & q2  # request_options on one query apply to both once combined
-q("assembly").facets
-
+q = q1 & q2
+q(return_type="assembly", facets=ff).facets
+```
+```python
 tf1 = TerminalFilter(
     attribute="rcsb_polymer_entity_group_membership.aggregation_method",
     operator="exact_match",
@@ -659,12 +665,11 @@ q = AttributeQuery(
     attribute="rcsb_assembly_info.polymer_entity_count",
     operator="equals",
     value=1,
-    request_options=[ff]
 )
-q("polymer_entity").facets
+q(return_type="polymer_entity", facets=ff).facets
 ```
 
-## GroupBy and GroupByReturnType Example
+## GroupBy Example
 For more details on arguments to create `RequestOption` objects, see the [API reference](api.rst).
 
 Sequence Identity and Matching Uniprot Accession examples from [Search API Documentation](https://search.rcsb.org/#group-by-return-type).
@@ -672,32 +677,26 @@ Sequence Identity and Matching Uniprot Accession examples from [Search API Docum
 ### Matching Deposit Group ID
 Grouping on the basis of common identifier for a group of entries deposited as a collection.
 
-This example searches for Human Growth Receptor protein groups from humans with investigational or experimental drugs bound.
-Since GroupByReturnType is specified as "representatives", one representative structure per group is returned.
+This example searches for entries associated with "interleukin" from humans with investigational or experimental drugs bound.
+Since group_by_return_type is specified as "representatives", one representative structure per group is returned.
 
 ```python
 from rcsbsearchapi import AttributeQuery, TextQuery
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import GroupBy, GroupByReturnType
+from rcsbsearchapi.search import GroupBy
 
 q1 = TextQuery("interleukin")
 q2 = attrs.rcsb_entity_source_organism.scientific_name == "Homo sapiens"
 q3 = attrs.drugbank_info.drug_groups == "investigational"
-q4 = AttributeQuery(
-    attribute="drugbank_info.drug_groups",
-    operator="exact_match",
-    value="experimental",
-    # request_options must be used with the AttributeQuery constructor not attrs
-    request_options=[
-        GroupBy(
-            aggregation_method="matching_deposit_group_id"
-        ),
-        GroupByReturnType("representatives")  # only a single search hit is returned per group
-    ]
-)
+q4 = attrs.drugbank_info.drug_groups == "experimental"
 
-query = q1 & q2 & (q3 | q4)  # request_options on one query apply to all once combined
-list(query())
+query = q1 & q2 & (q3 | q4)
+list(
+    query(
+        group_by=GroupBy(aggregation_method="matching_deposit_group_id"),
+        group_by_return_type="representatives"  # only a single search hit is returned per group
+    )
+)
 ```
 
 ### Sequence Identity
@@ -707,29 +706,27 @@ This example groups together identical human sequences from high-resolution (1.0
 ```python
 from rcsbsearchapi import AttributeQuery
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import GroupBy, GroupByReturnType, RankingCriteriaType
+from rcsbsearchapi.search import GroupBy, RankingCriteriaType
+
 q1 = attrs.rcsb_entity_source_organism.taxonomy_lineage.name == "Homo sapiens"
 q2 = attrs.exptl.method == "X-RAY DIFFRACTION"
 q3 = attrs.rcsb_entry_info.resolution_combined >= 1
-q4 = AttributeQuery(
-    attribute="rcsb_entry_info.resolution_combined",
-    operator="less_or_equal",
-    value=2,
-    request_options=[
-        GroupBy(
-            aggregation_method="sequence_identity",
-            similarity_cutoff=100,  # 100, 95, 90, 70, 50, or 30
-            ranking_criteria_type=RankingCriteriaType(
+q4 = attrs.rcsb_entry_info.resolution_combined <= 2
+
+query = q1 & q2 & q3 & q4
+
+list(query(
+    return_type="polymer_entity", # "sequence_identity" must use return type "polymer_entity"
+    group_by=GroupBy(
+        aggregation_method="sequence_identity",
+        similarity_cutoff=100,  # 100, 95, 90, 70, 50, or 30
+        ranking_criteria_type=RankingCriteriaType(
                 sort_by="entity_poly.rcsb_sample_sequence_length",
                 direction="desc"
-            )
-        ),
-        GroupByReturnType("groups")  # divide into groups returned with all associated hits
-    ]
-)
-
-query = q1 & q2 & q3 & q4  # request_options on one query apply to all once combined
-list(query("polymer_entity"))  # "sequence_identity" must use return type "polymer_entity"
+        )
+    ),
+    group_by_return_type="groups"  # divide into groups returned with all associated hits
+))
 ```
 
 ### Matching Uniprot Accession
@@ -738,26 +735,26 @@ This example demonstrates how to use matching_uniprot_accession grouping to get 
 ```python
 from rcsbsearchapi import AttributeQuery
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.search import GroupBy, GroupByReturnType, RankingCriteriaType
+from rcsbsearchapi.search import GroupBy, RankingCriteriaType
 
 q1 = AttributeQuery(
     attribute="rcsb_polymer_entity.pdbx_description",
     operator="contains_phrase",
-    value="Spike protein S1",
-    request_options=[
-        GroupBy(
-            aggregation_method="matching_uniprot_accession",
-            ranking_criteria_type= RankingCriteriaType(
-                sort_by="coverage"
-            )
-        ),
-        GroupByReturnType("groups")
-    ]
+    value="Spike protein S1"
 )
 q2 = attrs.rcsb_accession_info.initial_release_date > "2020-01-01"
 
-query = q1 & q2  # request_options on one query apply to all once combined
-list(query("polymer_entity"))  # "matching_uniprot_accession" must use return type "polymer_entity"
+query = q1 & q2
+list(query(
+    return_type="polymer_entity",  # "matching_uniprot_accession" must use return type "polymer_entity"
+    group_by=GroupBy(
+        aggregation_method="matching_uniprot_accession",
+        ranking_criteria_type= RankingCriteriaType(
+            sort_by="coverage"
+        )
+    ),
+    group_by_return_type="groups"
+))
 ```
 
 ## Sort Example
@@ -774,12 +771,12 @@ query = AttributeQuery(
     attribute="struct.title",
     operator="contains_phrase",
     value="hiv protease",
-    request_options=[
-        Sort(
-            sort_by="rcsb_accession_info.initial_release_date",
-            direction="desc"
-        )
-    ]
 )
-list(query())
+
+list(query(sort=
+    Sort(
+        sort_by="rcsb_accession_info.initial_release_date",
+        direction="desc"
+    )
+))
 ```
