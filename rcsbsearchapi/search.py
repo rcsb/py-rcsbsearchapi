@@ -242,7 +242,7 @@ class Query(ABC):
 
         response = session.to_dict()
 
-        # If return_counts exists, return only the total count  
+        # If return_counts exists, return only the total count
         if return_counts:
             if not response:
                 return 0
