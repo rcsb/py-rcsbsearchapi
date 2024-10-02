@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.7.0 (2024-10-02)
+
+- Facets changed from function to argument during execution
+- Count changed from function to argument during execution
+- Added support for request options: group_by, group_by_return_type, sort, return_explain_metadata, scoring_strategy
+- Updated documentation and README
+- Updated schema files
+
 ## v1.6.0 (2024-06-06)
 
 - Automatic fetching of latest schema files

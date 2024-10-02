@@ -610,6 +610,9 @@ q(
 )).facets
 ```
 ```python
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import TerminalFilter, GroupFilter, FilterFacet, Facet
+
 tf1 = TerminalFilter(
     attribute="rcsb_struct_symmetry.kind",
     operator="exact_match",
@@ -643,6 +646,9 @@ q = q1 & q2
 q(return_type="assembly", facets=ff).facets
 ```
 ```python
+from rcsbsearchapi import AttributeQuery
+from rcsbsearchapi.search import TerminalFilter, GroupFilter, FilterFacet, Facet
+
 tf1 = TerminalFilter(
     attribute="rcsb_polymer_entity_group_membership.aggregation_method",
     operator="exact_match",
@@ -730,7 +736,7 @@ list(query(
 ```
 
 ### Matching Uniprot Accession
-This example demonstrates how to use matching_uniprot_accession grouping to get distinct Spike protein S1 proteins released from the beginning of 2020 with. Here, all entities are represented by distinct groups of SARS-CoV, SARS-CoV-2 and Pangolin coronavirus spike proteins.
+This example demonstrates how to use `matching_uniprot_accession` grouping to get distinct Spike protein S1 proteins released from the beginning of 2020 with. Here, all entities are represented by distinct groups of SARS-CoV, SARS-CoV-2 and Pangolin coronavirus spike proteins.
 
 ```python
 from rcsbsearchapi import AttributeQuery
@@ -758,7 +764,7 @@ list(query(
 ```
 
 ## Sort Example
-The Sort request option can be used to control sorting of results. By default, results are sorted by "score" in descending order.
+The `sort` request option can be used to control sorting of results. By default, results are sorted by "score" in descending order.
 You can also sort by attribute name and apply filters.
 
 Example from [RCSB PDB Search API](https://search.rcsb.org/#sorting) page.
