@@ -248,6 +248,10 @@ class Query(ABC):
                 return 0
             return response["total_count"]
 
+        if "total_count" in response:
+            total_count = response["total_count"]
+            setattr(session, "count", total_count)
+
         if "explain_metadata" in response:
             explain_metadata = response["explain_metadata"]
             setattr(session, "explain_metadata", explain_metadata)
