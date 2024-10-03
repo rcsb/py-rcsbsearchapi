@@ -442,7 +442,8 @@ class Attr:
     """
 
     attribute: str
-    type: Optional[Union[List[str], str]]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE
+    type: Optional[Union[List[str], str]]  # POSSIBLY BIG CHANGE -- was STRUCTURE_ATTRIBUTE_SEARCH_SERVICE.
+    """search service type. `text` for structure attributes, `text_chem` for chemical attributes"""
     description: Optional[Union[str, List[str]]] = None
 
     def exact_match(self, value: Union[str, "Value[str]"]) -> "AttributeQuery":
