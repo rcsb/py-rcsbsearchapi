@@ -24,8 +24,8 @@ import time
 import unittest
 
 from rcsbsearchapi import rcsb_attributes as attrs
-from rcsbsearchapi.schema import _load_json_schema, _load_chem_schema, _fetch_schema
-from rcsbsearchapi.const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL
+from rcsbsearchapi import SCHEMA
+from rcsbsearchapi.const import STRUCTURE_ATTRIBUTE_SCHEMA_URL, CHEMICAL_ATTRIBUTE_SCHEMA_URL, STRUCTURE_ATTRIBUTE_SCHEMA_FILE, CHEMICAL_ATTRIBUTE_SCHEMA_FILE
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]-%(module)s.%(funcName)s: %(message)s")
@@ -54,8 +54,8 @@ class SchemaTests(unittest.TestCase):
 
     def testSchemaVersion(self):
         # Check structure attribute schema version
-        webSchema = _fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
-        localSchema = _load_json_schema()
+        webSchema = SCHEMA._fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
+        localSchema = SCHEMA._load_json_schema(STRUCTURE_ATTRIBUTE_SCHEMA_FILE)
         webVer = webSchema.get("$comment").split()[-1]
         localVer = localSchema.get("$comment").split()[-1]
         ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
@@ -68,8 +68,8 @@ class SchemaTests(unittest.TestCase):
         self.assertTrue(ok)
         logger.info("Metadata schema tests results: local version (%r) and web version (%s)", localVer, webVer)
         # Check chemical attribute schema version
-        webSchema = _fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
-        localSchema = _load_chem_schema()
+        webSchema = SCHEMA._fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
+        localSchema = SCHEMA._load_json_schema(CHEMICAL_ATTRIBUTE_SCHEMA_FILE)
         webVer = webSchema.get("$comment").split()[-1]
         localVer = localSchema.get("$comment").split()[-1]
         ok = len(localVer.split(".")) == 3 and len(webVer.split(".")) == 3
@@ -84,19 +84,39 @@ class SchemaTests(unittest.TestCase):
 
     def testFetchSchema(self):
         # check fetching of structure attribute schema
-        fetchSchema = _fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
+        fetchSchema = SCHEMA._fetch_schema(STRUCTURE_ATTRIBUTE_SCHEMA_URL)
         ok = fetchSchema is not None
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
-        fetchSchema = _fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
+        fetchSchema = SCHEMA._fetch_schema(CHEMICAL_ATTRIBUTE_SCHEMA_URL)
         ok = fetchSchema is not None
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
         errorURL = "https://httpbin.org/status/404"
-        fetchSchema = _fetch_schema(errorURL)
+        fetchSchema = SCHEMA._fetch_schema(errorURL)
         ok = fetchSchema is None
         logger.info("ok is %r", ok)
         self.assertTrue(ok)
+
+    def testRcsbAttrs(self):
+        with self.subTest(msg="1. Check type and descriptions exist for attributes"):
+            for attr in attrs:
+                attr_dict = vars(attr)
+                desc = attr_dict["description"]
+                self.assertIsNotNone(desc)
+
+        with self.subTest(msg="2. Check searching for attribute details"):
+            attr_details = attrs.get_attribute_details("drugbank_info.drug_groups")
+            for obj_attr in ["attribute", "type", "description"]:
+                self.assertIn(obj_attr, vars(attr_details).keys())
+
+            # special case because rcsb_id is in both structure and chemical attributes
+            attr_dict = vars(attrs.get_attribute_details("rcsb_id"))
+            self.assertIsInstance(attr_dict["type"], list)
+            self.assertIsInstance(attr_dict["description"], list)
+
+            attr_details = attrs.get_attribute_details("foo")
+            self.assertIsNone(attr_details)
 
 
 def buildSchema():
@@ -104,6 +124,7 @@ def buildSchema():
     suiteSelect.addTest(SchemaTests("testSchema"))
     suiteSelect.addTest(SchemaTests("testSchemaVersion"))
     suiteSelect.addTest(SchemaTests("testFetchSchema"))
+    suiteSelect.addTest(SchemaTests("testRcsbAttrs"))
 
     return suiteSelect
 
