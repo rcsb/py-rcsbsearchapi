@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.0.0 (2024-10-02)
+
+- Changed facets from function to argument during execution
+- Changed count from function to argument during execution
+- Added support for request options: group_by, group_by_return_type, sort, return_explain_metadata, scoring_strategy
+- Added automatic determination of search service for attribute queries
+- Added methods to explore attribute schemas
+- Updated documentation and README
+- Updated schema files (version 1.47.6)
+
 ## v1.6.0 (2024-06-06)
 
 - Automatic fetching of latest schema files

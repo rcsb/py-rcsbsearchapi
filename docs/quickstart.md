@@ -84,10 +84,10 @@ results = list(query())
 print(results[:10])
 ```
 
-These examples are in `operator` syntax. You can also make queries in `fluent` syntax. Learn more about both syntaxes and implementation details in [Constructing and Executing Queries](query_construction.md#constructing-and-executing-queries).
+These examples are in `operator` syntax. You can also make queries in `fluent` syntax. Learn more about both syntaxes and implementation details in [Constructing and Executing Queries](query_construction.html#constructing-and-executing-queries).
 
 ### Supported Search Services
-The list of supported search service types are listed in the table below. For more details on their usage, see [Search Service Types](query_construction.md#search-service-types).
+The list of supported search service types are listed in the table below. For more details on their usage, see [Search Service Types](query_construction.html#search-service-types).
 
 |Search service                    |QueryType                 |
 |----------------------------------|--------------------------|

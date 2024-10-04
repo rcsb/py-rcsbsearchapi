@@ -1,6 +1,6 @@
 # Exploring Schema Attributes
 
-Attributes are pieces of information associated with a PDB structure that can be searched for or compared to a value using an [`AttributeQuery`](quickstart.md#getting-started). There are [structure attributes](https://search.rcsb.org/structure-search-attributes.html) and [chemical attributes](https://search.rcsb.org/chemical-search-attributes.html), which are both stored in `rcsb_attributes`. This can be imported as shown below:
+Attributes are pieces of information associated with a PDB structure that can be searched for or compared to a value using an [`AttributeQuery`](quickstart.html#getting-started). There are [structure attributes](https://search.rcsb.org/structure-search-attributes.html) and [chemical attributes](https://search.rcsb.org/chemical-search-attributes.html), which are both stored in `rcsb_attributes`. This can be imported as shown below:
 
 ```python
 # import rcsb_attributes as attrs for a shorter name

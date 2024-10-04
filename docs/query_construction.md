@@ -38,7 +38,7 @@ List of supported comparative operators:
 |<=      |less than or equal to   |
 |in      |contains phrase or contains words|
 
-To use the `exists` operator, create an [AttributeQuery](quickstart.md#attribute-search)
+To use the `exists` operator, create an [AttributeQuery](quickstart.html#attribute-search)
 
 For methods to search and find details on attributes within this package, go to the [attributes page](attributes.md)
 For a full list of attributes, please refer to the [RCSB PDB schema](http://search.rcsb.org/rcsbsearch/v2/metadata/schema).
@@ -101,11 +101,18 @@ from rcsbsearchapi.search import TextQuery, AttributeQuery, Attr
 # Start with a Attr or TextQuery, then add terms
 results = TextQuery("heat-shock transcription factor").and_(
     # Add attribute node as fully-formed AttributeQuery
-    AttributeQuery(attribute="rcsb_struct_symmetry.symbol", operator="exact_match", value="C2") \
+    AttributeQuery(
+        attribute="rcsb_struct_symmetry.symbol",
+        operator="exact_match",
+        value="C2"
+    )
 
     # Add attribute node as Attr with chained operations
     # Setting type to "text" specifies that it's a Structure Attribute
-    .and_(Attr(attribute="rcsb_struct_symmetry.kind", type="text")).exact_match("Global Symmetry") \
+    .and_(Attr(
+        attribute="rcsb_struct_symmetry.kind",
+        type="text"
+    )).exact_match("Global Symmetry")
 
     # Add attribute node by name (converted to Attr) with chained operations
     .and_("rcsb_entry_info.polymer_entity_count_DNA").greater_or_equal(1) \
@@ -155,7 +162,7 @@ lazily as needed. The page size can be controlled with the `rows` parameter.
 first = next(iter(query(rows=1)))
 ```
 #### Query Editor Link
-`Session.rcsb_query_editor_url()` will print a link to the [Search API query editor](https://search.rcsb.org/query-editor.html) populated with the query.
+`Session.rcsb_query_editor_url()` will return a link to the [Search API query editor](https://search.rcsb.org/query-editor.html) populated with the query.
 
 ```python
 from rcsbsearchapi import AttributeQuery
@@ -166,7 +173,7 @@ session.rcsb_query_editor_url()
 ```
 
 #### Advanced Search Query Builder Link
-`Session.rcsb_query_builder_url()` will print a link to the [Advanced Search Query Builder](https://www.rcsb.org/search/advanced) populated with the query.
+`Session.rcsb_query_builder_url()` will return a link to the [Advanced Search Query Builder](https://www.rcsb.org/search/advanced) populated with the query.
 
 ```python
 from rcsbsearchapi import AttributeQuery
@@ -184,67 +191,6 @@ progress of the query interactively.
 results = query().iquery()
 ```
 
-
-## Query Options
-### Return Types
-A search query can return different result types when a return type is specified. Below are Structure Attribute query examples specifying return types Polymer Entities, Non-polymer Entities, Polymer Instances, and Molecular Definitions. More information on return types can be found in the [RCSB PDB Search API](https://search.rcsb.org/#building-search-request) page.
-
-```python
-from rcsbsearchapi.search import AttributeQuery
-
-# query for 4HHB deoxyhemoglobin
-q1 = AttributeQuery(
-    attribute="rcsb_entry_container_identifiers.entry_id",
-    operator="in",
-    value=["4HHB"]
-)
-
-# Polymer entities
-for poly in q1(return_type="polymer_entity"):
-    print(poly)
-    
-# Non-polymer entities
-for nonPoly in q1(return_type="non_polymer_entity"):
-    print(nonPoly)
-    
-# Polymer instances
-for polyInst in q1(return_type="polymer_instance"):
-    print(polyInst)
-    
-# Molecular definitions
-for mol in q1(return_type="mol_definition"):
-    print(mol)
-```
-
-### Computed Structure Models
-The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type) page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below.
-
-This query returns IDs for experimental and computed structure models associated with "hemoglobin". Queries for *only* computed models or *only* experimental models can also be made (default).
-```python
-from rcsbsearchapi.search import TextQuery
-
-q1 = TextQuery(value="hemoglobin")
-
-# add parameter as a list with either "computational" or "experimental" or both
-q2 = q1(return_content_type=["computational", "experimental"])
-
-list(q2)
-```
-
-### Result Verbosity
-Results can be returned alongside additional metadata, including result scores. To return this metadata, set the `results_verbosity` parameter to "verbose" (all metadata), "minimal" (scores only), or "compact" (default, no metadata). If set to "verbose" or "minimal", results will be returned as a list of dictionaries. 
-
-For example, here we get all experimental models associated with "hemoglobin", along with their scores.
-
-```python
-from rcsbsearchapi.search import TextQuery
-
-q1 = TextQuery(value="hemoglobin")
-for idscore in list(q1(results_verbosity="minimal")):
-    print(idscore)
-```
-
-
 ## Search Service Types
 The list of supported search service types are listed in the table below.
 
@@ -260,9 +206,7 @@ The list of supported search service types are listed in the table below.
 
 Learn more about available search services on the [RCSB PDB Search API docs](https://search.rcsb.org/#search-services).
 
-
 ### Full-Text Search
-
 To perform a general search for structures associated with the phrase "Hemoglobin", you can create a TextQuery. This does a "full-text" search, which is a general search on text associated with PDB structures or molecular definitions.
 
 ```python
@@ -385,8 +329,6 @@ for polyid in query("polymer_entity"):
 ### Sequence Motif Search
 Below is an example from the [RCSB PDB Search API](https://search.rcsb.org/#search-example-6) page, using the sequence motif search function. This query retrives occurences of the His2/Cys2 Zinc Finger DNA-binding domain as represented by its PROSITE signature.
 
-
-
 ```python
 from rcsbsearchapi.search import SeqMotifQuery
 
@@ -408,7 +350,7 @@ for polyid in query("polymer_entity"):
 |pattern_type   |no      |Motif syntax ("simple", "prosite", "regex")          |"simple"              |
 |sequence_type  |no      |Type of biological sequence ("protein", "dna", "rna")|"protein"             |
 
-See [Sequence Motif Search Examples](additional_examples.md#Sequence-Motif-Search-Examples) for more use cases.
+See [Sequence Motif Search Examples](additional_examples.html#Sequence-Motif-Search-Examples) for more use cases.
 
 ### Structure Similarity Search
 The PDB archive can be queried using the 3D shape of a protein structure. To perform this query, 3D protein structure data must be provided as an input or parameter, A chain ID or assembly ID must be specified, whether the input structure data should be compared to Assemblies or Polymer Entity Instance (Chains) is required, and defining the search type as either strict or relaxed is required. More information on how Structure Similarity Queries work can be found on the [RCSB PDB Structure Similarity Search](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-similarity-search) page.
@@ -455,7 +397,7 @@ If you provide an entry_id, you must provide either an assembly_id or chain_id
 
 If you provide a file_url or file_path, you must also provide a file_format.
 
-See [Structure Similarity Search Examples](additional_examples.md#Structure-Similarity-Search-Examples) for more use cases.
+See [Structure Similarity Search Examples](additional_examples.html#Structure-Similarity-Search-Examples) for more use cases.
 
 ### Structure Motif Search
 The PDB Archive can also be queried by using a "motif" found in these 3D structures. To perform this type of query, an entry_id or a file URL/path must be provided, along with residues (which are parts of 3D structures.) This is the bare minimum needed to make a search, but there are lots of other parameters that can be added to a Structure Motif Query (see [full search schema](https://search.rcsb.org/redoc/index.html)).
@@ -532,7 +474,7 @@ If you provide a file_url, you must also provide a file_extension.
 
 If you provide a file_path, you must also provide a file_extension.
 
-See [Structure Motif Search Examples](additional_examples.md#Structure-Motif-Search-Examples) for more use cases.
+See [Structure Motif Search Examples](additional_examples.html#Structure-Motif-Search-Examples) for more use cases.
 
 ### Chemical Similarity Search
 When you have unique chemical information (e.g., a chemical formula or descriptor) you can use this information to find chemical components (e.g., drugs, inhibitors, modified residues, or building blocks such as amino acids, nucleotides, or sugars), so that it is similar to the formula or descriptor used in the query (perhaps one or two atoms/groups are different), is part of a larger molecule (i.e., the specified formula/descriptor is a substructure), or is exactly or very closely matches the formula or descriptor used in the query. 
@@ -576,40 +518,96 @@ list(q1())
 | "sub-struct-graph-relaxed"        | Substructure (including Stereoisomers)    |
 | "graph-exact"                     | Exact match                               |
 
-See [Chemical Similarity Search Examples](additional_examples.md#Chemical-Similarity-Search-Examples) for more use cases.
+See [Chemical Similarity Search Examples](additional_examples.html#Chemical-Similarity-Search-Examples) for more use cases.
 
-## Count Queries
-### Counting Results
-If only the number of results is desired, the count function can be used. This query returns the number of experimental models associated with "hemoglobin".
+## Request Options
+
+### Return Types
+A search query can return different result types when a return type is specified. Below are Structure Attribute query examples specifying return types Polymer Entities, Non-polymer Entities, Polymer Instances, and Molecular Definitions. More information on return types can be found in the [RCSB PDB Search API](https://search.rcsb.org/#building-search-request) page.
+
+```python
+from rcsbsearchapi.search import AttributeQuery
+
+# query for 4HHB deoxyhemoglobin
+q1 = AttributeQuery(
+    attribute="rcsb_entry_container_identifiers.entry_id",
+    operator="in",
+    value=["4HHB"]
+)
+
+# Polymer entities
+for poly in q1(return_type="polymer_entity"):
+    print(poly)
+    
+# Non-polymer entities
+for nonPoly in q1(return_type="non_polymer_entity"):
+    print(nonPoly)
+    
+# Polymer instances
+for polyInst in q1(return_type="polymer_instance"):
+    print(polyInst)
+    
+# Molecular definitions
+for mol in q1(return_type="mol_definition"):
+    print(mol)
+```
+
+### Computed Structure Models
+The [RCSB PDB Search API](https://search.rcsb.org/#results_content_type) page provides information on how to include Computed Structure Models (CSMs) into a search query. Here is a code example below.
+
+This query returns IDs for experimental and computed structure models associated with "hemoglobin". Queries for *only* computed models or *only* experimental models can also be made (default).
 ```python
 from rcsbsearchapi.search import TextQuery
 
 q1 = TextQuery(value="hemoglobin")
 
-# As with `query()`, `return_type` and `return_content_type` can be parameters to `count()`
-result_count = q1.count()
-print(result_count)
+# add parameter as a list with either "computational" or "experimental" or both
+q2 = q1(return_content_type=["computational", "experimental"])
+
+list(q2)
 ```
 
-## Faceted Queries
-In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. The `facets()` function runs the query `q` using the specified facet(s), and returns a list of dictionaries:
+### Results Verbosity
+Results can be returned alongside additional metadata, including result scores. To return this metadata, set the `results_verbosity` parameter to "verbose" (all metadata), "minimal" (scores only), or "compact" (default, no metadata). If set to "verbose" or "minimal", results will be returned as a list of dictionaries. 
+
+For example, here we get all experimental models associated with "hemoglobin", along with their scores.
+
+```python
+from rcsbsearchapi.search import TextQuery
+
+q1 = TextQuery(value="hemoglobin")
+for idscore in list(q1(results_verbosity="minimal")):
+    print(idscore)
+```
+
+### Count Queries
+If only the number of results is desired, the count request option can be used. This query returns the number of experimental models associated with "hemoglobin".
+```python
+from rcsbsearchapi.search import TextQuery
+
+q1 = TextQuery(value="hemoglobin")
+
+result_count = q1(return_counts=True)
+print(result_count)
+```
+### Faceted Queries
+In order to group and perform calculations and statistics on PDB data by using a simple search query, you can use a faceted query (or facets). Facets arrange search results into categories (buckets) based on the requested field values. More information on Faceted Queries can be found [here](https://search.rcsb.org/#using-facets). All facets should be provided with `name`, `aggregation_type`, and `attribute` values. Depending on the aggregation type, other parameters must also be specified. To run a faceted query, create a `Facet` object and pass it in as a single object or list into the `facets` argument during query execution.
+
 ```python
 from rcsbsearchapi.search import AttributeQuery, Facet, Range
 
 q = AttributeQuery(
     attribute="rcsb_accession_info.initial_release_date",
     operator="greater",
-    value="2019-08-20"
+    value="2019-08-20",
 )
 
-facet_results = q.facets(
-    facets=Facet(
-        name="Methods",
-        aggregation_type="terms",
-        attribute="exptl.method"
-    )
-)
-print(facet_results)
+q_result = q(facets=Facet(
+    name="Methods",
+    aggregation_type="terms",
+    attribute="exptl.method"
+))
+print(q_result.facets)
 ```
 
 List of available types of Faceted queries:
@@ -621,4 +619,27 @@ List of available types of Faceted queries:
 - Multidimensional Facet
 - Filter Facet
 
-See example usage of each of these types of Faceted queries at [Faceted Query Examples](additional_examples.md#Faceted-Query-Examples).
+See example usage of each of these types of Faceted queries at [Faceted Query Examples](additional_examples.html#faceted-query-examples).
+
+### Additional Request Options
+Other request options can also be added to queries through arguments at execution. `facet`, `group_by`, and `sort` are more complex request_options and require creating a `RequestOption` object (`Facet`, `GroupBy`, `Sort`).
+
+List of available request options:
+- `results_content_type`
+- `results_verbosity`
+- `return_counts`
+- `facets`
+- `group_by`
+- `group_by_return_type`
+- `sort`
+- `return_explain_metadata`
+- `scoring_strategy`
+
+
+Some request options are currently not implemented:
+- paginate: automatically handled by package. Results are paginated by package and all results are returned
+- return_all_hits: not implemented since all results are returned
+
+For more information on what each request option does, refer to the [Search API documentation](https://search.rcsb.org/#scoring-strategy).
+
+For information on how to create `RequestOption` objects, see the [API reference](api.rst).

@@ -4,7 +4,7 @@ from typing import List
 from .search import Terminal, SCHEMA  # noqa: F401
 from .search import Attr, AttributeQuery, Group, Query, TextQuery
 
-__version__ = "1.6.0"
+__version__ = "2.0.0"
 
 rcsb_attributes = SCHEMA.rcsb_attributes
 
