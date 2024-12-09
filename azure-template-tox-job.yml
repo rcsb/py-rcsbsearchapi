@@ -13,9 +13,9 @@ jobs:
   timeoutInMinutes: 0
   pool:
     ${{ if eq(parameters.os, 'macos') }}:
-      vmImage: 'macOS-12'
+      vmImage: 'macOS-latest'
     ${{ if eq(parameters.os, 'linux') }}:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
 
   variables:
     - group: py-shared-variables
@@ -36,7 +36,7 @@ jobs:
       - bash: |
           set -e
           ls -la /Applications/Xcode*
-          sudo xcode-select --switch /Applications/Xcode_14.2.app/Contents/Developer
+          sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
           which g++
           c++ --version
         displayName: "setup Xcode"
@@ -60,6 +60,11 @@ jobs:
       - script: |
           export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
           ${{ format('python -m tox -e {0}', parameters.tox) }}
+        displayName: 'Running tox task'
+    - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.10')) }}:
+      - script: |
+          export CONFIG_SUPPORT_TOKEN_ENV=$(VAR_CONFIG_SUPPORT_TOKEN_ENV)
+          ${{ format('python -m tox -e {0}-py310', parameters.tox) }}
         displayName: 'Running tox task'
     - ${{ if and(not(startsWith(parameters.tox, 'py')), startsWith(parameters.python, '3.9')) }}:
       - script: |

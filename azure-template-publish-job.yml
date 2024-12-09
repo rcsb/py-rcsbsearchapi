@@ -12,9 +12,9 @@ jobs:
 - job: ${{ format('publish_{0}_{1}', parameters.tox, parameters.os) }}
   pool:
     ${{ if eq(parameters.os, 'macos') }}:
-      vmImage: 'macOS-12'
+      vmImage: 'macOS-latest'
     ${{ if eq(parameters.os, 'linux') }}:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
   dependsOn:
   - ${{ format('build_test_{0}_{1}', parameters.tox, parameters.os) }}
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
