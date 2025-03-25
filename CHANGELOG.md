@@ -1,5 +1,8 @@
 # Changelog
 
+[DEPRECATED] Active at [rcsb-api](https://rcsbapi.readthedocs.io/en/latest/)
+> Please migrate to our new and improved package, [rcsb-api](https://rcsbapi.readthedocs.io/en/latest/), which contains all the same functionalities as rcsbsearchapi and more! New features will only be added to the new rcsb-api package. For more details, see https://github.com/rcsb/py-rcsbsearchapi/issues/51.
+
 ## v2.0.1 (2025-03-25)
 
 - Add deprecation warnings to README and readthedocs
