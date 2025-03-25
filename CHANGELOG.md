@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.1 (2025-03-25)
+
+- Add deprecation warnings to README and readthedocs
+- Raise a deprecation warning upon import
+
 ## v2.0.0 (2024-10-04)
 
 - Changed facets from function to argument during execution

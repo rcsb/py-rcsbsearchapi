@@ -3,6 +3,9 @@
 [![Documentation Status](https://readthedocs.org/projects/rcsbsearchapi/badge/?version=latest)](https://rcsbsearchapi.readthedocs.io/en/latest/?badge=latest)
 <a href="https://colab.research.google.com/github/rcsb/py-rcsbsearchapi/blob/master/notebooks/quickstart.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
+# ⛔️ [DEPRECATED] Active at [py-rcsb-api](https://github.com/rcsb/py-rcsb-api)
+> Please migrate to our new and improved package, [rcsb-api](https://github.com/rcsb/py-rcsb-api), which contains all the same functionalities as rcsbsearchapi and more! New features will only be added to the new rcsb-api package. For more details, see https://github.com/rcsb/py-rcsbsearchapi/issues/51.
+
 # rcsbsearchapi
 
 Python interface for the RCSB PDB Search API.
