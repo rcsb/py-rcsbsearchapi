@@ -1,3 +1,6 @@
+# ⛔️ [DEPRECATED] Active at [rcsb-api](https://rcsbapi.readthedocs.io/en/latest/#)
+> Please migrate to our new and improved package, [rcsb-api](https://rcsbapi.readthedocs.io/en/latest/), which contains all the same functionalities as rcsbsearchapi and more! New features will only be added to the new rcsb-api package. For more details, see https://github.com/rcsb/py-rcsbsearchapi/issues/51.
+
 # rcsbsearchapi - Query protein structures from Python
 
 The `rcsbsearchapi` package provides a Python interface to the [RCSB PDB Search API](http://search.rcsb.org/). Use it to fetch lists of PDB IDs corresponding to advanced query searches.
