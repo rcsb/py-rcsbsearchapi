@@ -10,13 +10,14 @@ pr:
 - master
 - staging
 
-schedules:
-- cron: "0 12 * * 0"
-  displayName: Weekly Sunday build
-  branches:
-    include:
-    - master
-  always: true
+# Turn off Sep 22 2026 since this package has been deprecated in favor of py-rcsb-api
+# schedules:
+# - cron: "0 12 * * 0"
+#   displayName: Weekly Sunday build
+#   branches:
+#     include:
+#     - master
+#   always: true
 
 jobs:
   - template: azure-template-tox-job.yml
